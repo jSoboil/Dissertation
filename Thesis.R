@@ -48,8 +48,8 @@ data_JAGS <- list(r = r, n = n, p_Age = p_Age)
 data_JAGS
 
 inits <- list(
- list(LSIL = c(.1)),
- list(LSIL = c(.3))
+ list(LSIL = c(.1), HSIL = c(.1)),
+ list(LSIL = c(.3), HSIL = c(.4)) 
  )
 
 params <- c("LSIL", "HSIL", "mu", "tau.sq")
