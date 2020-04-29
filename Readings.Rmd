@@ -1,0 +1,59 @@
+---
+title: "ThesisReadings"
+author: "Josh Soboil"
+date: "17/12/2019"
+output: html_document
+---
+
+# Textbook Readings
+
+**1. Bayesian Cost-Effectiveness Analysis with R package BCEA**:
+
+ - Authors: Gianluca Baio, Andrea Berardi, and Anna Heath
+ - Publisher: Springer
+ - Year: 2017
+ 
+ **2. Introducing Monte Carlo Methods with R**:
+ 
+ - Authors: Christian P Robert, and George Casella
+ - Publisher Springer
+ - Year: 2010
+ 
+ **3. Bayesian Methods in Health Economics**:
+ 
+ - Authors: Gianluca Baio
+ - Publisher: Chapman & Hall/CRC Biostatistics Series
+ - Year: 2013
+ 
+ **4. The BUGS Book: A Practical Introduction to Bayesian Analysis**:
+ 
+ - Authors: David Lunn, Christopher Jackson, Nicky Best, Andrew Thomas, and David Spiegelhalter
+ - Publisher: Chapman & Hall/CRC Press
+ - Year: 2012
+ 
+ **5. Bayesian Data Analysis, 3rd ed.**:
+ 
+ - Authors: Andrew Gelman, John B Carlin, Hal S Stern, David B Dunson, Aki Vehtari, and Donald
+            B Rubin
+- Publisher: Chapman & Hall/CRC Press
+- Year: 2014
+
+**6. Handbook of Approximate Markov Chain Monte Carlo **:
+
+- Authors (eds): Steve Brooks, Andrew Gelman, Galin L Jones, and Xiao-Li Meng
+- Publisher: Chapman & Hall/CRC Press
+- Year: 2011
+
+**7. Monte Carlo Statistical Methods, 2nd ed.**:
+
+- Authors: Christian P Robert, and George Casella
+- Publisher: Springer
+- Year: 2004
+
+**8. A First Course in Bayesian Statistics**:
+
+- Author: Peter D Hoff
+- Publisher: Springer
+- Year: 2009
+
+ # Article Readings
