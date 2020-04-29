@@ -37,7 +37,7 @@ model_String <- "
  # Priors on LSIL and
  # HSIL
  LSIL ~ dbeta(.2, .8)
- HSIL ~ dbeta(.35, .65)
+ HSIL ~ dbeta(.35, .9)
  
 }
 "
@@ -55,7 +55,7 @@ inits <- list(
 params <- c("LSIL", "HSIL", "mu", "tau.sq")
 
 jags_Model <- jags(data = data_JAGS, parameters.to.save = params, model.file = "test.txt", 
-                   inits = inits, n.chains = 2, n.iter = 10000, n.burnin = 1000)
+                   inits = inits, n.chains = 2, n.iter = 10000, n.burnin = 1000, n.thin = 18)
 jags_Model
 
 posterior <- as.array(jags_Model$BUGSoutput$sims.array)

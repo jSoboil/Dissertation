@@ -24,7 +24,7 @@
  # Priors on LSIL and
  # HSIL
  LSIL ~ dbeta(.2, .8)
- HSIL ~ dbeta(.35, .65)
+ HSIL ~ dbeta(.35, .9)
  
 }
 
