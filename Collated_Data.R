@@ -35,10 +35,17 @@ View(v_r_mort_by_age)
 
 # Age-specific probability of dying when Healthy (all-cause mortality)
 p_HDage  <- 1 - exp(-v_r_mort_by_age[1:19, 2] * 1)
+<<<<<<< HEAD
 cbind(v_r_mort_by_age[1:19, 1], p_HDage)
 
 # ==========================================================================================
 # Age-specific incidence ----------------------------------------------------
+=======
+p_HDage
+
+# ==========================================================================================
+# Probability of Age-specific incidence ----------------------------------------------------
+>>>>>>> 1dbd3086eec9f1d41d1cfa7781e724468989103e
 # ==========================================================================================
 # Data collated from per-protocol population.
 
@@ -48,6 +55,7 @@ cbind(v_r_mort_by_age[1:19, 1], p_HDage)
 
 # Age-specific incidence:
 age <- c("15-16", "17", "18", "19", "20", "21", "22-23", "24-29", "30-49", "50≥")
+<<<<<<< HEAD
 timelength <- c(rep(12, 10))
 incidence <- as.numeric(c(.1, .12, .15, .17, .15, .12, .1, .05, .01, .005))
 
@@ -67,6 +75,14 @@ rateConversionAge(r = .2, timelength = )
 
 - (1 / 36) * log(1 - 0.9992534)
 
+=======
+incidence <- as.numeric(c(.1, .12, .15, .17, .15, .12, .1, .05, .01, .005))
+
+# Convert rate to probability:
+p_Age <- 1 - exp(-incidence * 1)
+cbind(age, round(p_Age, 4))
+barplot(p_Age, names.arg = age)
+>>>>>>> 1dbd3086eec9f1d41d1cfa7781e724468989103e
 
 # ==========================================================================================
 # Genital Warts -----------------------------------------------------------
@@ -100,6 +116,7 @@ rateConversionAge(r = .2, timelength = )
 # tB:48
 # nB:2279
 
+<<<<<<< HEAD
 # Study 3: Perez G., et al. 2008 ------------------------------------------
 # Safety, immunogenicity, and efficacy of quadrivalent human papillomavirus (types 6, 11, 16, 
 # 18) L1 virus-like-particle vaccine in Latin American women.
@@ -115,6 +132,10 @@ rateConversionAge(r = .2, timelength = )
 
 # ==========================================================================================
 # LSIL -----------------------------------------------------
+=======
+# ==========================================================================================
+# Probability of LSIL -----------------------------------------------------
+>>>>>>> 1dbd3086eec9f1d41d1cfa7781e724468989103e
 # ==========================================================================================
 # Low-Grade Squamous Intraepithelial Lesions
 
@@ -163,7 +184,11 @@ rateConversionAge(r = .2, timelength = )
 # nB:2258
 
 # ==========================================================================================
+<<<<<<< HEAD
 # HSIL -----------------------------------------------------
+=======
+# Probability of HSIL -----------------------------------------------------
+>>>>>>> 1dbd3086eec9f1d41d1cfa7781e724468989103e
 # ==========================================================================================
 # High-Grade Squamous Intraepithelial Lesions.
 
@@ -214,10 +239,42 @@ rateConversionAge(r = .2, timelength = )
 # ==========================================================================================
 # Cervical Adenocarcinoma -------------------------------------------------
 # ==========================================================================================
+<<<<<<< HEAD
 
 # Study 1: Sinanovic, E., et al. 2009 -------------------------------------
 # The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
 # cancer screening programme in South Africa
 
 # Progression rate HSIL to stage I cancer:
+=======
+# Data collated from per-protocol population.
+
+# Study 1: Garland S., et al. 2007 ----------------------------------------
+# Quadrivalent Vaccine against Human Papillomavirus to Prevent Anogenital Diseases.
+
+# Vaccine Efficacy against External Anogenital, Vaginal, and Cervical Lesions Associated 
+# with HPV-6, HPV-11, HPV-16, or HPV-18 or Regardless of HPV Type.
+
+# Events by group:
+# tA:0
+# nA:2241
+
+# tB:6
+# nB:2258
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> 1dbd3086eec9f1d41d1cfa7781e724468989103e
 
