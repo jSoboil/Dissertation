@@ -1,13 +1,17 @@
-library(rjags)    # to synthesise and simulate
-library(R2jags)
-library(dplyr)    # to manipulate data
+library(rjags) # to synthesise and simulate
+library(R2jags) # to synthesise and simulate
+library(dplyr) # to manipulate data
 library(reshape2) # to transform data
-library(ggplot2)  # for nice looking plots
-library(scales)   # for dollar signs and commas
-library(dampack)  # for CEA and calculate ICERs
+library(ggplot2) # for nice looking plots
+library(scales) # for dollar signs and commas
+library(dampack) # for CEA and calculate ICERs
 library(tidyverse) # for general data wrangling and vis
 library(reshape2) # data wrangling
-library(BCEA)
+library(BCEA) # Bayesian HE package
+library(bayesplot) # Tools for posterior inspection
+library(parallel) # used for parrallel processing of chains
+
+options(mc.cores = detectCores())
 
 # ==========================================================================================
 # Evidence Synthesis ------------------------------------------------------
@@ -175,6 +179,45 @@ jags_mod <- jags(data = data_JAGS, parameters.to.save = params,
 jags_mod
 attach.jags(jags_mod)
 
+# Visual inspection of posterior ------------------------------------------
+posterior <- as.array(jags_mod$BUGSoutput$sims.array)
+dimnames(posterior)
+
+color_scheme_set("viridisB")
+theme_set(theme_minimal())
+mcmc_trace(posterior, pars = c("pi_res[1]", "pi_res[2]",
+                               "pi_tox[1]", "pi_tox[2]", "beta_tr[1]", "beta_tr[2]",
+                               "beta_tp[1]", "beta_tp[2]", "beta_surv[1]", "beta_surv[2]"),
+           facet_args = list(ncol = 1, strip.position = "left"))
+
+color_scheme_set("viridisA")
+theme_set(theme_minimal())
+mcmc_trace(posterior[,, 1:13], window = c(100, 150), size = 1) + 
+  panel_bg(fill = "white", color = NA) +
+  legend_move("top")
+
+color_scheme_set("mix-teal-pink")
+mcmc_dens_overlay(posterior, pars = c("pi_res[1]", "pi_res[2]",
+                               "pi_tox[1]", "pi_tox[2]", "beta_tr[1]", "beta_tr[2]",
+                               "beta_tp[1]", "beta_tp[2]", "beta_surv[1]", "beta_surv[2]"))
+
+color_scheme_set("pink")
+mcmc_pairs(posterior, pars = c("pi_res[1]", "pi_tox[1]", "beta_tr[1]", "beta_tp[1]", 
+                               "beta_surv[1]"),
+           off_diag_args = list(size = 1.5))
+
+color_scheme_set("pink")
+mcmc_pairs(posterior, pars = c("pi_res[2]", "pi_tox[2]", "beta_tr[2]",
+                               "beta_tp[2]", "beta_surv[2]"),
+           off_diag_args = list(size = 1.5))
+# ... seems there to be a high negative autocorrelation between the beta and d variables.
+color_scheme_set("mix-blue-brightblue")
+mcmc_acf(posterior, pars = c("pi_res[1]", "pi_res[2]",
+                               "pi_tox[1]", "pi_tox[2]", "beta_tr[1]", "beta_tr[2]",
+                               "beta_tp[1]", "beta_tp[2]", "beta_surv[1]", "beta_surv[2]"), 
+         lags = 50)
+
+
 # Misc: define treatments ---------------------------------------------
 colnames(pi_res) <- c("Status Quo", "New Treatment")
 colnames(pi_res)
@@ -244,9 +287,10 @@ a_P["Stable", "Progression", , ] <- pi_tox[, 2]
 a_P["Stable", "Response", , ] <- (1 - pi_tox[, 2]) * beta_tr[, 2]
 a_P["Stable", "Death", , ] <- 1 - ((1 - pi_tox[, 2]) * (1 - beta_tr[, 2]) + pi_tox[, 2] + 
                                     (1 - pi_tox[, 2]) * beta_tr[, 2])
+
 # All transitions from the state Response
-a_P["Response", "Response", , ] <- 1 - pi_tox[, 2] * pi_res[, 2]
-a_P["Response", "Progression", , ] <-  pi_tox[, 2] + (1 - pi_tox[, 2]) * (1 - pi_res[, 2])
+a_P["Response", "Response", , ] <- ((1 - pi_tox[, 2] ) * pi_res[, 2])
+a_P["Response", "Progression", , ] <-  (pi_tox[, 2]) + (1 - pi_tox[, 2]) * (1 - pi_res[, 2])
 
 # All transitions from the state Progression
 a_P["Progression", "Progression", , ] <- 1 - beta_dth[, 2]
@@ -255,6 +299,27 @@ a_P["Progression", "Death", , ] <- beta_dth[, 2]
 # All transitions from the state Death
 a_P["Death", "Death", , ] <- 1
 a_P
+
+# ==========================================================================================
+# Probability Validation ----------------------------------------------
+# ==========================================================================================
+# For each state, all transitions must add up to the total number of n_sims, or 1 when 
+# divided by the number of n_sims.
+
+# Stable:
+sum((1 - pi_tox[, 2]) * (1 - beta_tr[, 2]) + (pi_tox[, 2]) + 
+      ((1 - pi_tox[, 2]) * beta_tr[, 2]) + 1 - ((1 - pi_tox[, 2]) * (1 - beta_tr[, 2]) + 
+                                                  pi_tox[, 2] + 
+                                    (1 - pi_tox[, 2]) * beta_tr[, 2])) / n.sims
+
+# Response:
+sum(((1 - pi_tox[, 2] )* pi_res[, 2]) + 
+      (pi_tox[, 2]) + (1 - pi_tox[, 2]) * (1 - pi_res[, 2])) / n.sims
+
+# Progression:
+sum((1 - beta_dth[, 2]) + beta_dth[, 2]) / n.sims
+
+# and death is obvious...
 
 # ==========================================================================================
 # Run Markov model --------------------------------------------------------
@@ -269,11 +334,11 @@ m_M_ad <- array(matrix(0, nrow = n_t + 1, ncol = n_states),
                 dim = c(c(n_t + 1, n_states), n.sims), 
                 dimnames = list(0:n_t, v_n, 1:n.sims))
 dim(m_M_ad)
-
+m_M_ad
 
 # Store the initial state vector in the first row of the cohort trace
 m_M_ad[1, , ] <- v_s_init
-m_M_ad
+sum(m_M_ad[1, 1:4, 1000])
 
 ## Initialize transition array for each cycle, for each sim
 a_A <- array(0,
@@ -307,7 +372,10 @@ cols <- c("Stable" = DARTHgreen, "Response" = DARTHblue,
           "Progression" = DARTHyellow, "Death" = DARTHgray)
 lty <-  c("Stable" = 1, "Response" = 2, "Progression" = 3, "Death" = 4)
 
-ggplot(melt(m_M_ad[, , 22]), aes(x = Var1, y = value, 
+
+
+
+ggplot(melt(apply(m_M_ad, c(1, 2), mean)), aes(x = Var1, y = value, 
                       color = Var2, linetype = Var2)) +
  geom_line(size = 1) +
  scale_colour_manual(name = "Health state", 
@@ -316,10 +384,17 @@ ggplot(melt(m_M_ad[, , 22]), aes(x = Var1, y = value,
                        values = lty) +
   xlab("Cycle") +
   ylab("Proportion of the cohort") +
-  theme_bw(base_size = 14) +
+  theme_light(base_size = 14) +
   theme(legend.position = "bottom", 
         legend.background = element_rect(fill = NA))
 
 # Cost-effectiveness analysis ---------------------------------------------
+
+
+
+
+
+
+
 
 
