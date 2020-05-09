@@ -9,7 +9,7 @@ library(tidyverse) # for general data wrangling and vis
 library(reshape2) # data wrangling
 library(BCEA) # Bayesian HE package
 library(bayesplot) # Tools for posterior inspection
-library(parallel) # used for parrallel processing of chains
+library(parallel) # used for parrallel processing of Markov chains
 
 options(mc.cores = detectCores())
 
@@ -96,8 +96,8 @@ model_string <- "model {
   delta_res2[i] ~ dnorm(mu_res[2], tau_res[2])
  }
  for (t in 1:2) {
-  mu_res[t] ~ dnorm(0, .5)T(0, )
-  sigma_res[t] ~ dunif(0, 10)
+  mu_res[t] ~ dnorm(0, 10)
+  sigma_res[t] ~ dunif(0, 100)
   tau_res[t] <- 1 / (sigma_res[t] * sigma_res[t])
   pi_res[t] <- exp(mu_res[t]) / (1 + exp(mu_res[t]))
  }
@@ -113,15 +113,15 @@ model_string <- "model {
   delta_tox2[i] ~ dnorm(mu_tox[2], tau_tox[2])
  }
  for (t in 1:2) {
-  mu_tox[t] ~ dnorm(0, .5)T(0, )
-  sigma_tox[t] ~ dunif(0, 10)
+  mu_tox[t] ~ dnorm(0, 10)
+  sigma_tox[t] ~ dunif(0, 100)
   tau_tox[t] <- 1 / (sigma_tox[t] * sigma_tox[t])
   pi_tox[t] <- exp(mu_tox[t]) / (1 + exp(mu_tox[t]))
  }
   # Sub-model 3
  for (t in 1:2) {
   x_tr[t] ~ dnorm(mu_tr[t], prec_tr[t])
-  mu_tr[t] ~ dnorm(0, .5)T(0, )
+  mu_tr[t] ~ dnorm(0, 10)T(0, )
   rho_tr[t] <- -log(.5) / mu_tr[t]
   beta_tr[t] <- 1 - exp(-rho_tr[t] / tau)
   prec_tr[t] <- 1 / phi_tr[t]
@@ -139,7 +139,7 @@ model_string <- "model {
  }
  for (t in 1:2) {
   mu_tp[t] ~ dnorm(0, prec_mu_tp[t])T(0, )
-  sigma_tp[t] ~ dunif(0, 10)
+  sigma_tp[t] ~ dunif(0, 100)
   prec_mu_tp[t] <- 1 / (sigma_tp[t] * sigma_tp[t])
   rho_tp[t] <- -log(.5) / mu_tp[t]
   beta_tp[t] <- 1 - exp(-rho_tp[t] / tau)
@@ -210,7 +210,7 @@ color_scheme_set("pink")
 mcmc_pairs(posterior, pars = c("pi_res[2]", "pi_tox[2]", "beta_tr[2]",
                                "beta_tp[2]", "beta_surv[2]"),
            off_diag_args = list(size = 1.5))
-# ... seems there to be a high negative autocorrelation between the beta and d variables.
+
 color_scheme_set("mix-blue-brightblue")
 mcmc_acf(posterior, pars = c("pi_res[1]", "pi_res[2]",
                                "pi_tox[1]", "pi_tox[2]", "beta_tr[1]", "beta_tr[2]",
@@ -359,21 +359,20 @@ for (i in 1:n.sims) {
   a_A[, , t + 1, i]  <- m_M_ad[t, , i] * a_P[ , , t, i]
   }
 }
+str(a_P)
+str(m_M_ad)
 
-# Visualise MM ------------------------------------------------------------
+# Visualise Markov Model -----------------------------------------------------
 # code for the DARTH colors for the figures
-DARTHgreen      <- '#009999'  
-DARTHyellow     <- '#FDAD1E'  
-DARTHblue       <- '#006699' 
-DARTHlightgreen <- '#00adad'
-DARTHgray       <- '#666666'
+DARTHgreen      <- '#9A031E'  
+DARTHyellow     <- '#E36414'  
+DARTHblue       <- '#FFD959' 
+DARTHlightgreen <- '#D9CFC1'
+DARTHgray       <- '#0F4C5C'
 
 cols <- c("Stable" = DARTHgreen, "Response" = DARTHblue, 
           "Progression" = DARTHyellow, "Death" = DARTHgray)
 lty <-  c("Stable" = 1, "Response" = 2, "Progression" = 3, "Death" = 4)
-
-
-
 
 ggplot(melt(apply(m_M_ad, c(1, 2), mean)), aes(x = Var1, y = value, 
                       color = Var2, linetype = Var2)) +
@@ -386,15 +385,16 @@ ggplot(melt(apply(m_M_ad, c(1, 2), mean)), aes(x = Var1, y = value,
   ylab("Proportion of the cohort") +
   theme_light(base_size = 14) +
   theme(legend.position = "bottom", 
-        legend.background = element_rect(fill = NA))
+        legend.background = element_rect(fill = NA),
+        text = element_text(size = 15))
+
+barplot(apply(m_M_ad, c(2, 1), mean), space = 1,
+        ylab = "Proportion of patients in each state",
+        main = "New Treatment", col = cols, cex.names = 1, cex.main = 1.5)
+legend("topright", legend = c("Stable", "Response", "Progrssion", "Death"), 
+       fill = cols, cex = .55, box.lwd = 2, x = 45, y = -.05,
+       horiz = TRUE, bty = "n")
 
 # Cost-effectiveness analysis ---------------------------------------------
-
-
-
-
-
-
-
 
 

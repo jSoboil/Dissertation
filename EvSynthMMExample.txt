@@ -11,8 +11,8 @@ model {
   delta_res2[i] ~ dnorm(mu_res[2], tau_res[2])
  }
  for (t in 1:2) {
-  mu_res[t] ~ dnorm(0, .5)T(0, )
-  sigma_res[t] ~ dunif(0, 10)
+  mu_res[t] ~ dnorm(0, 10)
+  sigma_res[t] ~ dunif(0, 100)
   tau_res[t] <- 1 / (sigma_res[t] * sigma_res[t])
   pi_res[t] <- exp(mu_res[t]) / (1 + exp(mu_res[t]))
  }
@@ -28,15 +28,15 @@ model {
   delta_tox2[i] ~ dnorm(mu_tox[2], tau_tox[2])
  }
  for (t in 1:2) {
-  mu_tox[t] ~ dnorm(0, .5)T(0, )
-  sigma_tox[t] ~ dunif(0, 10)
+  mu_tox[t] ~ dnorm(0, 10)
+  sigma_tox[t] ~ dunif(0, 100)
   tau_tox[t] <- 1 / (sigma_tox[t] * sigma_tox[t])
   pi_tox[t] <- exp(mu_tox[t]) / (1 + exp(mu_tox[t]))
  }
   # Sub-model 3
  for (t in 1:2) {
   x_tr[t] ~ dnorm(mu_tr[t], prec_tr[t])
-  mu_tr[t] ~ dnorm(0, .5)T(0, )
+  mu_tr[t] ~ dnorm(0, 10)T(0, )
   rho_tr[t] <- -log(.5) / mu_tr[t]
   beta_tr[t] <- 1 - exp(-rho_tr[t] / tau)
   prec_tr[t] <- 1 / phi_tr[t]
@@ -54,7 +54,7 @@ model {
  }
  for (t in 1:2) {
   mu_tp[t] ~ dnorm(0, prec_mu_tp[t])T(0, )
-  sigma_tp[t] ~ dunif(0, 10)
+  sigma_tp[t] ~ dunif(0, 100)
   prec_mu_tp[t] <- 1 / (sigma_tp[t] * sigma_tp[t])
   rho_tp[t] <- -log(.5) / mu_tp[t]
   beta_tp[t] <- 1 - exp(-rho_tp[t] / tau)

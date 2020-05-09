@@ -9,7 +9,7 @@ rateConversionCons <- function(r, timelength) {
 }
 
 # Each cohort collected from each study's end-point. All data extracted only includes 
-# estimates from the per-protocol pop.
+# estimates from per-protocol pop.
 
 # COMPARISON GROUPS: VACCINE(A) AND PLACEBO (B).
 
@@ -25,28 +25,19 @@ rateConversionCons <- function(r, timelength) {
 #      r = - (1 / t) * log(1 - p)
 
 # ==========================================================================================
-# Age-specific mortality --------------------------------------------------
+# Age-specific all cause mortality --------------------------------------------------
 # ==========================================================================================
-# Import WHO lifetable:
-mort_data <- read_csv("mort_data.csv", col_types = cols(Female = col_double()), 
-    skip = 1)
-v_r_mort_by_age <- mort_data[, 2:3]
-View(v_r_mort_by_age)
+# Import ASSA mortality table:
+mort_data <- read_excel("mortality tables.xls", sheet = "ASSA data", range = "B3:C94")
 
-# Age-specific probability of dying when Healthy (all-cause mortality)
-p_HDage  <- 1 - exp(-v_r_mort_by_age[1:19, 2] * 1)
-<<<<<<< HEAD
-cbind(v_r_mort_by_age[1:19, 1], p_HDage)
+# Total Pop. divided by total deaths:
+v_r_mort_by_age <- mort_data[, 2] / mort_data[, 1]
+v_r_mort_by_age
 
 # ==========================================================================================
 # Age-specific incidence ----------------------------------------------------
-=======
-p_HDage
+# ==========================================================================================
 
-# ==========================================================================================
-# Probability of Age-specific incidence ----------------------------------------------------
->>>>>>> 1dbd3086eec9f1d41d1cfa7781e724468989103e
-# ==========================================================================================
 # Data collated from per-protocol population.
 
 # Study 1: Sinanovic, E., et al. 2009 -------------------------------------
@@ -54,35 +45,30 @@ p_HDage
 # cancer screening programme in South Africa
 
 # Age-specific incidence:
-age <- c("15-16", "17", "18", "19", "20", "21", "22-23", "24-29", "30-49", "50≥")
-<<<<<<< HEAD
-timelength <- c(rep(12, 10))
-incidence <- as.numeric(c(.1, .12, .15, .17, .15, .12, .1, .05, .01, .005))
-
-rateConversionAge <- function(r, timelength) {
- for (i in timelength) {
-  for (j in r) {
-  P <- 1 - exp(-r * i)
-  }
- }
- print(P)
-}
-
-p_Age <- rateConversionAge(r = incidence, timelength = timelength)
-p_Age
-
-rateConversionAge(r = .2, timelength = )
-
-- (1 / 36) * log(1 - 0.9992534)
-
-=======
+age_group <- c("15-16", "17", "18", "19", "20", "21", "22-23", "24-29", "30-49", "50≥")
 incidence <- as.numeric(c(.1, .12, .15, .17, .15, .12, .1, .05, .01, .005))
 
 # Convert rate to probability:
 p_Age <- 1 - exp(-incidence * 1)
-cbind(age, round(p_Age, 4))
-barplot(p_Age, names.arg = age)
->>>>>>> 1dbd3086eec9f1d41d1cfa7781e724468989103e
+cbind(age_group, round(p_Age, 4))
+barplot(p_Age, names.arg = age_group, ylab = "Probability of HPV+", 
+        xlab = "Probability by Age group")
+p_Age
+
+# Study 2: Richter K., et al. 2013 ----------------------------------------
+# Age-specific prevalence of cervical human papillomavirus infection and cytological 
+# abnormalities in women in Gauteng Province, South Africa
+
+# This cross-sectional study describes the age-specific prevalence of human papillomavirus 
+# (HPV) infection and cytological abnormalities among this urban and peri-urban population.
+age_group_2 <- c("<25", "25-29", "30-34", "35-39", "40-44", "45-49", "50-54", 
+                 "≥55", "Total")
+# Total subjects:
+N_2 <- c(100, 186, 233, 215, 206, 180, 146, 179, 1445)
+# Total HPV positive:
+HPV_pos <- c(85, 149, 184, 157, 159, 122, 93, 129, 1084)
+
+cbind(age_group_2, HPV_pos, N_2)
 
 # ==========================================================================================
 # Genital Warts -----------------------------------------------------------
@@ -116,7 +102,6 @@ barplot(p_Age, names.arg = age)
 # tB:48
 # nB:2279
 
-<<<<<<< HEAD
 # Study 3: Perez G., et al. 2008 ------------------------------------------
 # Safety, immunogenicity, and efficacy of quadrivalent human papillomavirus (types 6, 11, 16, 
 # 18) L1 virus-like-particle vaccine in Latin American women.
@@ -132,10 +117,6 @@ barplot(p_Age, names.arg = age)
 
 # ==========================================================================================
 # LSIL -----------------------------------------------------
-=======
-# ==========================================================================================
-# Probability of LSIL -----------------------------------------------------
->>>>>>> 1dbd3086eec9f1d41d1cfa7781e724468989103e
 # ==========================================================================================
 # Low-Grade Squamous Intraepithelial Lesions
 
@@ -183,12 +164,21 @@ barplot(p_Age, names.arg = age)
 # tB:49
 # nB:2258
 
+# Study 4: Perez G., et al. 2008 ------------------------------------------
+# Safety, immunogenicity, and efficacy of quadrivalent human papillomavirus (types 6, 11, 16, 
+# 18) L1 virus-like-particle vaccine in Latin American women.
+
+# This study did not exclude subjects with prior HPV infection.
+
+# Events by group:
+# tA:2
+# nA:2415
+
+# tB:29
+# nB:2377
+
 # ==========================================================================================
-<<<<<<< HEAD
 # HSIL -----------------------------------------------------
-=======
-# Probability of HSIL -----------------------------------------------------
->>>>>>> 1dbd3086eec9f1d41d1cfa7781e724468989103e
 # ==========================================================================================
 # High-Grade Squamous Intraepithelial Lesions.
 
@@ -236,17 +226,29 @@ barplot(p_Age, names.arg = age)
 # tB:38
 # nB:2258
 
+# Study 4: Perez G., et al. 2008 ------------------------------------------
+# Safety, immunogenicity, and efficacy of quadrivalent human papillomavirus (types 6, 11, 16, 
+# 18) L1 virus-like-particle vaccine in Latin American women.
+
+# This study did not exclude subjects with prior HPV infection.
+
+# Events by group:
+# tA:1
+# nA:2415
+
+# tB:21
+# nB:2377
+
 # ==========================================================================================
 # Cervical Adenocarcinoma -------------------------------------------------
 # ==========================================================================================
-<<<<<<< HEAD
 
 # Study 1: Sinanovic, E., et al. 2009 -------------------------------------
 # The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
 # cancer screening programme in South Africa
 
 # Progression rate HSIL to stage I cancer:
-=======
+
 # Data collated from per-protocol population.
 
 # Study 1: Garland S., et al. 2007 ----------------------------------------
@@ -261,20 +263,3 @@ barplot(p_Age, names.arg = age)
 
 # tB:6
 # nB:2258
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> 1dbd3086eec9f1d41d1cfa7781e724468989103e
-
