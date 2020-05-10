@@ -46,8 +46,6 @@ n_tox2 <- c(161, 203, 143, 46)
 x_tr <- c(23, 12)
 # Observed variance
 phi_tr <- c(3, 2) ^ 2
-# Computed precision
-
 
 # Data on time to progression (sub-model 4) -------------------------------
 # Number of studies
@@ -56,14 +54,10 @@ N_tp <- c(2, 3)
 x_tp1 <- c(23, 21)
 # Observed variance for t = 1
 phi_tp1 <- c(4.077, 1.943) ^ 2
-# Computed precision for t = 1
-
 # Observed median time for t = 2
 x_tp2 <- c(19, 26, 27.3)
 # Observed variance for t = 2
 phi_tp2 <- c(2.048, 2.263, 1.631) ^ 2
-# Computed precision for t = 2
-
 # Markov Model cycle length
 tau <- 3
 
@@ -74,8 +68,6 @@ N_surv <- c(2, 3)
 x_surv1 <- c(60.66, 47)
 # Observed variance for t = 1
 phi_surv1 <- c(3.9723, 5.6880) ^ 2
-# Computed precision
-
 # Observed median time for t = 2
 x_surv2 <- c(47.67, 65, 45.07)
 # Observed variance for t = 2
@@ -352,7 +344,7 @@ for (i in 1:n.sims) {
 
 ## Iterative solution of age-dependent cSTM
 for (i in 1:n.sims) {
- for(t in 1:n_t){
+ for(t in 1:n_t) {
   # Fill in cohort trace
   m_M_ad[t + 1, , i] <- m_M_ad[t, , i] %*% a_P[ , , t, i]
   # Fill in transition dynamics array
@@ -392,8 +384,8 @@ barplot(apply(m_M_ad, c(2, 1), mean), space = 1,
         ylab = "Proportion of patients in each state",
         main = "New Treatment", col = cols, cex.names = 1, cex.main = 1.5)
 legend("topright", legend = c("Stable", "Response", "Progrssion", "Death"), 
-       fill = cols, cex = .55, box.lwd = 2, x = 45, y = -.05,
-       horiz = TRUE, bty = "n")
+       fill = cols, cex = .55, box.lwd = .001,
+       horiz = F)
 
 # Cost-effectiveness analysis ---------------------------------------------
 

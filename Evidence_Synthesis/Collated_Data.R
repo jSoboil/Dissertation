@@ -1,4 +1,15 @@
 library(tidyverse)
+library(readxl)
+
+# ==========================================================================================
+# Thoughts on Model -------------------------------------------------------
+# ==========================================================================================
+
+
+
+# ==========================================================================================
+# Misc --------------------------------------------------------------------
+# ==========================================================================================
 
 # Function to convert rate to probability assuming cons rate:
 rateConversionCons <- function(r, timelength) {
@@ -24,18 +35,25 @@ rateConversionCons <- function(r, timelength) {
 
 #      r = - (1 / t) * log(1 - p)
 
+# Included statistics for HPV-6, HPV-11, HPV-16, and HPV-18 as model assess quadrivalent
+# vaccine efficacy.
+
 # ==========================================================================================
 # Age-specific all cause mortality --------------------------------------------------
 # ==========================================================================================
 # Import ASSA mortality table:
-mort_data <- read_excel("mortality tables.xls", sheet = "ASSA data", range = "B3:C94")
+mort_data <- read_excel("Evidence_Synthesis/mortality tables.xls", 
+                        sheet = "ASSA data", range = "B3:C94")
 
 # Total Pop. divided by total deaths:
 v_r_mort_by_age <- mort_data[, 2] / mort_data[, 1]
 v_r_mort_by_age
 
+# Therefore, all-less HPV mortality calculated as All-cause mortality - HPV mortality, i.e.
+# the number of people who die due to cervical cancer.
+
 # ==========================================================================================
-# Age-specific incidence ----------------------------------------------------
+# Age-specific HPV incidence ----------------------------------------------------
 # ==========================================================================================
 
 # Data collated from per-protocol population.
@@ -50,10 +68,17 @@ incidence <- as.numeric(c(.1, .12, .15, .17, .15, .12, .1, .05, .01, .005))
 
 # Convert rate to probability:
 p_Age <- 1 - exp(-incidence * 1)
-cbind(age_group, round(p_Age, 4))
-barplot(p_Age, names.arg = age_group, ylab = "Probability of HPV+", 
-        xlab = "Probability by Age group")
-p_Age
+
+Pr_Age <- cbind(age_group, round(p_Age, 4))
+Pr_Age
+
+p_Age <- c(rep(p_Age[1], length(15:16)), rep(p_Age[2], 1), rep(p_Age[3], 1), 
+           rep(p_Age[4], 1), rep(p_Age[5], 1), rep(p_Age[6], 1), 
+           rep(p_Age[7], length(22:23)), rep(p_Age[8], length(24:29)), 
+           rep(p_Age[9], length(30:49)), rep(p_Age[10], length(50:100)))
+length(p_Age)
+# I THINK IT IS BEST TO RUN THE VIRTUAL COHORT FROM AGE OF VACCINATION TO 100.
+barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 
 # Study 2: Richter K., et al. 2013 ----------------------------------------
 # Age-specific prevalence of cervical human papillomavirus infection and cytological 
@@ -69,6 +94,9 @@ N_2 <- c(100, 186, 233, 215, 206, 180, 146, 179, 1445)
 HPV_pos <- c(85, 149, 184, 157, 159, 122, 93, 129, 1084)
 
 cbind(age_group_2, HPV_pos, N_2)
+
+barplot(HPV_pos[-9]/N_2[-9], names.arg = age_group_2[-9], ylab = "Proportion HPV+",
+        xlab = "By Age group", main = "Richter K., et al. 2013.", ylim = 0:1)
 
 # ==========================================================================================
 # Genital Warts -----------------------------------------------------------
@@ -242,6 +270,7 @@ cbind(age_group_2, HPV_pos, N_2)
 # ==========================================================================================
 # Cervical Adenocarcinoma -------------------------------------------------
 # ==========================================================================================
+# Use observational studies to obtain incidence or prevalence.
 
 # Study 1: Sinanovic, E., et al. 2009 -------------------------------------
 # The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
