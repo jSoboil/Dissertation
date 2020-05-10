@@ -1,0 +1,16 @@
+model {
+ for (i in 1:86) {
+ # Likelihood
+ p_Age[i] ~ dnorm(mu[i], prec[i])T(0, )
+ 
+ # Prior on mu:
+ mu[i] ~ dnorm(rho, psi)
+ # Precision function:
+ prec[i] <- 1 / (beta * beta)
+ }
+# Priors
+rho ~ dunif(0, 1)
+phi ~ dunif(0, 10)
+psi <- 1  / (phi * phi)
+beta ~ dunif(0, 10)
+}

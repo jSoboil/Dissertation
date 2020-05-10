@@ -4,10 +4,11 @@ model {
  for (i in 1:91) {
   Dead[i] ~ dbin(p[i], N[i])
   
+  # Prior Sampling model:
   p[i] ~ dbeta(alpha, beta)
   
  }
- # Priors on mortality probablity:
+ # Priors on mortality:
  alpha ~ dunif(0, 10)
  beta ~ dunif(0, 100)
 }

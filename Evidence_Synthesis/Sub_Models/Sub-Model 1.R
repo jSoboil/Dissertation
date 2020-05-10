@@ -1,3 +1,5 @@
+# setwd("/Users/joshuamusson/Desktop/Analytics/R/Intergrated-CEA-thesis/Evidence_Synthesis/Sub_Models/")
+
 # ====================================================================================
 # All Cause Mortality Model -----------------------------------------------
 # ====================================================================================
@@ -8,6 +10,7 @@ library(parallel)
 
 options(mc.cores = detectCores())
 
+# Mortality data for female population from ASSA model: 
 mort_data <- read_excel("Evidence_Synthesis/mortality tables.xls", 
                         sheet = "ASSA data", range = "B3:C94")
 
@@ -26,10 +29,11 @@ model {
  for (i in 1:91) {
   Dead[i] ~ dbin(p[i], N[i])
   
+  # Prior Sampling model:
   p[i] ~ dbeta(alpha, beta)
   
  }
- # Priors on mortality probablity:
+ # Priors on mortality:
  alpha ~ dunif(0, 10)
  beta ~ dunif(0, 100)
 }
