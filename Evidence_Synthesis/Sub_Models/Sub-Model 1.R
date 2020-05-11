@@ -1,4 +1,4 @@
-# setwd("/Users/joshuamusson/Desktop/Analytics/R/Intergrated-CEA-thesis/Evidence_Synthesis/Sub_Models/")
+setwd("/Users/joshuamusson/Desktop/Analytics/R/Intergrated-CEA-thesis/Evidence_Synthesis/Sub_Models/")
 
 # ====================================================================================
 # All Cause Mortality Model -----------------------------------------------
@@ -11,7 +11,7 @@ library(parallel)
 options(mc.cores = detectCores())
 
 # Mortality data for female population from ASSA model: 
-mort_data <- read_excel("Evidence_Synthesis/mortality tables.xls", 
+mort_data <- read_excel("mortality tables.xls", 
                         sheet = "ASSA data", range = "B3:C94")
 
 N <- round(as.matrix(mort_data[, 1]), digits = 0)
@@ -19,9 +19,6 @@ Dead <- round(as.matrix(mort_data[, 2]), digits = 0)
 Dead / N
 N <- as.numeric(unlist(N))
 Dead <- as.numeric(unlist(Dead))
-typeof(N) == typeof(Dead)
-
-# p(d) ~ dbin(dead, N)
 
 model_string <-"
 model {

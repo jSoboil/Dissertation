@@ -56,8 +56,6 @@ v_r_mort_by_age
 # Age-specific HPV incidence ----------------------------------------------------
 # ==========================================================================================
 
-# Data collated from per-protocol population.
-
 # Study 1: Sinanovic, E., et al. 2009 -------------------------------------
 # The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
 # cancer screening programme in South Africa
@@ -76,27 +74,37 @@ p_Age <- c(rep(p_Age[1], length(15:16)), rep(p_Age[2], 1), rep(p_Age[3], 1),
            rep(p_Age[4], 1), rep(p_Age[5], 1), rep(p_Age[6], 1), 
            rep(p_Age[7], length(22:23)), rep(p_Age[8], length(24:29)), 
            rep(p_Age[9], length(30:49)), rep(p_Age[10], length(50:100)))
-length(p_Age)
-# I THINK IT IS BEST TO RUN THE VIRTUAL COHORT FROM AGE OF VACCINATION TO 100.
 barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 
-# Study 2: Richter K., et al. 2013 ----------------------------------------
-# Age-specific prevalence of cervical human papillomavirus infection and cytological 
-# abnormalities in women in Gauteng Province, South Africa
 
-# This cross-sectional study describes the age-specific prevalence of human papillomavirus 
-# (HPV) infection and cytological abnormalities among this urban and peri-urban population.
-age_group_2 <- c("<25", "25-29", "30-34", "35-39", "40-44", "45-49", "50-54", 
-                 "≥55", "Total")
-# Total subjects:
-N_2 <- c(100, 186, 233, 215, 206, 180, 146, 179, 1445)
-# Total HPV positive:
-HPV_pos <- c(85, 149, 184, 157, 159, 122, 93, 129, 1084)
+	s2 <- .05^2
+	mulog <- rep(NA, length(p_Age))
+for (i in 1:length(p_Age)) {
+ 	mulog[i] <- log(p_Age[i]) - .5*log(1+s2/p_Age[i]^2)
+ 	s2log <- log(1+(s2/p_Age[i]^2))
+	 sigmalog <- sqrt(s2log)
+}
+ plot(density(exp(mulog)))
 
-cbind(age_group_2, HPV_pos, N_2)
 
-barplot(HPV_pos[-9]/N_2[-9], names.arg = age_group_2[-9], ylab = "Proportion HPV+",
-        xlab = "By Age group", main = "Richter K., et al. 2013.", ylim = 0:1)
+# ==========================================================================================
+# Vaccine efficacy --------------------------------------------------------
+# ==========================================================================================
+
+# Study 1: Munoz N., et al. 2009 ------------------------------------------
+# Safety, immunogenicity, and eðcacy of quadrivalent human papillomavirus (types 6, 11, 16, 
+# 18) recombinant vaccine in women aged 24–45 years: a randomised, double-blind trial.
+
+# Women aged 24–45 years with no history of genital warts or cervical disease were enrolled 
+# from community health centres, academic health centres, and primary health-care providers 
+# into an ongoing multicentre, parallel, randomised, placebo-controlled, double-blind study.
+
+# Events by group:
+# tA:4
+# nA:1615
+
+# tB:41
+# nB:1607
 
 # ==========================================================================================
 # Genital Warts -----------------------------------------------------------

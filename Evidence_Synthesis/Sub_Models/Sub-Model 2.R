@@ -1,11 +1,8 @@
-setwd("/Users/joshuamusson/Desktop/Analytics/R/Intergrated-CEA-thesis/Evidence_Synthesis/Sub_Models/")
-# ==========================================================================================
-# Age-specific incidence --------------------------------------------------
-# ==========================================================================================
 library(rjags)
 library(R2jags)
+library(bayesplot)
 library(parallel)
-
+setwd(dir = "/Users/joshuamusson/Desktop/Analytics/R/Intergrated-CEA-thesis/Evidence_Synthesis/Sub_Models/")
 options(mc.cores = detectCores())
 
 # Study 1: Sinanovic, E., et al. 2009 -------------------------------------
@@ -25,39 +22,56 @@ Pr_Age
 p_Age <- c(rep(p_Age[1], length(15:16)), rep(p_Age[2], 1), rep(p_Age[3], 1), 
            rep(p_Age[4], 1), rep(p_Age[5], 1), rep(p_Age[6], 1), 
            rep(p_Age[7], length(22:23)), rep(p_Age[8], length(24:29)), 
-           rep(p_Age[9], length(30:49)), rep(p_Age[10], length(50:100)))
-length(p_Age)
-# I THINK IT IS BEST TO RUN THE VIRTUAL COHORT FROM AGE OF VACCINATION TO 100.
+           rep(p_Age[9], length(30:49)), rep(p_Age[10], length(50:114)))
 barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 
-# Model -------------------------------------------------------------------
-# Must make this a lognormal, so it is not truncated...
-model_string <- "model {
- for (i in 1:86) {
- # Likelihood
- p_Age[i] ~ dnorm(mu[i], prec[i])T(0, )
- 
- # Prior on mu:
- mu[i] ~ dnorm(rho, psi)
- # Precision function:
- prec[i] <- 1 / (beta * beta)
+N <- 1000
+x <- 1:N
+
+plot(density(rpois(n = 1000, lambda = 33.3)))
+
+model_string <- "
+model {
+ for (i in 1:100) {
+  p_Age[i] ~ dgamma(shape, rate)
  }
-# Priors
-rho ~ dunif(0, 1)
-phi ~ dunif(0, 10)
-psi <- 1  / (phi * phi)
-beta ~ dunif(0, 10)
-}"
-writeLines(text = model_string, con = "ASInc.txt")
+ 
+ shape <- pow(m,2) / pow(sd,2)
+ rate <-     m / pow(sd,2)
+    m ~ dunif(0,100)
+    sd ~ dunif(0,100)
+}
+"
+writeLines(text = model_string, con = "AgeInc.txt")
 
 data_JAGS <- list(p_Age = p_Age)
-data_JAGS
-jags(data = data_JAGS, parameters.to.save = "p_Age", model.file = "ASInc.txt")
 
+params <- c("shape", "rate")
 
+mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, model.file = "AgeInc.txt",
+                 n.iter = 10000, n.chains = 2, n.burnin = 1000, n.thin = 5)
+mod_JAGS
+attach.jags(mod_JAGS)
 
+barplot(p_Age, axes = FALSE)
+par(new = TRUE)
+plot(density(rgamma(n = 10000, shape = mean(shape), rate = mean(rate))), 
+     col = "red", lwd = 3, xlab = "From Age 15 to 100", ylab = "Probability of HPV+")
 
+model_String <- model {
+  for (i in 1:100) {
+    y[i] ~ dgamma
+  }
+}
 
+weibSurv <- function(t, shape, scale) {
+ pweibull(t, shape = shape, scale = scale, lower.tail = F)
+}
 
+weibSurv(t = 100, shape = .775, scale = 1 / 40.589)
 
+curve(weibSurv(x, shape = .775, scale = 1 / 0.02463722), from = 0, to = 100,
+      ylab = "Survival probability", xlab = "Time", col = "darkblue")
+      
 
+40.589 ^ -1

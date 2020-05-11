@@ -2,13 +2,13 @@ library(rjags) # to synthesise and simulate
 library(R2jags) # to synthesise and simulate
 library(dplyr) # to manipulate data
 library(reshape2) # to transform data
-library(ggplot2) # for nice looking plots
+library(ggplot2) # for plots
 library(scales) # for dollar signs and commas
-library(dampack) # for CEA and calculate ICERs
+library(dampack) # for CEA and to calculate ICERs
 library(tidyverse) # for general data wrangling and vis
 library(reshape2) # data wrangling
-library(BCEA) # Bayesian HE package
-library(bayesplot) # Tools for posterior inspection
+library(BCEA) # bayesian CEA package
+library(bayesplot) # tools for posterior inspection
 library(parallel) # used for parrallel processing of Markov chains
 
 options(mc.cores = detectCores())
@@ -184,7 +184,7 @@ mcmc_trace(posterior, pars = c("pi_res[1]", "pi_res[2]",
 
 color_scheme_set("viridisA")
 theme_set(theme_minimal())
-mcmc_trace(posterior[,, 1:13], window = c(100, 150), size = 1) + 
+mcmc_trace(posterior[, , 1:13], window = c(100, 150), size = 1) + 
   panel_bg(fill = "white", color = NA) +
   legend_move("top")
 
