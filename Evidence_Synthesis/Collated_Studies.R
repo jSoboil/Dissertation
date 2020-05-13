@@ -6,7 +6,7 @@ library(readxl)
 # ==========================================================================================
 # COMPARISON GROUPS: VACCINE(A) AND PLACEBO (B).
 
-# Function to convert rate to probability assuming cons rate:
+# Function to convert rate to probability assuming cons. rate:
 rateConversionCons <- function(r, timelength) {
  for (i in 1:timelength) {
   P <- 1 - exp(-r * 1:i)
@@ -203,11 +203,11 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # reported a lifetime history of four or fewer male sex partners.
 
 # Events by group:
-# tA:0
-# nA:235
+# tB:0
+# nB:235
 
-# tB:3
-# nB:233
+# tA:3
+# nA:233
 
 # Study 2: Garland S., et al. FUTURE I 2007 -------------------------------
 # Quadrivalent Vaccine against Human Papillomavirus to Prevent Anogenital Diseases.
@@ -216,11 +216,11 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # with HPV-6, HPV-11, HPV-16, or HPV-18 or Regardless of HPV Type.
 
 # Events by group:
-# tA:0
-# nA:2261
+# tB:0
+# nB:2261
 
-# tB:48
-# nB:2279
+# tA:48
+# nA:2279
 
 # Study 3: Perez G., et al. 2008 ------------------------------------------
 # Safety, immunogenicity, and efficacy of quadrivalent human papillomavirus (types 6, 11, 16, 
@@ -229,11 +229,11 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # This study did not exclude subjects with prior HPV infection.
 
 # Events by group:
-# tA:0
-# nA:2429
+# tB:0
+# nB:2429
 
-# tB:45
-# nB:2396
+# tA:45
+# nA:2396
 
 # ==========================================================================================
 # LSIL -----------------------------------------------------
@@ -251,11 +251,11 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # active cervical disease, or prior HPV vaccine recipients were excluded.
 
 # Events by group:
-# tA:1
-# nA:1271
+# tB:1
+# nB:1271
 
-# tB:29
-# nB:1243
+# tA:29
+# nA:1243
 
 # Study 2: Catellsague X., et al. 2011 ------------------------------------
 # End-of-study safety, immunogenicity, and efficacy of quadrivalent HPV (types 6, 11, 16, 
@@ -265,11 +265,11 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # warts in the past 5 years.
 
 # Events by group:
-# tA:0
-# nA:1578
+# tB:0
+# nB:1578
 
-# tB:25
-# nB:1583
+# tA:25
+# nA:1583
 
 # Study 3: Garland S., et al. FUTURE I 2007 -------------------------------
 # Quadrivalent Vaccine against Human Papillomavirus to Prevent Anogenital Diseases.
@@ -278,11 +278,11 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # with HPV-6, HPV-11, HPV-16, or HPV-18 or Regardless of HPV Type.
 
 # Events by group:
-# tA:0
-# nA:2241
+# tB:0
+# nB:2241
 
-# tB:49
-# nB:2258
+# tA:49
+# nA:2258
 
 # Study 4: Perez G., et al. 2008 ------------------------------------------
 # Safety, immunogenicity, and efficacy of quadrivalent human papillomavirus (types 6, 11, 16, 
@@ -291,11 +291,11 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # This study did not exclude subjects with prior HPV infection.
 
 # Events by group:
-# tA:2
-# nA:2415
+# tB:2
+# nB:2415
 
-# tB:29
-# nB:2377
+# tA:29
+# nA:2377
 
 # ==========================================================================================
 # HSIL -----------------------------------------------------
@@ -313,11 +313,11 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # active cervical disease, or prior HPV vaccine recipients were excluded.
 
 # Events by group:
-# tA:0 
-# nA:1271
+# tB:0 
+# nB:1271
 
-# tB:3
-# nB:1243
+# tA:3
+# nA:1243
 
 # Study 2: Catellsague X., et al. 2011 ------------------------------------
 # End-of-study safety, immunogenicity, and efficacy of quadrivalent HPV (types 6, 11, 16, 
@@ -327,11 +327,11 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # warts in the past 5 years.
 
 # Events by group:
-# tA:0
-# nA:1578
-
 # tB:0
-# nB:1583
+# nB:1578
+
+# tA:0
+# nA:1583
 
 # Study 3: Garland S., et al. FUTURE I 2007 -------------------------------
 # Quadrivalent Vaccine against Human Papillomavirus to Prevent Anogenital Diseases.
@@ -340,11 +340,11 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # with HPV-6, HPV-11, HPV-16, or HPV-18 or Regardless of HPV Type.
 
 # Events by group:
-# tA:0
-# nA:2241
+# tB:0
+# nB:2241
 
-# tB:38
-# nB:2258
+# tA:38
+# nA:2258
 
 # Study 4: Perez G., et al. 2008 ------------------------------------------
 # Safety, immunogenicity, and efficacy of quadrivalent human papillomavirus (types 6, 11, 16, 
@@ -353,11 +353,11 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # This study did not exclude subjects with prior HPV infection.
 
 # Events by group:
-# tA:1
-# nA:2415
+# tB:1
+# nB:2415
 
-# tB:21
-# nB:2377
+# tA:21
+# nA:2377
 
 # ==========================================================================================
 # Cervical Adenocarcinoma -------------------------------------------------
@@ -379,8 +379,13 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # with HPV-6, HPV-11, HPV-16, or HPV-18 or Regardless of HPV Type.
 
 # Events by group:
-# tA:0
-# nA:2241
+# tB:0
+# nB:2241
 
-# tB:6
-# nB:2258
+# tA:6
+# nA:2258
+
+# ==========================================================================================
+# Median time to response -------------------------------------------------
+# ==========================================================================================
+

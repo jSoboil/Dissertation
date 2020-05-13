@@ -256,16 +256,7 @@ a_P <- array(0, dim = c(n_states, n_states, n_t, n.sims),
              dimnames = list(v_n, v_n, 0:(n_t - 1), 1:n.sims))
 dim(a_P)
 
-
-
-
-
 # NOTE: WHEN READY ADD TREATMENTS 1 AND 2, I.E. MAKE a_P_1 AND a_P_2... etc.
-
-
-
-
-
 
 # ==========================================================================================
 # Fill in transition array ------------------------------------------------

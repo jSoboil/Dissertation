@@ -17,28 +17,36 @@ mort_data <- read_excel("mortality tables.xls",
 N <- round(as.matrix(mort_data[, 1]), digits = 0)
 Dead <- round(as.matrix(mort_data[, 2]), digits = 0)
 Dead / N
-N <- as.numeric(unlist(N))
-Dead <- as.numeric(unlist(Dead))
+N.pop <- as.numeric(unlist(N))
+mort <- as.numeric(unlist(Dead))
 
 model_string <-"
 model {
+# Sub-model 1: population probability for age-specific mortality
+    # model parameters abbreviated by .pop
+
 # Binomial Likelihood:
  for (i in 1:91) {
-  Dead[i] ~ dbin(p[i], N[i])
+  mort[i] ~ dbin(pop.pi[i], N.pop[i])
   
   # Prior Sampling model:
-  p[i] ~ dbeta(alpha, beta)
+  logit(pop.pi[i]) <-  mu.pop[i] + delta[i]
+  
+  # Priors on mort_pr:
+  mu.pop[i] ~ dnorm(0, 1.0e-5)
+  delta[i] ~ dnorm(rho.pop, 1 / sigma.pop ^ 2)
   
  }
- # Priors on mortality:
- alpha ~ dunif(0, 10)
- beta ~ dunif(0, 100)
+ # Hyperpriors on delta:
+ rho.pop ~ dnorm(0, 1.0e-5)
+ sigma.pop ~ dunif(0, 20)
+ 
 }
 "
 writeLines(text = model_string, con = "mortProb.txt")
 
-data_JAGS <- list(Dead = Dead, N = N)
+data_JAGS <- list(mort = mort, N.pop = N.pop)
 data_JAGS
 
-jags(data = data_JAGS, parameters.to.save = "p", model.file = "mortProb.txt", n.chains = 2,
-    n.iter = 10000, n.burnin = 1000)
+jags(data = data_JAGS, parameters.to.save = c("pop.pi"), 
+     model.file = "mortProb.txt", n.chains = 2, n.iter = 10000, n.burnin = 1000)
