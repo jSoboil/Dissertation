@@ -1,5 +1,3 @@
-setwd("/Users/joshuamusson/Desktop/Analytics/R/Intergrated-CEA-thesis/Evidence_Synthesis/Sub_Models/")
-
 # ====================================================================================
 # All Cause Mortality Model -----------------------------------------------
 # ====================================================================================
@@ -39,14 +37,26 @@ model {
  }
  # Hyperpriors on delta:
  rho.pop ~ dnorm(0, 1.0e-5)
- sigma.pop ~ dunif(0, 20)
+ sigma.pop ~ dunif(0, 10)
  
 }
 "
 writeLines(text = model_string, con = "mortProb.txt")
 
+# Data format that is readable for JAGS:
 data_JAGS <- list(mort = mort, N.pop = N.pop)
 data_JAGS
+# Initial starting values for JAGS sampler:
+inits <- list(
+ list(rho.pop = 1, delta = rep(.09, 91), 
+      mu.pop = rep(.1, 91)),
+ list(rho.pop = 0, delta = rep(1, 91), 
+      mu.pop = rep(.5, 91))
+)
+# Parameters to monitor:
+params <- c("d", "OR", "pEfficacy")
 
-jags(data = data_JAGS, parameters.to.save = c("pop.pi"), 
-     model.file = "mortProb.txt", n.chains = 2, n.iter = 10000, n.burnin = 1000)
+mod_JAGS <- jags(data = data_JAGS, parameters.to.save = c("pop.pi"), 
+                 model.file = "mortProb.txt", inits = inits, n.chains = 2, 
+                 n.iter = 10000, n.burnin = 1000)
+mod_JAGS

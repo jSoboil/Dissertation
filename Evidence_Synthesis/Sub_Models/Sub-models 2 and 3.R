@@ -6,6 +6,48 @@ library(parallel)
 
 options(mc.cores = detectCores())
 
+# The following sub-models model age-specific probability of infection and vaccine efficiacy.
+
+# ==========================================================================================
+# Age-specific HPV incidence ----------------------------------------------------
+# ==========================================================================================
+# Study 1: Sinanovic, E., et al. 2009 -------------------------------------
+# The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
+# cancer screening programme in South Africa
+
+# Age-specific incidence:
+age_group <- c("15-16", "17", "18", "19", "20", "21", "22-23", "24-29", "30-49", "50≥")
+group_Age <- c(rep(age_group[1], length(15:16)), rep(age_group[2], 1), 
+           rep(age_group[3], 1), rep(age_group[4], 1), rep(age_group[5], 1), 
+           rep(age_group[6], 1), rep(age_group[7], length(22:23)), 
+           rep(age_group[8], length(24:29)), rep(age_group[9], length(30:49)), 
+           rep(age_group[10], length(50:104)))
+group_Age
+
+incidence <- as.numeric(c(.1, .12, .15, .17, .15, .12, .1, .05, .01, .005))
+r_Age <- c(rep(incidence[1], length(15:16)), rep(incidence[2], 1), 
+           rep(incidence[3], 1), rep(incidence[4], 1), rep(incidence[5], 1), 
+           rep(incidence[6], 1), rep(incidence[7], length(22:23)), 
+           rep(incidence[8], length(24:29)), rep(incidence[9], length(30:49)), 
+           rep(incidence[10], length(50:104)))
+r_Age
+barplot(r_Age, names.arg = "From Age 15 to 100", 
+        main = "Rate of HPV+", sub =  "At constant t-cycle of 1-year")
+
+## Copyright Gianluca Baio 2012
+lognPar <- function(mu, sdev) {
+	sdev.sq <- sdev ^ 2
+	mu.log <- log(mu) - .5 * log(1 + sdev.sq / mu ^ 2)
+	sdev.sq.log <- log(1 + (sdev.sq / mu ^ 2))
+	sigma.log <- sqrt(sdev.sq.log)
+	list(mu.log = mu.log, sigma.log= sigma.log)
+}
+
+r_mu.log <- lognPar(mu = r_Age, sdev = r_Age)$mu.log
+r_mu.log
+r_sigma.log <- 1 / lognPar(mu = r_Age, sdev = r_Age)$sigma.log ^ 2
+r_sigma.log
+
 # ===========================================================================================
 # Vaccine efficacy --------------------------------------------------------
 # ===========================================================================================
@@ -109,56 +151,69 @@ options(mc.cores = detectCores())
 # tA:25
 # nA:1880
 
-# ===========================================================================================
-# Model specifications ----------------------------------------------------
-# ===========================================================================================
+# Vaccine efficacy data ----------------------------------------------------
 # COMPARISON GROUPS: PLACEBO (A) AND VACCINE(B).
-Nstud <- 7
-rA <- c(41, 45, 38, 60, 48, 42, 25)
-nA <- c(1607, 233, 1583, 2279, 1243, 5260, 1880)
-rB <- c(4, 2, 1, 0, 3, 1, 3)
-nB <- c(1615, 235, 1578, 2261, 1271, 5305, 1990)
- #  p = 1 - exp(-r * t)
+Nstud.vac <- 7
+rA.vac <- c(41, 45, 38, 60, 48, 42, 25)
+nA.vac <- c(1607, 233, 1583, 2279, 1243, 5260, 1880)
+rB.vac <- c(4, 2, 1, 0, 3, 1, 3)
+nB.vac <- c(1615, 235, 1578, 2261, 1271, 5305, 1990)
 
+# ==========================================================================================
+# Sub-models 2 and 3 ------------------------------------------------------
+# ==========================================================================================
 model_String <- "model {
-# Sub-model 3:
- for (i in 1:Nstud) {
-  rA[i] ~ dbin(pA[i], nA[i])
-  rB[i] ~ dbin(pB[i], nB[i])
+# Sub-model 2: age-specific probability of infection:
+  # model parameters abbreviated by .age
+    
+    # Note: equivalent of sampling directly from prior.
+  for (i in 1:90) {
+    omega.age[i] ~ dlnorm(r_mu.log[i], r_sigma.log[i])
+  }
+
+# Sub-model 3: vaccine-efficacy against infection:
+  # model parmaeters abbreviated by .vac
+ for (i in 1:Nstud.vac) {
+  rA.vac[i] ~ dbin(pA.vac[i], nA.vac[i])
+  rB.vac[i] ~ dbin(pB.vac[i], nB.vac[i])
  
-  logit(pA[i]) <- mu[i]
-  logit(pB[i]) <- mu[i] + delta[i]
+  logit(pA.vac[i]) <- mu.vac[i]
+  logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
  
-  mu[i] ~ dnorm(0, 1.0e-5)
-  delta[i] ~ dnorm(d, prec)
+  mu.vac[i] ~ dnorm(0, 1.0e-5)
+  delta.vac[i] ~ dnorm(psi.vac, prec.vac)
 }
 # Priors for sub-model 3:
- d ~ dnorm(0, 1.0e-6)
- tau ~ dunif(0, 10)
- tau.sq <- (tau * tau)
- prec <- 1 / tau.sq
+ psi.vac ~ dnorm(0, 1.0e-6)
+ tau.vac ~ dunif(0, 10)
+ tau.sq.vac <- (tau.vac * tau.vac)
+ prec.vac <- 1 / tau.sq.vac
  
- OR <- exp(d)
- pEfficacy <- (OR / 1 + OR)
+ OR.vac <- exp(psi.vac)
+ pEfficacy.vac <- (OR.vac / 1 + OR.vac)
  
 }
 "
-writeLines(text = model_String, con = "VaccineEfficacy.txt")
+writeLines(text = model_String, con = "Inc_and_efficacy.txt")
 
 # Transform data into list format so that can be read by JAGS:
-data_JAGS <- list(Nstud = Nstud, rA = rA, rB = rB, nA = nA, nB = nB)
+data_JAGS <- list(Nstud.vac = Nstud.vac, rA.vac = rA.vac, rB.vac = rB.vac, nA.vac = nA.vac, 
+                  nB.vac = nB.vac, r_mu.log = r_mu.log, 
+                  r_sigma.log = r_sigma.log)
 # Initial JAGS sampler values:
 inits <- list(
- list(d = 1, tau = .3, delta = c(0, 0, 0, 0, 0, 0, 0), 
-      mu = c(0, 0, 0, 0, 0, 0, 0)),
- list(d = 0, tau = 1, delta = c(0, 0, 0, 0, 0, 0, 0), 
-      mu = c(0, 0, 0, 0, 0, 0, 0))
+ list(psi.vac = 1, tau.vac = .3, delta.vac = c(0, 0, 0, 0, 0, 0, 0), 
+      mu.vac = c(0, 0, 0, 0, 0, 0, 0), 
+      omega.age = c(rep(0, 30), rep(1, 30), rep(.5, 30))),
+ list(psi.vac = 0, tau.vac = 1, delta.vac = c(0, 0, 0, 0, 0, 0, 0), 
+      mu.vac = c(0, 0, 0, 0, 0, 0, 0),
+      omega.age = c(rep(0, 30), rep(1, 30), rep(.5, 30)))
 )
 # Parameters to monitor:
-params <- c("d", "OR", "pEfficacy")
+params <- c("OR.vac", "pEfficacy.vac", "omega.age")
 
 mod_JAGS <- jags(data = data_JAGS, inits = inits, parameters.to.save = params, 
-                 model.file = "VaccineEfficacy.txt", n.chains = 2, 
+                 model.file = "Inc_and_efficacy.txt", n.chains = 2, 
                  n.iter = 20000, n.burnin = 10000, n.thin = 20)
 mod_JAGS
 # Attach JAGS model to global envir:
@@ -171,53 +226,32 @@ dimnames(posterior)
 # Inspect trace of chain for each parameter:
 color_scheme_set("viridisB")
 theme_set(theme_minimal())
-mcmc_trace(posterior, pars = params,
+mcmc_trace(posterior, pars = c("OR.vac", "omega.age[1]", "omega.age[5]"),
            facet_args = list(ncol = 1, strip.position = "left"))
 
 color_scheme_set("viridisA")
 theme_set(theme_minimal())
-mcmc_trace(posterior[, , 1:3], window = c(100, 150), size = 1) + 
+mcmc_trace(posterior[, , 1:10], window = c(100, 150), size = 1) + 
   panel_bg(fill = "white", color = NA) +
   legend_move("top")
 
 color_scheme_set("mix-teal-pink")
-mcmc_dens_overlay(posterior, pars = params)
+mcmc_dens_overlay(posterior, pars = c("OR.vac", "omega.age[1]", "omega.age[5]"))
 
 color_scheme_set("pink")
-mcmc_pairs(posterior, pars = params,
+mcmc_pairs(posterior, pars = c("OR.vac", "omega.age[1]", "omega.age[5]"),
            off_diag_args = list(size = 1.5))
 
 color_scheme_set("mix-blue-brightblue")
-mcmc_acf(posterior, pars = params, 
+mcmc_acf(posterior, pars = c("OR.vac", "omega.age[1]", "omega.age[5]"), 
          lags = 50)
 
-# ===========================================================================================
 # Age-specific incidence with Vaccine:
-# ===========================================================================================
 age_group <- c("15-16", "17", "18", "19", "20", "21", "22-23", "24-29", "30-49", "50≥")
 incidence <- as.numeric(c(.1, .12, .15, .17, .15, .12, .1, .05, .01, .005))
 
-# Convert rate to probability:
+# Convert rate to probability for untreated cohort:
 p_Age <- 1 - exp(-incidence * 1)
 
-Pr_Age <- cbind(age_group, round(p_Age, 4))
-Pr_Age
-
-p_Age <- c(rep(p_Age[1], length(15:16)), rep(p_Age[2], 1), rep(p_Age[3], 1), 
-           rep(p_Age[4], 1), rep(p_Age[5], 1), rep(p_Age[6], 1), 
-           rep(p_Age[7], length(22:23)), rep(p_Age[8], length(24:29)), 
-           rep(p_Age[9], length(30:49)), rep(p_Age[10], length(50:100)))
-
-OddsEff <- mean(OR)
-p_AgeVaccinated <- rep(NA, length(p_Age))
-
-for (i in 1:length(p_Age)) {
- p_AgeVaccinated[i] <- ((OddsEff * p_Age[i] / (1 - p_Age[i])) / 
-                      (1 + OddsEff * p_Age[i] / (1 - p_Age[i])))
-}
 # Age dependet probability of infection given vaccine:
-p_AgeVaccinated
-
-cbind(p_Age * 100, p_AgeVaccinated * 100)
-
-# NOTE THIS WILL BE OMEGA FROM MODEL 2!
+cbind(100 - p_Age * 100, 100 - omega.age[1000, 90] * 100)

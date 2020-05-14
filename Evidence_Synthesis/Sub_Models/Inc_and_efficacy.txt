@@ -1,0 +1,32 @@
+model {
+# Sub-model 2: age-specific probability of infection:
+  # model parameters abbreviated by .age
+    
+    # Note: equivalent of sampling directly from prior.
+  for (i in 1:90) {
+    omega.age[i] ~ dlnorm(r_mu.log[i], r_sigma.log[i])
+  }
+
+# Sub-model 3: vaccine-efficacy against infection:
+  # model parmaeters abbreviated by .vac
+ for (i in 1:Nstud.vac) {
+  rA.vac[i] ~ dbin(pA.vac[i], nA.vac[i])
+  rB.vac[i] ~ dbin(pB.vac[i], nB.vac[i])
+ 
+  logit(pA.vac[i]) <- mu.vac[i]
+  logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
+ 
+  mu.vac[i] ~ dnorm(0, 1.0e-5)
+  delta.vac[i] ~ dnorm(psi.vac, prec.vac)
+}
+# Priors for sub-model 3:
+ psi.vac ~ dnorm(0, 1.0e-6)
+ tau.vac ~ dunif(0, 10)
+ tau.sq.vac <- (tau.vac * tau.vac)
+ prec.vac <- 1 / tau.sq.vac
+ 
+ OR.vac <- exp(psi.vac)
+ pEfficacy.vac <- (OR.vac / 1 + OR.vac)
+ 
+}
+
