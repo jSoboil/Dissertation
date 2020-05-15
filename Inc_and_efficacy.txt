@@ -4,7 +4,7 @@ model {
     
     # Note: equivalent of sampling directly from an
     # informative prior.
-  for (i in 1:86) {
+  for (i in 1:90) {
     omega.age[i] ~ dlnorm(r_mu.log[i], r_sigma.log[i])
   }
 

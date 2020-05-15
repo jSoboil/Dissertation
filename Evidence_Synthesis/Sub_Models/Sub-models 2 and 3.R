@@ -6,7 +6,8 @@ library(parallel)
 
 options(mc.cores = detectCores())
 
-# The following sub-models model age-specific probability of infection and vaccine efficiacy.
+# The following sub-models simulate age-specific probability of infection using informative 
+# priors, and the average vaccine efficiacy using data from multiple RCTs.
 
 # ==========================================================================================
 # Age-specific HPV incidence ----------------------------------------------------
@@ -21,7 +22,7 @@ group_Age <- c(rep(age_group[1], length(15:16)), rep(age_group[2], 1),
            rep(age_group[3], 1), rep(age_group[4], 1), rep(age_group[5], 1), 
            rep(age_group[6], 1), rep(age_group[7], length(22:23)), 
            rep(age_group[8], length(24:29)), rep(age_group[9], length(30:49)), 
-           rep(age_group[10], length(50:104)))
+           rep(age_group[10], length(50:100)))
 group_Age
 
 incidence <- as.numeric(c(.1, .12, .15, .17, .15, .12, .1, .05, .01, .005))
@@ -29,12 +30,13 @@ r_Age <- c(rep(incidence[1], length(15:16)), rep(incidence[2], 1),
            rep(incidence[3], 1), rep(incidence[4], 1), rep(incidence[5], 1), 
            rep(incidence[6], 1), rep(incidence[7], length(22:23)), 
            rep(incidence[8], length(24:29)), rep(incidence[9], length(30:49)), 
-           rep(incidence[10], length(50:104)))
+           rep(incidence[10], length(50:100)))
 r_Age
 barplot(r_Age, names.arg = "From Age 15 to 100", 
         main = "Rate of HPV+", sub =  "At constant t-cycle of 1-year")
 
-## Copyright Gianluca Baio 2012
+# Function to convert means and st.deviations to the log-normal scale. Note: Copyright 
+# Baio G. 2012.
 lognPar <- function(mu, sdev) {
 	sdev.sq <- sdev ^ 2
 	mu.log <- log(mu) - .5 * log(1 + sdev.sq / mu ^ 2)
@@ -43,10 +45,14 @@ lognPar <- function(mu, sdev) {
 	list(mu.log = mu.log, sigma.log= sigma.log)
 }
 
+# Used as age-specific means for informative log-normal prior:
 r_mu.log <- lognPar(mu = r_Age, sdev = r_Age)$mu.log
 r_mu.log
+# Used as age-specific st.deviation for informative log-normal prior:
 r_sigma.log <- 1 / lognPar(mu = r_Age, sdev = r_Age)$sigma.log ^ 2
 r_sigma.log
+# Note: above computes the precision for the log-normal distribution outside of JAGS to speed
+# up computation.
 
 # ===========================================================================================
 # Vaccine efficacy --------------------------------------------------------
@@ -166,8 +172,9 @@ model_String <- "model {
 # Sub-model 2: age-specific probability of infection:
   # model parameters abbreviated by .age
     
-    # Note: equivalent of sampling directly from prior.
-  for (i in 1:90) {
+    # Note: equivalent of sampling directly from an
+    # informative prior.
+  for (i in 1:86) {
     omega.age[i] ~ dlnorm(r_mu.log[i], r_sigma.log[i])
   }
 
@@ -204,10 +211,10 @@ data_JAGS <- list(Nstud.vac = Nstud.vac, rA.vac = rA.vac, rB.vac = rB.vac, nA.va
 inits <- list(
  list(psi.vac = 1, tau.vac = .3, delta.vac = c(0, 0, 0, 0, 0, 0, 0), 
       mu.vac = c(0, 0, 0, 0, 0, 0, 0), 
-      omega.age = c(rep(0, 30), rep(1, 30), rep(.5, 30))),
+      omega.age = c(rep(0, 30), rep(1, 30), rep(.5, 26))),
  list(psi.vac = 0, tau.vac = 1, delta.vac = c(0, 0, 0, 0, 0, 0, 0), 
       mu.vac = c(0, 0, 0, 0, 0, 0, 0),
-      omega.age = c(rep(0, 30), rep(1, 30), rep(.5, 30)))
+      omega.age = c(rep(0, 30), rep(1, 30), rep(.5, 26)))
 )
 # Parameters to monitor:
 params <- c("OR.vac", "pEfficacy.vac", "omega.age")
@@ -231,7 +238,7 @@ mcmc_trace(posterior, pars = c("OR.vac", "omega.age[1]", "omega.age[5]"),
 
 color_scheme_set("viridisA")
 theme_set(theme_minimal())
-mcmc_trace(posterior[, , 1:10], window = c(100, 150), size = 1) + 
+mcmc_trace(posterior[, , 80:90], window = c(100, 150), size = 1) + 
   panel_bg(fill = "white", color = NA) +
   legend_move("top")
 
@@ -246,12 +253,14 @@ color_scheme_set("mix-blue-brightblue")
 mcmc_acf(posterior, pars = c("OR.vac", "omega.age[1]", "omega.age[5]"), 
          lags = 50)
 
-# Age-specific incidence with Vaccine:
-age_group <- c("15-16", "17", "18", "19", "20", "21", "22-23", "24-29", "30-49", "50≥")
-incidence <- as.numeric(c(.1, .12, .15, .17, .15, .12, .1, .05, .01, .005))
+# Convert rate of infection to probability of infection for Status Quo cohort:
+p_Age <- 1 - exp(-r_Age * 1)
+p_Age
 
-# Convert rate to probability for untreated cohort:
-p_Age <- 1 - exp(-incidence * 1)
+# Vaccine efficacy probability:
+1 - apply(pEfficacy.vac, 2, mean)
+# Status quo compared to age dependet probability of infection given vaccine efficacy:
+cbind("Status Quo" = p_Age, "Vaccine" = p_Age * apply(pEfficacy.vac, 2, mean))
 
-# Age dependet probability of infection given vaccine:
-cbind(100 - p_Age * 100, 100 - omega.age[1000, 90] * 100)
+
+

@@ -9,12 +9,11 @@ library(parallel)
 options(mc.cores = detectCores())
 
 # Mortality data for female population from ASSA model: 
-mort_data <- read_excel("mortality tables.xls", 
+mort_Fem.data <- read_excel("mortality tables.xls", 
                         sheet = "ASSA data", range = "B3:C94")
 
-N <- round(as.matrix(mort_data[, 1]), digits = 0)
-Dead <- round(as.matrix(mort_data[, 2]), digits = 0)
-Dead / N
+N <- round(as.matrix(mort_Fem.data[, 1]), digits = 0)
+Dead <- round(as.matrix(mort_Fem.data[, 2]), digits = 0)
 N.pop <- as.numeric(unlist(N))
 mort <- as.numeric(unlist(Dead))
 
@@ -39,6 +38,9 @@ model {
  rho.pop ~ dnorm(0, 1.0e-5)
  sigma.pop ~ dunif(0, 10)
  
+ # Odds ratio:
+ OR <- exp(rho.pop)
+ 
 }
 "
 writeLines(text = model_string, con = "mortProb.txt")
@@ -54,9 +56,9 @@ inits <- list(
       mu.pop = rep(.5, 91))
 )
 # Parameters to monitor:
-params <- c("d", "OR", "pEfficacy")
+params <- c("rho.pop", "OR", "pop.pi")
 
-mod_JAGS <- jags(data = data_JAGS, parameters.to.save = c("pop.pi"), 
+mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
                  model.file = "mortProb.txt", inits = inits, n.chains = 2, 
                  n.iter = 10000, n.burnin = 1000)
 mod_JAGS
