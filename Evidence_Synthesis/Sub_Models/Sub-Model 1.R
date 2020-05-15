@@ -62,3 +62,5 @@ mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params,
                  model.file = "mortProb.txt", inits = inits, n.chains = 2, 
                  n.iter = 10000, n.burnin = 1000)
 mod_JAGS
+
+# End file ----------------------------------------------------------------

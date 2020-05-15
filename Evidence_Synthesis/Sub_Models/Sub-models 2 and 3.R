@@ -262,5 +262,4 @@ p_Age
 # Status quo compared to age dependet probability of infection given vaccine efficacy:
 cbind("Status Quo" = p_Age, "Vaccine" = p_Age * apply(pEfficacy.vac, 2, mean))
 
-
-
+# End file ----------------------------------------------------------------
