@@ -238,7 +238,7 @@ mcmc_trace(posterior, pars = c("OR.vac", "omega.age[1]", "omega.age[5]"),
 
 color_scheme_set("viridisA")
 theme_set(theme_minimal())
-mcmc_trace(posterior[, , 80:90], window = c(100, 150), size = 1) + 
+mcmc_trace(posterior[, , 80:86], window = c(100, 150), size = 1) + 
   panel_bg(fill = "white", color = NA) +
   legend_move("top")
 
@@ -259,7 +259,7 @@ p_Age
 
 # Vaccine efficacy probability:
 1 - apply(pEfficacy.vac, 2, mean)
-# Status quo compared to age dependet probability of infection given vaccine efficacy:
+# Status quo compared to age dependet probability of infection given vaccine:
 cbind("Status Quo" = p_Age, "Vaccine" = p_Age * apply(pEfficacy.vac, 2, mean))
 
 # End file ----------------------------------------------------------------

@@ -48,7 +48,7 @@ v_r_mort_by_age
 # the number of people who die due to cervical cancer.
 
 # ==========================================================================================
-# Age-specific HPV incidence ----------------------------------------------------
+# Age-specific HPV infection ----------------------------------------------------
 # ==========================================================================================
 
 # Study 1: Sinanovic, E., et al. 2009 -------------------------------------
@@ -61,6 +61,7 @@ incidence <- as.numeric(c(.1, .12, .15, .17, .15, .12, .1, .05, .01, .005))
 
 # Convert rate to probability:
 p_Age <- 1 - exp(-incidence * 1)
+p_Age
 
 Pr_Age <- cbind(age_group, round(p_Age, 4))
 Pr_Age
@@ -70,6 +71,20 @@ p_Age <- c(rep(p_Age[1], length(15:16)), rep(p_Age[2], 1), rep(p_Age[3], 1),
            rep(p_Age[7], length(22:23)), rep(p_Age[8], length(24:29)), 
            rep(p_Age[9], length(30:49)), rep(p_Age[10], length(50:100)))
 barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
+
+
+# Prior: Sinanovic, E., et al. 2009 -------------------------------------
+# The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
+# cancer screening programme in South Africa
+
+# Progression probability Infection to Cleared:
+1 - exp(-.7 * 1.5) # 15-24 years.
+1 - exp(-.5 * 1.5) # 25-29 years.
+1 - exp(-.15 * 1.5) # ≥ 30 years.
+# Progression probability Infection to LSIL:
+1 - exp(-.2 * 3)
+# From Infection the proportion directly transitioning to HSIL (10%):
+.1 * p_Age
 
 # ==========================================================================================
 # Vaccine efficacy --------------------------------------------------------
@@ -240,6 +255,20 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # ==========================================================================================
 # Low-Grade Squamous Intraepithelial Lesions
 
+# Prior: Sinanovic, E., et al. 2009 -------------------------------------
+# The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
+# cancer screening programme in South Africa
+
+# Regression probability LSIL to HPV or Cleared:
+1 - exp(-.65 * 6) # 15-34 years
+1 - exp(-.4 * 6) # 15-34 years
+# Of the regressed, LSIL reverting to Cleared (90%):
+.9 * (1 - exp(-.65 * 6))
+.9 * (1 - exp(-.4 * 6))
+# Progression probability LSIL to HSIL:
+1 - exp(-.1 * 6) # 15-34 years.
+1 - exp(-.35 * 6) # ≥ 35 years
+ 
 # Data collated from per-protocol population. CIN 1 graded as LSIL.
 
 # Study 1: Wei L., et al. 2018 --------------------------------------------
@@ -301,6 +330,17 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # HSIL -----------------------------------------------------
 # ==========================================================================================
 # High-Grade Squamous Intraepithelial Lesions.
+
+# Prior: Sinanovic, E., et al. 2009 -------------------------------------
+# The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
+# cancer screening programme in South Africa
+
+# Regression HSIL to LSIL or Cleared:
+1 - exp(-.35 * 6)
+# Proportion of regressed, HSIL to Cleared:
+.5 * 1 - exp(-.35 * 6)
+# Progression probability for HSIL to Stage I Cancer:
+1 - exp(-.4 * 12)
 
 # Data collated from per-protocol population. CIN 2/3 graded as HSIL.
 
@@ -364,11 +404,10 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # ==========================================================================================
 # Use observational studies to obtain incidence or prevalence.
 
-# Study 1: Sinanovic, E., et al. 2009 -------------------------------------
+# Study Prior: Sinanovic, E., et al. 2009 -------------------------------------
 # The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
 # cancer screening programme in South Africa
 
-# Progression rate HSIL to stage I cancer:
 
 # Data collated from per-protocol population.
 
@@ -385,7 +424,4 @@ barplot(p_Age, names.arg = "From Age 15 to 100", ylab = "Probability of HPV+")
 # tA:6
 # nA:2258
 
-# ==========================================================================================
-# Median time to response -------------------------------------------------
-# ==========================================================================================
-
+# End file ----------------------------------------------------------------
