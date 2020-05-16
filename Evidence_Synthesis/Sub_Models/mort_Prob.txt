@@ -19,8 +19,8 @@ model {
  rho.pop ~ dnorm(0, 1.0e-5)
  sigma.pop ~ dunif(0, 10)
  
+ # Odds ratio:
  OR <- exp(rho.pop)
- 
  
 }
 
