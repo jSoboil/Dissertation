@@ -1,10 +1,11 @@
 library(tidyverse)
+library(dampack)
 library(readxl)
 
 # ==========================================================================================
 # Misc --------------------------------------------------------------------
 # ==========================================================================================
-# COMPARISON GROUPS: VACCINE(A) AND PLACEBO (B).
+# COMPARISON GROUPS: VACCINE(B) AND PLACEBO (A).
 
 # Function to convert rate to probability assuming cons. rate by time:
 rateConversionCons <- function(r, t) {
@@ -53,63 +54,32 @@ v_r_mort_by_age
 # Note: will use a relative risk parameter for proportion of HIV+ population who have 
 # increased risk of being reinfected rather than clearing HPV. See Italian study.
 
-# Informative prior: Sinanovic, E., et al. 2009 -------------------------------------
-# The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
-# cancer screening programme in South Africa
-
-# Age-specific incidence:
+# Informative prior -------------------------------------
+# Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa:
 age_group <- c("15-16", "17", "18", "19", "20", "21", "22-23", "24-29", "30-49", "50≥")
 incidence <- as.numeric(c(.1, .12, .15, .17, .15, .12, .1, .05, .01, .005))
+
+# Data collected from HPV and Related Diseases Report:
+age_group <- c("≤25", "25-34", "35-44", "45-54", "55-64")
+# Note: probability converted to yearly rate for use in lognormal distribution.
+# r = - (1 / t) * log(1 - p)
+incidence <- c(.44, .37, .205, .18, .17)
 cbind(age_group, incidence)
 
-# Study: Peto J., et al 2004 --------------------------------------------
-# Cervical HPV infection and neoplasia in a large population-based prospective study: the 
-# Manchester cohort.
+mu.log <- lnorm_params(m = incidence, v = 1)$mu
+sigma.log <- lnorm_params(m = incidence, v = 1)$sigma
 
-# 15-19:
-# n = 319
-# r = 69
+# Sampling Model :
+# omega.age[i] ~ dlnorm(mu.log[i], sigma.log[i])
+plot(density(rlnorm(n = 10000, meanlog = mu.log[4], sdlog = sigma.log[4])))
 
-# 20-24:
-# n = 466
-# r = 92
-
-# 25-29:
-# n = 586
-# r = 93
-
-# 30-34:
-# n = 1191
-# r = 86
-
-# 35-39:
-# n = 914
-# r = 47
-
-# 40-44:
-# n = 926
-# r = 28
-
-# 45-49:
-# n = 508
-# r = 15
-
-# 50-54:
-# n = 1104
-# r = 29
-
-# 55-59:
-# n = 114
-# r = 1
-
-# ==========================================================================================
+# ===========================================================================================
 # Vaccine efficacy --------------------------------------------------------
-# ==========================================================================================
-# Vaccine efficacy, expressed as the reduction in the occurrence of HPV due to vaccination.
+# ===========================================================================================
+# Vaccine efficacy is expressed as the reduction in the occurrence of HPV due to vaccination.
 # Individuals who are vaccinated fully experience a rate of occurrence of HPV that is 
 # (1 – alpha) times that of those who are not vaccinated (Favato G., et al. 2012).
-
-# All data collected from quadrivalent vaccine RCTs per protocol pop.
 
 # Study 1: Munoz N., et al. 2009 ------------------------------------------
 # Safety, immunogenicity, and eðcacy of quadrivalent human papillomavirus (types 6, 11, 16, 
@@ -119,110 +89,107 @@ cbind(age_group, incidence)
 # from community health centres, academic health centres, and primary health-care providers 
 # into an ongoing multicentre, parallel, randomised, placebo-controlled, double-blind study.
 
-# Events by group:
-# tB:4
-# nB:1615
+# Efficacy against the incidence of infection .
 
+# Events by group:
 # tA:41
 # nA:1607
+# tB:4
+# nB:1615
 
  # Study 2: Villa L, et al. 2006 -------------------------------------------
 # High sustained efficacy of a prophylactic quadrivalent human papillomavirus types 
 # 6/11/16/18 L1 virus-like particle vaccine through 5 years of follow-up.
 
 # The study enrolled nonpregnant, healthy women who had no prior abnormal Pap smears, and 
-# reported a lifetime history of four or fewer male sex partners.
+# reported a lifetime history of four or fewer male sex partners. By end point persistent 
+# infection.
 
 # Events by group:
-# tB:2
-# nB:235
-
-# tA:45
+# tA:35
 # nA:233
+# tB:4
+# nB:235
 
 # Study 3: Catellsague X., et al. 2011 ------------------------------------
 # End-of-study safety, immunogenicity, and efficacy of quadrivalent HPV (types 6, 11, 16, 
 # 18) recombinant vaccine in adult women 24–45 years of age.
 
 # Study enrolled 3819 24–45-year-old women with no history of cervical disease or genital 
-# warts in the past 5 years.
+# warts in the past 5 years. By end point persistent infection.
 
 # Events by group:
+# tA:38
+# nA:1583
 # tB:1
 # nB:1578
 
-# tA:38
-# nA:1583
-
-# Study 4: Garland S., et al. FUTURE I 2007 -------------------------------
-# Quadrivalent Vaccine against Human Papillomavirus to Prevent Anogenital Diseases.
-
-# Vaccine Efficacy against External Anogenital, Vaginal, and Cervical Lesions Associated 
-# with HPV-6, HPV-11, HPV-16, or HPV-18 or Regardless of HPV Type.
-
-# PPE pop:
-# Events by group:
-# tB:0
-# nB:2261
-
-# tA:60
-# nA:2279
-
-# Unrestricted susceptible pop:
-# Events by group:
-# tB:4
-# nB:2667
-
-# tA:81
-# nA:2684
-
-# Study 5: Wei L., et al. 2018 --------------------------------------------
+# Study 4: Wei L., et al. 2018 --------------------------------------------
 # Efficacy of quadrivalent human papillomavirus vaccine against persistent infection and 
 # genital disease in Chinese women: A randomized, placebo-controlled trial with 78-month 
 # follow-up.
 
 # Pregnant women and those with a history of genital warts or significant cervical disease, 
-# active cervical disease, or prior HPV vaccine recipients were excluded.
+# active cervical disease, or prior HPV vaccine recipients were excluded. 12-Month cervical
+# Persisitent Infection.
 
 # Events by group:
+# tA:53
+# nA:1245
+# tB:5
+# nB:1276
+
+# Study 5: Yoshikawa H., et al. 2013 --------------------------------------
+# Efficacy of quadrivalent human papillomavirus (types 6, 11, 16 and 18) vaccine (GARDASIL) 
+# in Japanese women aged 18–26 years.
+
+# A randomized double-blind placebo-controlled phase II trial was conducted to evaluate the 
+# efficacy of a prophylactic quadrivalent vaccine targeting the human papillomavirus (HPV) 
+# types most fre- quently associated with cervical cancer (types 16 ⁄ 18) and genital warts 
+# (types 6 ⁄ 11) in Japanese women aged 18–26 years.
+
+# Events by group:
+# tA:24
+# nA:422
 # tB:3
-# nB:1271
+# nB:419
 
-# tA:48
-# nA:1243
+# Study 6: Garland S., et al 2007 -----------------------------------------
+# Quadrivalent Vaccine against Human Papillomavirus to Prevent Anogenital Diseases.
 
-# Study 6: Koutsky L., et al. FUTURE II Group. 2007 -----------------------
-# Quadrivalent Vaccine against Human Papillomavirus to Prevent High-Grade Cervical Lesions.
+# A phase 3 trial was conducted to evaluate the efficacy of a prophylactic quadrivalent 
+# vaccine in preventing anogenital diseases associated with human papillomavirus (HPV) types
+# 6, 11, 16, and 18.
 
-# PPE pop:
 # Events by group:
+# tA:60
+# nA:2279
+# tB:0
+# nB:2261
+
+# Study 7: Koutsky L., et al. 2007 ----------------------------------------
+# Quadrivalent Vaccine against Human Papillomavirus to Prevent High-Grade Cervical Lesions
+
+# Randomized, double-blind trial, we assigned 12,167 women between the ages of 15 and 26 
+# years to receive three doses of either HPV-6/11/16/18 vaccine or placebo, administered at 
+# day 1, month 2, and month 6.
+
+# Events by group:
+# tA:42
+# nA:5260
 # tB:1
 # nB:5305
 
-# tA:42
-# nA:5260
-
-# Unrestricted susceptible pop:
-# Events by group:
-# tB:3
-# nB:5865
-
-# tA:62
-# nA:5863
-
-# Study 7: Perez G., et al. 2008 ------------------------------------------
-# Safety, immunogenicity, and efficacy of quadrivalent human papillomavirus (types 6, 11, 16, 
-# 18) L1 virus-like-particle 2vaccine in Latin American women.
-
-# This study did not exclude subjects with prior HPV infection.
+# Study 8: Perez G., et al. 2008 ------------------------------------------
+# Safety, immunogenicity, and efficacy of quadrivalent human papillomavirus (types 6, 11, 
+# 16, 18) L1 virus-like-particle vaccine in Latin American women.
 
 # Events by group:
+# tA:41
+# nA:2377
 # tB:3
-# nB:1990
+# nB:2415
 
-# tA:25
-# nA:1880
-	
 # ==========================================================================================
 # Genital Warts -----------------------------------------------------------
 # ==========================================================================================

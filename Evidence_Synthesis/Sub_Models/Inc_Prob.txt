@@ -14,7 +14,7 @@
   }
   # Hyperpriors on precision:
   iota ~ dnorm(0, 1.0e-6)
-  phi ~ dunif(0, 10)
+  phi ~ dunif(0, 1)
   phi.prec <- 1 / (phi * phi)
   
 }

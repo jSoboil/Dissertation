@@ -5,21 +5,22 @@ model {
 
 # Binomial Likelihood:
  for (i in 1:91) {
-  mort[i] ~ dbin(pop.pi[i], N.pop[i])
+  mort.pop[i] ~ dbin(pop.pi[i], N.pop[i])
   
   # Prior Sampling model:
   logit(pop.pi[i]) <-  mu.pop[i] + delta[i]
   
-  # Priors on mort_pr:
+  # Priors on mort_Pr:
   mu.pop[i] ~ dnorm(0, 1.0e-5)
-  delta[i] ~ dnorm(rho.pop, 1 / sigma.pop ^ 2)
+  delta[i] ~ dnorm(rho.pop, 1 / prec.pop ^ 2)
   
  }
  # Hyperpriors on delta:
  rho.pop ~ dnorm(0, 1.0e-5)
  sigma.pop ~ dunif(0, 10)
+ prec.pop <- 1 / (sigma.pop * sigma.pop)
  
- # Odds ratio:
+ # Compute Odds ratio:
  OR <- exp(rho.pop)
  
 }
