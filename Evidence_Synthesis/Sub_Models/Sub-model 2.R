@@ -18,19 +18,28 @@ options(mc.cores = detectCores())
 # increased risk of being reinfected rather than clearing HPV. See Italian study.
 
 # Informative prior -------------------------------------
-# Data collected from HPV and Related Diseases Report:
-age_group <- c("≤25", "25-34", "35-44", "45-54", "55-64")
-# Note: probability converted to yearly rate for use in lognormal distribution.
-# r = - (1 / t) * log(1 - p)
-incidence <- c(0.5798185, 0.4620355, 0.2231436, 0.1984509, 0.1863296)
+# Mix of the following two sources:
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+# Used age groups 15-20:
 
-mu.log <- lnorm_params(m = incidence, v = 1)$mu
-sigma.log <- lnorm_params(m = incidence, v = 1)$sigma
+# 2. Data collected from HPV and Related Diseases Report. Used age groups 25+.
+
+# Age groups:
+age_group <- c("15-16", "17", "18", "19", "20", "≤25", "25-34", 
+               "35-44", "45-54", "55-64")
+# Estimated Prevalence:
+1 - exp(-.17)
+Prevalence <- c(0.09516258, 0.1130796, 0.139292, 0.1563352, 0.139292, 
+                .435, .3643, 0.2051, 0.1852, 0.1654)
+
+mu.log <- lnorm_params(m = Prevalence, v = .1)$mu
+sigma.log <- 1 / (lnorm_params(m = Prevalence, v = .1)$sigma) ^ 2
 mu.log
 sigma.log
-cbind(age_group, incidence)
+cbind(age_group, Prevalence)
 
-# Prior sampling Model :
+# Informative prior sampling model:
 # omega.age[i] ~ dlnorm(mu.log[i], sigma.log[i])
 
 # ===========================================================================================
@@ -157,28 +166,35 @@ nB.vac <- c(1615, 235, 1578, 1276, 419, 2261, 5305)
 # ==========================================================================================
 model_String <- "model {
   # Sub-model 2: age-specific prevalence:
-  for (i in 1:5) {
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior.
+  for (i in 1:10) {
     omega.age[i] ~ dlnorm(mu.log[i], sigma.log[i])
+    
   }
   
   # Sub-model 3: vaccine-efficacy against infection:
   # model parmaeters abbreviated by .vac
   for (i in 1:Nstud.vac) {
+    # Likelihood
     rA.vac[i] ~ dbin(pA.vac[i], nA.vac[i])
     rB.vac[i] ~ dbin(pB.vac[i], nB.vac[i])
-    
+    # Logistic function:
     logit(pA.vac[i]) <- mu.vac[i]
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
-    
-    mu.vac[i] ~ dnorm(0, 1.0e-5)
+    # Average effect:
+    mu.vac[i] ~ dnorm(0, 1.0e-2)
+    # Random population effect:
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
     }
   # Priors for sub-model 3:
-  psi.vac ~ dnorm(0, 1)
+  psi.vac ~ dnorm(0, 1.0e-1)
   tau.vac ~ dunif(0, 1)
   prec.vac <- 1 / pow(tau.vac, 2)
-  
+  # Odds ratio:
   OR.vac <- exp(psi.vac)
+  # Probability of no protection given
+  # vaccine:
   pEfficacy.vac <- (OR.vac / 1 + OR.vac)
  
 }
@@ -233,9 +249,11 @@ mcmc_acf(posterior, pars = c("pEfficacy.vac", "omega.age[1]", "omega.age[2]",
 # Calibration: ------------------------------------------------------------
 # Age-specific prevalence:
 plot(apply(omega.age, 2, mean), type = "l", ylab = "Prevalence", xlab = "By Age", 
-     xgap.axis = 100)
+     xgap.axis = 100, ylim = c(0, .65), 
+     col = "red", lwd = 2)
 # Vaccine efficacy probability:
-1 - apply(pEfficacy.vac, 2, mean)
+1 - (apply(pEfficacy.vac, 2, mean))
 # Example: say 21% of some age pop. group has HPV:
 .21 * apply(pEfficacy.vac, 2, mean)
+
 # End file ----------------------------------------------------------------
