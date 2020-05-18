@@ -17,8 +17,11 @@ options(mc.cores = detectCores())
 mortFem_data <- read_excel("mortality tables.xls", 
                         sheet = "ASSA data", range = "B3:C94")
 
+# Total pop.
 N <- round(as.matrix(mortFem_data[, 1]), digits = 0)
+# Total mort.
 Dead <- round(as.matrix(mortFem_data[, 2]), digits = 0)
+# Set to numeric:
 N.pop <- as.numeric(unlist(N))
 mort.pop <- as.numeric(unlist(Dead))
 
