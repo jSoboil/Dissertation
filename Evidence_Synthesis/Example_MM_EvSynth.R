@@ -207,8 +207,7 @@ color_scheme_set("mix-blue-brightblue")
 mcmc_acf(posterior, pars = c("pi_res[1]", "pi_res[2]",
                                "pi_tox[1]", "pi_tox[2]", "beta_tr[1]", "beta_tr[2]",
                                "beta_tp[1]", "beta_tp[2]", "beta_surv[1]", "beta_surv[2]"), 
-         lags = 50)
-
+         lags = 150)
 
 # Misc: define treatments ---------------------------------------------
 colnames(pi_res) <- c("Status Quo", "New Treatment")
@@ -251,17 +250,16 @@ d_c <- 0.03 # discount rate for costs
 d_e <- 0.03 # discount rate for QALYs
 v_names_str <- c("Usual care", "New treatment") # store the strategy names
 
-
 a_P <- array(0, dim = c(n_states, n_states, n_t, n.sims),
              dimnames = list(v_n, v_n, 0:(n_t - 1), 1:n.sims))
 dim(a_P)
-
 # NOTE: WHEN READY ADD TREATMENTS 1 AND 2, I.E. MAKE a_P_1 AND a_P_2... etc.
 
 # ==========================================================================================
 # Fill in transition array ------------------------------------------------
 # ==========================================================================================
 # Status Quo  ----------------------------------------------------------
+
 
 # New Treatment  ----------------------------------------------------------
 # All transitions from the state Stable
@@ -270,7 +268,6 @@ a_P["Stable", "Progression", , ] <- pi_tox[, 2]
 a_P["Stable", "Response", , ] <- (1 - pi_tox[, 2]) * beta_tr[, 2]
 a_P["Stable", "Death", , ] <- 1 - ((1 - pi_tox[, 2]) * (1 - beta_tr[, 2]) + pi_tox[, 2] + 
                                     (1 - pi_tox[, 2]) * beta_tr[, 2])
-
 # All transitions from the state Response
 a_P["Response", "Response", , ] <- ((1 - pi_tox[, 2] ) * pi_res[, 2])
 a_P["Response", "Progression", , ] <-  (pi_tox[, 2]) + (1 - pi_tox[, 2]) * (1 - pi_res[, 2])
@@ -294,14 +291,11 @@ sum((1 - pi_tox[, 2]) * (1 - beta_tr[, 2]) + (pi_tox[, 2]) +
       ((1 - pi_tox[, 2]) * beta_tr[, 2]) + 1 - ((1 - pi_tox[, 2]) * (1 - beta_tr[, 2]) + 
                                                   pi_tox[, 2] + 
                                     (1 - pi_tox[, 2]) * beta_tr[, 2])) / n.sims
-
 # Response:
 sum(((1 - pi_tox[, 2] )* pi_res[, 2]) + 
       (pi_tox[, 2]) + (1 - pi_tox[, 2]) * (1 - pi_res[, 2])) / n.sims
-
 # Progression:
 sum((1 - beta_dth[, 2]) + beta_dth[, 2]) / n.sims
-
 # and death is obvious...
 
 # ==========================================================================================
@@ -321,7 +315,8 @@ m_M_ad
 
 # Store the initial state vector in the first row of the cohort trace
 m_M_ad[1, , ] <- v_s_init
-sum(m_M_ad[1, 1:4, 1000])
+# Check:
+m_M_ad[1:2, ,  ]
 
 ## Initialize transition array for each cycle, for each sim
 a_A <- array(0,
@@ -332,10 +327,12 @@ dim(a_A)
 for (i in 1:n.sims) {
  diag(a_A[, , 1, i]) <- v_s_init
 }
+# Check (first state, all states, for all cycles, across all n.sims):
+a_A[1, 1:4, , ]
 
 ## Iterative solution of age-dependent cSTM
-for (i in 1:n.sims) {
- for(t in 1:n_t) {
+for (t in 1:n_t) {
+ for(i in 1:n.sims) {
   # Fill in cohort trace
   m_M_ad[t + 1, , i] <- m_M_ad[t, , i] %*% a_P[ , , t, i]
   # Fill in transition dynamics array
@@ -375,8 +372,8 @@ barplot(apply(m_M_ad, c(2, 1), mean), space = 1,
         ylab = "Proportion of patients in each state",
         main = "New Treatment", col = cols, cex.names = 1, cex.main = 1.5)
 legend("topright", legend = c("Stable", "Response", "Progrssion", "Death"), 
-       fill = cols, cex = .55, box.lwd = .001,
-       horiz = F)
+       fill = cols, cex = .5, box.lwd = 2,
+       horiz = FALSE)
 
 # Cost-effectiveness analysis ---------------------------------------------
 

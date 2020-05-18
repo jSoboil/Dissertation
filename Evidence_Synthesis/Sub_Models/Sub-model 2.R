@@ -38,7 +38,6 @@ sigma.log <- 1 / (lnorm_params(m = Prevalence, v = .1)$sigma) ^ 2
 mu.log
 sigma.log
 cbind(age_group, Prevalence)
-
 # Informative prior sampling model:
 # omega.age[i] ~ dlnorm(mu.log[i], sigma.log[i])
 
