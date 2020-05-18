@@ -12,11 +12,11 @@ model {
   
   # Priors on mort_Pr:
   mu.pop[i] ~ dnorm(0, 1.0e-5)
-  delta[i] ~ dnorm(rho.pop, 1 / prec.pop ^ 2)
+  delta[i] ~ dnorm(rho.pop, prec.pop)
   
  }
  # Hyperpriors on delta:
- rho.pop ~ dnorm(0, 1.0e-5)
+ rho.pop ~ dnorm(0, 1.0e-2)
  sigma.pop ~ dunif(0, 10)
  prec.pop <- 1 / (sigma.pop * sigma.pop)
  

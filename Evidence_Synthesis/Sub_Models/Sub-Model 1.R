@@ -31,21 +31,19 @@ model {
  for (i in 1:91) {
   mort.pop[i] ~ dbin(pop.pi[i], N.pop[i])
   
-  # Prior Sampling model:
+  # Logistic function:
   logit(pop.pi[i]) <-  mu.pop[i] + delta[i]
   
-  # Priors on mort_Pr:
+  # Prior pop. effect:
   mu.pop[i] ~ dnorm(0, 1.0e-5)
-  delta[i] ~ dnorm(rho.pop, 1 / prec.pop ^ 2)
+  # Random population effect:
+  delta[i] ~ dnorm(rho.pop, prec.pop)
   
  }
  # Hyperpriors on delta:
- rho.pop ~ dnorm(0, 1.0e-5)
+ rho.pop ~ dnorm(0, 1.0e-2)
  sigma.pop ~ dunif(0, 10)
  prec.pop <- 1 / (sigma.pop * sigma.pop)
- 
- # Compute Odds ratio:
- OR <- exp(rho.pop)
  
 }
 "
@@ -68,7 +66,7 @@ inits <- list(
 # Parameters to monitor:
 params <- c("OR", "pop.pi")
 
-n.iter <- 10000
+n.iter <- 20000
 n.burnin <- 5000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
@@ -98,6 +96,6 @@ mcmc_dens_overlay(posterior, pars = c("OR", "pop.pi[63]"))
 
 color_scheme_set("mix-blue-brightblue")
 mcmc_acf(posterior, pars = c("OR", "pop.pi[63]"),
-         lags = 250)
+         lags = 150)
 
 # End file ----------------------------------------------------------------
