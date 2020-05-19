@@ -34,46 +34,6 @@ rateConversionCons <- function(r, t) {
 # Note: the included statistics for HPV-6, HPV-11, HPV-16, and HPV-18 as model assesses
 # quadrivalent vaccine efficacy.
 
-# ==========================================================================================
-# Age-specific all cause mortality --------------------------------------------------
-# ==========================================================================================
-# Import ASSA mortality table:
-mort_data <- read_excel("Evidence_Synthesis/mortality tables.xls", 
-                        sheet = "ASSA data", range = "B3:C94")
-
-# Total Pop. divided by total deaths:
-v_r_mort_by_age <- mort_data[, 2] / mort_data[, 1]
-v_r_mort_by_age
-
-# Therefore, all-less HPV mortality calculated as All-cause mortality - HPV mortality, i.e.
-# the number of people who die due to cervical cancer.
-
-# ==========================================================================================
-# Age-specific HPV infection ----------------------------------------------------
-# ==========================================================================================
-# Note: will use a relative risk parameter for proportion of HIV+ population who have 
-# increased risk of being reinfected rather than clearing HPV. See Italian study.
-
-# Informative prior -------------------------------------
-# Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
-# papillomavirus vaccine to the cervical cancer screening programme in South Africa:
-age_group <- c("15-16", "17", "18", "19", "20", "21", "22-23", "24-29", "30-49", "50≥")
-incidence <- as.numeric(c(.1, .12, .15, .17, .15, .12, .1, .05, .01, .005))
-
-# Data collected from HPV and Related Diseases Report:
-age_group <- c("≤25", "25-34", "35-44", "45-54", "55-64")
-# Note: probability converted to yearly rate for use in lognormal distribution.
-# r = - (1 / t) * log(1 - p)
-incidence <- c(.44, .37, .205, .18, .17)
-cbind(age_group, incidence)
-
-mu.log <- lnorm_params(m = incidence, v = 1)$mu
-sigma.log <- lnorm_params(m = incidence, v = 1)$sigma
-
-# Sampling Model :
-# omega.age[i] ~ dlnorm(mu.log[i], sigma.log[i])
-plot(density(rlnorm(n = 10000, meanlog = mu.log[4], sdlog = sigma.log[4])))
-
 # ===========================================================================================
 # Vaccine efficacy --------------------------------------------------------
 # ===========================================================================================
@@ -191,7 +151,51 @@ plot(density(rlnorm(n = 10000, meanlog = mu.log[4], sdlog = sigma.log[4])))
 # nB:2415
 
 # ==========================================================================================
-# Genital Warts -----------------------------------------------------------
+# Age-specific all cause mortality --------------------------------------------------
+# ==========================================================================================
+# Import ASSA mortality table:
+mort_data <- read_excel("Evidence_Synthesis/mortality tables.xls", 
+                        sheet = "ASSA data", range = "B3:C94")
+
+# Total Pop. divided by total deaths:
+v_r_mort_by_age <- mort_data[, 2] / mort_data[, 1]
+v_r_mort_by_age
+
+# Therefore, all-less HPV mortality calculated as All-cause mortality - HPV mortality, i.e.
+# the number of people who die due to cervical cancer.
+
+# ==========================================================================================
+# Age-specific infection ----------------------------------------------------
+# ==========================================================================================
+# Note: will use a relative risk parameter for proportion of HIV+ population who have 
+# increased risk of being reinfected rather than clearing HPV. See Italian study.
+
+# Informative prior -------------------------------------
+# Mix of the following two sources:
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+# Used age groups 15-20:
+
+# 2. Data collected from HPV and Related Diseases Report. Used age groups 25+.
+
+# Age groups:
+age_group <- c("15-16", "17", "18", "19", "20", "≤25", "25-34", 
+               "35-44", "45-54", "55-64")
+# Estimated Prevalence:
+1 - exp(-.17)
+Prevalence <- c(0.09516258, 0.1130796, 0.139292, 0.1563352, 0.139292, 
+                .435, .3643, 0.2051, 0.1852, 0.1654)
+
+mu.a.log <- lnorm_params(m = Prevalence, v = .1)$mu
+sigma.a.log <- 1 / (lnorm_params(m = Prevalence, v = .1)$sigma) ^ 2
+mu.a.log
+sigma.a.log
+cbind(age_group, Prevalence)
+# Informative prior sampling model:
+# omega.age[i] ~ dlnorm(mu.log[i], sigma.log[i])
+
+# ==========================================================================================
+# Condyloma (Genital Warts) -----------------------------------------------------------
 # ==========================================================================================
 # Probability of Condyloma.
 
@@ -208,16 +212,10 @@ plot(density(rlnorm(n = 10000, meanlog = mu.log[4], sdlog = sigma.log[4])))
 # The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
 # cancer screening programme in South Africa.
 
-# Regression probability LSIL to HPV or Cleared:
-rateConversionCons(r = .65, t = 6)
-1 - exp(-.65 * 6) # 15-34 years
-1 - exp(-.4 * 6) # 15-34 years
-# Of the regressed, LSIL reverting to Cleared (90%):
-.9 * (1 - exp(-.65 * 6))
-.9 * (1 - exp(-.4 * 6))
-# Progression probability LSIL to HSIL:
-1 - exp(-.1 * 6) # 15-34 years.
-1 - exp(-.35 * 6) # ≥ 35 years
+# Regression probability LSIL to Cleared:
+beta_params(mean = .9, sigma = .01)
+plot(density(rbeta(n = 100000, shape1 = 809.1, 89.9)))
+
 
 # ==========================================================================================
 # HSIL -----------------------------------------------------
@@ -228,20 +226,81 @@ rateConversionCons(r = .65, t = 6)
 # The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
 # cancer screening programme in South Africa.
 
-# Regression HSIL to LSIL or Cleared:
-1 - exp(-.35 * 6)
-# Proportion of regressed, HSIL to Cleared:
-.5 * 1 - exp(-.35 * 6)
-# Progression probability for HSIL to Stage I Cancer:
-1 - exp(-.4 * 12)
+# Regression probability from HSIL to LSIL:
+# 1 year transition probability (Miller and Homan, 1994)
+1 - exp(-.35 / 6)
+# Beta parameters:
+beta_params(mean = 0.05666455, sigma = .01)
+plot(density(rbeta(n = 10000, shape1 = 30.23262, shape2 = 503.3042)))
+
+# Progression probability from HSIL to Cancer:
+# 1 year transition probability (Miller and Homan, 1994)
+1 - exp(-.4 / 12)
+# Beta parameters:
+beta_params(mean = 0.0327839, sigma = .01)
+plot(density(rbeta(n = 10000, shape1 = 10.3627, shape2 = 305.7285)))
 
 # ==========================================================================================
 # Cervical Adenocarcinoma -------------------------------------------------
 # ==========================================================================================
 
-# Informative Prior: Sinanovic, E., et al. 2009 -------------------------------------
-# The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
-# cancer screening programme in South Africa.
+# Informative prior -------------------------------------------------------
+# Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
+# Prevent HPV-related Diseases.
+
+# Proportion of inviduals in each of the four FIGO stages who progress to cancer, in one
+# cycle:
+# FIGO I 
+# dDirc(.5500)
+# FIGO II
+# dDirc(.1500)
+# FIGO III
+# dDirc(.1200)
+# FIGO IV
+# dDirc(.1800)
+alpha.c <- list(.55, .15, .12, .18)
+
+# Survival probabilities for each FIGO stage, over 5 years.
+
+# Year 1 survival by stage:
+# FIGO I
+beta_params(mean = .9770, sigma = .0104)
+# FIGO II
+beta_params(mean = .8290, sigma = .0116)
+# FIGO III
+beta_params(mean = .59, sigma = .0111)
+# FIGO IV
+beta_params(mean = .5020, sigma = .0121)
+
+# Year 2 survival by stage:
+# FIGO I
+beta_params(mean = .9790, sigma = .0105)
+# FIGO II
+beta_params(mean = .8330, sigma = .011)
+# FIGO III
+beta_params(mean = .6930, sigma = .0113)
+# FIGO IV
+beta_params(mean = .7820, sigma = .0113)
+
+# Year 3 survival by stage:
+# FIGO I
+beta_params(mean = .9630, sigma = .0112)
+# FIGO II
+beta_params(mean = .7550, sigma = .0114)
+# FIGO III
+beta_params(mean = .7780, sigma = 0.0115)
+# FIGO IV
+beta_params(mean = .7220, sigma = .0117)
+
+# Year 4 survival by stage:
+# FIGO I
+beta_params(mean = .9890, sigma = .0103)
+# FIGO II
+beta_params(mean = .8690, sigma = .0116)
+# FIGO III
+beta_params(mean = .9290, sigma = .0118)
+# FIGO IV
+beta_params(mean = .9250, sigma = .0111)
 
 # ==========================================================================================
 # Relative Risk HIV+ ------------------------------------------------------

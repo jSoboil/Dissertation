@@ -3,8 +3,7 @@ model {
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior.
   for (i in 1:10) {
-    omega.age[i] ~ dlnorm(mu.log[i], sigma.log[i])
-    
+    omega.age[i] ~ dlnorm(mu.a.log[i], sigma.a.log[i])
   }
   
   # Sub-model 3: vaccine-efficacy against infection:
@@ -30,6 +29,43 @@ model {
   # Probability of no protection given
   # vaccine:
   pEfficacy.vac <- (OR.vac / 1 + OR.vac)
+  
+# Sub-model 4: Cerival cancer,
+# distribution of invidiuals who have 
+# cancer according to FIGO stages I-IV, 
+# and the associated survival probabilities according 
+# to each stage, over 4 years.
+
+# Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior.
+    
+# Distribution of Cervical Cancer stages: 
+ FIGO ~ ddirch(alpha.c)
+ 
+# Surivival probabilities:
+ # Year 1:
+ FIGO_I.year_1 ~ dbeta(alphaI.year_1, betaI.year_1)
+ FIGO_II.year_1 ~ dbeta(alphaII.year_1, betaII.year_1)
+ FIGO_III.year_1 ~ dbeta(alphaIII.year_1, betaIII.year_1)
+ FIGO_IV.year_1 ~ dbeta(alphaIV.year_1, betaIV.year_1)
+ 
+ # Year 2:
+ FIGO_I.year_2 ~ dbeta(alphaI.year_2, betaI.year_2)
+ FIGO_II.year_2 ~ dbeta(alphaII.year_2, betaII.year_2)
+ FIGO_III.year_2 ~ dbeta(alphaIII.year_2, betaIII.year_2)
+ FIGO_IV.year_2 ~ dbeta(alphaIV.year_2, betaIV.year_2)
+ 
+ # Year 3:
+ FIGO_I.year_3 ~ dbeta(alphaI.year_3, betaI.year_3)
+ FIGO_II.year_3 ~ dbeta(alphaII.year_3, betaII.year_3)
+ FIGO_III.year_3 ~ dbeta(alphaIII.year_3, betaIII.year_3)
+ FIGO_IV.year_3 ~ dbeta(alphaIV.year_3, betaIV.year_3)
+ 
+ # Year 4:
+ FIGO_I.year_4 ~ dbeta(alphaI.year_4, betaI.year_4)
+ FIGO_II.year_4 ~ dbeta(alphaII.year_4, betaII.year_4)
+ FIGO_III.year_4 ~ dbeta(alphaIII.year_4, betaIII.year_4)
+ FIGO_IV.year_4 ~ dbeta(alphaIV.year_4, betaIV.year_4)
  
 }
 
