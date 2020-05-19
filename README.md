@@ -1,2 +1,2 @@
-# Intergrated-CEA
+# Integrated-CEA
 Continuing thesis repository
