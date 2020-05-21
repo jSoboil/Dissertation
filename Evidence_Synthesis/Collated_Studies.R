@@ -7,7 +7,7 @@ library(readxl)
 # ==========================================================================================
 # COMPARISON GROUPS: VACCINE(B) AND PLACEBO (A).
 
-# Function to convert rate to probability assuming cons. rate by time:
+# Function to convert rate to probability assuming cons. rate over time:
 rateConversionCons <- function(r, t) {
  for (i in 1:t) {
   P <- 1 - exp(-r * 1:i)
@@ -157,9 +157,9 @@ rateConversionCons <- function(r, t) {
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 # Used age groups 15-20:
-beta_params(mean = .8, sigma = .01)
+beta_params(mean = .8, sigma = .05)
 # Assumes 80% coverage
-plot(density(rbeta(n = 10000, shape1 = 1289.2, shape2 = 319.8)))
+plot(density(rbeta(n = 1000, shape1 = 50.4, shape2 = 12.6)))
 
 # ===========================================================================================
 # Vaccine compliance --------------------------------------------------------
@@ -168,26 +168,23 @@ plot(density(rbeta(n = 10000, shape1 = 1289.2, shape2 = 319.8)))
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 # Used age groups 15-20:
-beta_params(mean = .95, sigma = .01)
+beta_params(mean = .95, sigma = .05)
 # Assume full compliance.
-plot(density(rbeta(n = 100000, shape1 = 450.3, shape2 =  23.7)))
 
 # ===========================================================================================
 # Efficacy decrease due to non-compliance ------------------------------------
 # ===========================================================================================
 # Informative prior -------------------------------------------------------
 # 1. Favato G., et al. 2012. Bayesian HPV model:
-beta_params(mean = .5040, sigma = .1)
+beta_params(mean = .5040, sigma = .05)
 # Assume full compliance.
-plot(density(rbeta(n = 100000, shape1 = 12.09519, shape2 =  11.90321)))
 
 # ===========================================================================================
 # Cross-protection effect --------------------------------------------------------
 # ===========================================================================================
 # Informative prior -------------------------------------------------------
 # 1. Favato G., et al. 2012. Bayesian HPV model.
-lnorm_params(m = .0740, v = .0001)
-plot(density(rlnorm(n = 100000, meanlog = -2.612739, sdlog = 0.1345242)))
+lnorm_params(m = .0740, v = .05)
 
 # ==========================================================================================
 # Age-specific all cause mortality --------------------------------------------------
@@ -298,50 +295,65 @@ plot(density(rbeta(n = 10000, shape1 = 10.3627, shape2 = 305.7285)))
 # dDirc(.1800)
 alpha.c <- list(.55, .15, .12, .18)
 
-# Survival probabilities for each FIGO stage, over 5 years.
-
+# Survival probabilities over four years, according to each FIGO stage:
 # Year 1 survival by stage:
 # FIGO I
-beta_params(mean = .9770, sigma = .0104)
+alphaI.year_1 <- beta_params(mean = .9770, sigma = .05)$alpha
+betaI.year_1 <- beta_params(mean = .9770, sigma = .05)$beta
 # FIGO II
-beta_params(mean = .8290, sigma = .0116)
+alphaII.year_1 <- beta_params(mean = .8290, sigma = .05)$alpha
+betaII.year_1 <- beta_params(mean = .8290, sigma = .05)$beta
 # FIGO III
-beta_params(mean = .59, sigma = .0111)
+alphaIII.year_1 <- beta_params(mean = .59, sigma = .05)$alpha
+betaIII.year_1 <- beta_params(mean = .59, sigma = .05)$beta
 # FIGO IV
-beta_params(mean = .5020, sigma = .0121)
+alphaIV.year_1 <- beta_params(mean = .5020, sigma = .05)$alpha
+betaIV.year_1 <- beta_params(mean = .5020, sigma = .05)$beta
 
 # Year 2 survival by stage:
 # FIGO I
-beta_params(mean = .9790, sigma = .0105)
+alphaI.year_2 <- beta_params(mean = .9790, sigma = .05)$alpha
+betaI.year_2 <- beta_params(mean = .9790, sigma = .05)$beta
 # FIGO II
-beta_params(mean = .8330, sigma = .011)
+alphaII.year_2 <- beta_params(mean = .8330, sigma = .05)$alpha
+betaII.year_2 <- beta_params(mean = .8330, sigma = .05)$beta
 # FIGO III
-beta_params(mean = .6930, sigma = .0113)
+alphaIII.year_2 <- beta_params(mean = .6930, sigma = .05)$alpha
+betaIII.year_2 <- beta_params(mean = .6930, sigma = .05)$beta
 # FIGO IV
-beta_params(mean = .7820, sigma = .0113)
+alphaIV.year_2 <- beta_params(mean = .7820, sigma = .05)$alpha
+betaIV.year_2 <- beta_params(mean = .7820, sigma = .05)$beta
 
 # Year 3 survival by stage:
 # FIGO I
-beta_params(mean = .9630, sigma = .0112)
+alphaI.year_3 <- beta_params(mean = .9630, sigma = .05)$alpha
+betaI.year_3 <- beta_params(mean = .9630, sigma = .05)$beta
 # FIGO II
-beta_params(mean = .7550, sigma = .0114)
+alphaII.year_3 <- beta_params(mean = .7550, sigma = .05)$alpha
+betaII.year_3 <- beta_params(mean = .7550, sigma = .05)$beta
 # FIGO III
-beta_params(mean = .7780, sigma = 0.0115)
+alphaIII.year_3 <- beta_params(mean = .7780, sigma = .05)$alpha
+betaIII.year_3 <- beta_params(mean = .7780, sigma = .05)$beta
 # FIGO IV
-beta_params(mean = .7220, sigma = .0117)
+alphaIV.year_3 <- beta_params(mean = .7220, sigma = .05)$alpha
+betaIV.year_3 <- beta_params(mean = .7220, sigma = .05)$beta
 
 # Year 4 survival by stage:
 # FIGO I
-beta_params(mean = .9890, sigma = .0103)
+alphaI.year_4 <- beta_params(mean = .9890, sigma = .05)$alpha
+betaI.year_4 <- beta_params(mean = .9890, sigma = .05)$beta
 # FIGO II
-beta_params(mean = .8690, sigma = .0116)
+alphaII.year_4 <- beta_params(mean = .8690, sigma = .05)$alpha
+betaII.year_4 <- beta_params(mean = .8690, sigma = .05)$beta
 # FIGO III
-beta_params(mean = .9290, sigma = .0118)
+alphaIII.year_4 <- beta_params(mean = .9290, sigma = .05)$alpha
+betaIII.year_4 <- beta_params(mean = .9290, sigma = .05)$beta
 # FIGO IV
-beta_params(mean = .9250, sigma = .0111)
+alphaIV.year_4 <- beta_params(mean = .9250, sigma = .05)$alpha
+betaIV.year_4 <- beta_params(mean = .9250, sigma = .05)$beta
 
 # ==========================================================================================
-# Relative Risk HIV+ ------------------------------------------------------
+# Risk Increase (HIV+) ------------------------------------------------------
 # ==========================================================================================
 
 # Study: Mbulawa Z., et al. 2015 ------------------------------------------
