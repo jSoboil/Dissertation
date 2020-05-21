@@ -182,73 +182,75 @@ alpha.c <- list(.55, .15, .12, .18)
 
 # Year 1 survival by stage:
 # FIGO I
-alphaI.year_1 <- beta_params(mean = .9770, sigma = .0104)$alpha
-betaI.year_1 <- beta_params(mean = .9770, sigma = .0104)$beta
+alphaI.year_1 <- beta_params(mean = .9770, sigma = .05)$alpha
+betaI.year_1 <- beta_params(mean = .9770, sigma = .05)$beta
 # FIGO II
-alphaII.year_1 <- beta_params(mean = .8290, sigma = .0116)$alpha
-betaII.year_1 <- beta_params(mean = .8290, sigma = .0116)$beta
+alphaII.year_1 <- beta_params(mean = .8290, sigma = .05)$alpha
+betaII.year_1 <- beta_params(mean = .8290, sigma = .05)$beta
 # FIGO III
-alphaIII.year_1 <- beta_params(mean = .59, sigma = .0111)$alpha
-betaIII.year_1 <- beta_params(mean = .59, sigma = .0111)$beta
+alphaIII.year_1 <- beta_params(mean = .59, sigma = .05)$alpha
+betaIII.year_1 <- beta_params(mean = .59, sigma = .05)$beta
 # FIGO IV
-alphaIV.year_1 <- beta_params(mean = .5020, sigma = .0121)$alpha
-betaIV.year_1 <- beta_params(mean = .5020, sigma = .0121)$beta
+alphaIV.year_1 <- beta_params(mean = .5020, sigma = .05)$alpha
+betaIV.year_1 <- beta_params(mean = .5020, sigma = .05)$beta
 
 # Year 2 survival by stage:
 # FIGO I
-alphaI.year_2 <- beta_params(mean = .9790, sigma = .0105)$alpha
-betaI.year_2 <- beta_params(mean = .9790, sigma = .0105)$beta
+alphaI.year_2 <- beta_params(mean = .9790, sigma = .05)$alpha
+betaI.year_2 <- beta_params(mean = .9790, sigma = .05)$beta
 # FIGO II
-alphaII.year_2 <- beta_params(mean = .8330, sigma = .011)$alpha
-betaII.year_2 <- beta_params(mean = .8330, sigma = .011)$beta
+alphaII.year_2 <- beta_params(mean = .8330, sigma = .05)$alpha
+betaII.year_2 <- beta_params(mean = .8330, sigma = .05)$beta
 # FIGO III
-alphaIII.year_2 <- beta_params(mean = .6930, sigma = .0113)$alpha
-betaIII.year_2 <- beta_params(mean = .6930, sigma = .0113)$beta
+alphaIII.year_2 <- beta_params(mean = .6930, sigma = .05)$alpha
+betaIII.year_2 <- beta_params(mean = .6930, sigma = .05)$beta
 # FIGO IV
-alphaIV.year_2 <- beta_params(mean = .7820, sigma = .0113)$alpha
-betaIV.year_2 <- beta_params(mean = .7820, sigma = .0113)$beta
+alphaIV.year_2 <- beta_params(mean = .7820, sigma = .05)$alpha
+betaIV.year_2 <- beta_params(mean = .7820, sigma = .05)$beta
 
 # Year 3 survival by stage:
 # FIGO I
-alphaI.year_3 <- beta_params(mean = .9630, sigma = .0112)$alpha
-betaI.year_3 <- beta_params(mean = .9630, sigma = .0112)$beta
+alphaI.year_3 <- beta_params(mean = .9630, sigma = .05)$alpha
+betaI.year_3 <- beta_params(mean = .9630, sigma = .05)$beta
 # FIGO II
-alphaII.year_3 <- beta_params(mean = .7550, sigma = .0114)$alpha
-betaII.year_3 <- beta_params(mean = .7550, sigma = .0114)$beta
+alphaII.year_3 <- beta_params(mean = .7550, sigma = .05)$alpha
+betaII.year_3 <- beta_params(mean = .7550, sigma = .05)$beta
 # FIGO III
-alphaIII.year_3 <- beta_params(mean = .7780, sigma = 0.0115)$alpha
-betaIII.year_3 <- beta_params(mean = .7780, sigma = 0.0115)$beta
+alphaIII.year_3 <- beta_params(mean = .7780, sigma = .05)$alpha
+betaIII.year_3 <- beta_params(mean = .7780, sigma = .05)$beta
 # FIGO IV
-alphaIV.year_3 <- beta_params(mean = .7220, sigma = .0117)$alpha
-betaIV.year_3 <- beta_params(mean = .7220, sigma = .0117)$beta
+alphaIV.year_3 <- beta_params(mean = .7220, sigma = .05)$alpha
+betaIV.year_3 <- beta_params(mean = .7220, sigma = .05)$beta
 
 # Year 4 survival by stage:
 # FIGO I
-alphaI.year_4 <- beta_params(mean = .9890, sigma = .0103)$alpha
-betaI.year_4 <- beta_params(mean = .9890, sigma = .0103)$beta
+alphaI.year_4 <- beta_params(mean = .9890, sigma = .05)$alpha
+betaI.year_4 <- beta_params(mean = .9890, sigma = .05)$beta
 # FIGO II
-alphaII.year_4 <- beta_params(mean = .8690, sigma = .0116)$alpha
-betaII.year_4 <- beta_params(mean = .8690, sigma = .0116)$beta
+alphaII.year_4 <- beta_params(mean = .8690, sigma = .05)$alpha
+betaII.year_4 <- beta_params(mean = .8690, sigma = .05)$beta
 # FIGO III
-alphaIII.year_4 <- beta_params(mean = .9290, sigma = .0118)$alpha
-betaIII.year_4 <- beta_params(mean = .9290, sigma = .0118)$beta
+alphaIII.year_4 <- beta_params(mean = .9290, sigma = .05)$alpha
+betaIII.year_4 <- beta_params(mean = .9290, sigma = .05)$beta
 # FIGO IV
-alphaIV.year_4 <- beta_params(mean = .9250, sigma = .0111)$alpha
-betaIV.year_4 <- beta_params(mean = .9250, sigma = .0111)$beta
+alphaIV.year_4 <- beta_params(mean = .9250, sigma = .05)$alpha
+betaIV.year_4 <- beta_params(mean = .9250, sigma = .05)$beta
 
 # ==========================================================================================
 # Sub-models 3 ------------------------------------------------------
 # ==========================================================================================
 model_String <- "model {
-  # Sub-model 2: age-specific prevalence:
+# SUB-MODEL 2: AGE-SPECIFIC PREVALENCE,
+  # model parameters abbreviated by .age
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior.
   for (i in 1:10) {
     omega.age[i] ~ dlnorm(mu.a.log[i], sigma.a.log[i])
-  }
+    }
   
-  # Sub-model 3: vaccine-efficacy against infection:
-  # model parmaeters abbreviated by .vac
+  
+# SUB-MODEL 3: VACCINE-EFFICACY,
+  # model parameters abbreviated by .vac
   for (i in 1:Nstud.vac) {
     # Likelihood
     rA.vac[i] ~ dbin(pA.vac[i], nA.vac[i])
@@ -256,11 +258,13 @@ model_String <- "model {
     # Logistic function:
     logit(pA.vac[i]) <- mu.vac[i]
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
+    
     # Average effect:
     mu.vac[i] ~ dnorm(0, 1.0e-2)
     # Random population effect:
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
-    }
+  }
+  
   # Priors for sub-model 3:
   psi.vac ~ dnorm(0, 1.0e-1)
   tau.vac ~ dunif(0, 1)
@@ -271,14 +275,15 @@ model_String <- "model {
   # vaccine:
   pEfficacy.vac <- (OR.vac / 1 + OR.vac)
   
-# Sub-model 4: Cerival cancer,
-# distribution of invidiuals who have 
-# cancer according to FIGO stages I-IV, 
-# and the associated survival probabilities according 
+
+# SUB-MODEL 4: CERVICAL CANCER,
+# the distribution of invidiuals who have 
+# cancer according to FIGO stages I-IV, and 
+# the associated survival probabilities according 
 # to each stage, over 4 years.
 
-# Note: equivalent to standard PSA, as it is 
-    # sampling direclty from the prior.
+  # Note: equivalent to standard PSA, as it is 
+  # sampling direclty from the prior.
     
 # Distribution of Cervical Cancer stages: 
  FIGO ~ ddirch(alpha.c)
@@ -336,19 +341,23 @@ data_JAGS <- list(
  alphaIV.year_1 = alphaIV.year_1, betaIV.year_1 = betaIV.year_1,
  alphaIV.year_2 = alphaIV.year_2, betaIV.year_2 = betaIV.year_2,
  alphaIV.year_3 = alphaIV.year_3, betaIV.year_3 = betaIV.year_3,
- alphaIV.year_4 = alphaIV.year_4, betaIV.year_4 = betaIV.year_4)
+ alphaIV.year_4 = alphaIV.year_4, betaIV.year_4 = betaIV.year_4
+ )
 
 # Initial JAGS sampler values:
 # Parameters to monitor:
-params <- c("OR.vac", "pEfficacy.vac", "omega.age", 
-            "FIGO", "FIGO_I.year_1", "FIGO_II.year_1", "FIGO_III.year_1", 
-            "FIGO_IV.year_1", "FIGO_I.year_2", "FIGO_II.year_2", "FIGO_III.year_2",
-            "FIGO_IV.year_2", "FIGO_I.year_3", "FIGO_II.year_3", "FIGO_III.year_3", 
-            "FIGO_IV.year_3", "FIGO_I.year_4", "FIGO_II.year_4", "FIGO_III.year_4", 
-            "FIGO_IV.year_4"
+params <- c(
+  # Vaccine efficacy parameters:
+  "OR.vac", "pEfficacy.vac", "omega.age", 
+  # Cervical cancer parameters:
+  "FIGO", 
+  "FIGO_I.year_1", "FIGO_II.year_1", "FIGO_III.year_1", "FIGO_IV.year_1", 
+  "FIGO_I.year_2", "FIGO_II.year_2", "FIGO_III.year_2", "FIGO_IV.year_2", 
+  "FIGO_I.year_3", "FIGO_II.year_3", "FIGO_III.year_3", "FIGO_IV.year_3", 
+  "FIGO_I.year_4", "FIGO_II.year_4", "FIGO_III.year_4", "FIGO_IV.year_4"
             )
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 20000
+n.iter <- 40000
 n.burnin <- 5000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
@@ -368,7 +377,7 @@ color_scheme_set("viridisB")
 theme_set(theme_minimal())
 mcmc_trace(posterior, pars = c("pEfficacy.vac", "omega.age[1]", "omega.age[2]", 
                                "omega.age[3]", "omega.age[4]", "omega.age[5]", 
-                               "FIGO_IV.year_3"),
+                               "FIGO_IV.year_3", "FIGO[1]", "FIGO[3]"),
            facet_args = list(ncol = 1, strip.position = "left"))
 
 color_scheme_set("viridisA")
@@ -380,12 +389,12 @@ mcmc_trace(posterior[, , ], window = c(100, 150), size = 1) +
 color_scheme_set("mix-teal-pink")
 mcmc_dens_overlay(posterior, pars = c("pEfficacy.vac", "omega.age[1]", "omega.age[2]", 
                                "omega.age[3]", "omega.age[4]", "omega.age[5]", 
-                               "FIGO_III.year_4"))
+                               "FIGO_III.year_4", "FIGO[1]", "FIGO[3]"))
 
 color_scheme_set("mix-blue-brightblue")
 mcmc_acf(posterior, pars = c("pEfficacy.vac", "omega.age[1]", "omega.age[2]", 
                                "omega.age[3]", "omega.age[4]", "omega.age[5]",
-                             "FIGO_II.year_3"),
+                             "FIGO_II.year_3", "FIGO[1]", "FIGO[3]"),
          lags = 150)
 
 # Calibration: ------------------------------------------------------------

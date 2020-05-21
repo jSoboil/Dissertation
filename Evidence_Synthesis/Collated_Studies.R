@@ -150,6 +150,45 @@ rateConversionCons <- function(r, t) {
 # tB:3
 # nB:2415
 
+# ===========================================================================================
+# Vaccine coverage --------------------------------------------------------
+# ===========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+# Used age groups 15-20:
+beta_params(mean = .8, sigma = .01)
+# Assumes 80% coverage
+plot(density(rbeta(n = 10000, shape1 = 1289.2, shape2 = 319.8)))
+
+# ===========================================================================================
+# Vaccine compliance --------------------------------------------------------
+# ===========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+# Used age groups 15-20:
+beta_params(mean = .95, sigma = .01)
+# Assume full compliance.
+plot(density(rbeta(n = 100000, shape1 = 450.3, shape2 =  23.7)))
+
+# ===========================================================================================
+# Efficacy decrease due to non-compliance ------------------------------------
+# ===========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Favato G., et al. 2012. Bayesian HPV model:
+beta_params(mean = .5040, sigma = .1)
+# Assume full compliance.
+plot(density(rbeta(n = 100000, shape1 = 12.09519, shape2 =  11.90321)))
+
+# ===========================================================================================
+# Cross-protection effect --------------------------------------------------------
+# ===========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Favato G., et al. 2012. Bayesian HPV model.
+lnorm_params(m = .0740, v = .0001)
+plot(density(rlnorm(n = 100000, meanlog = -2.612739, sdlog = 0.1345242)))
+
 # ==========================================================================================
 # Age-specific all cause mortality --------------------------------------------------
 # ==========================================================================================
@@ -215,7 +254,6 @@ cbind(age_group, Prevalence)
 # Regression probability LSIL to Cleared:
 beta_params(mean = .9, sigma = .01)
 plot(density(rbeta(n = 100000, shape1 = 809.1, 89.9)))
-
 
 # ==========================================================================================
 # HSIL -----------------------------------------------------
