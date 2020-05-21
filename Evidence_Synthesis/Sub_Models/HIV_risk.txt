@@ -1,0 +1,21 @@
+model {
+ rHIV_pos ~ dbin(pHIV_pos, nHIV_pos)
+ rHIV_neg ~ dbin(pHIV_neg, nHIV_neg)
+ 
+ logit(pHIV_pos) <- mu.hiv + delta.hiv
+ logit(pHIV_neg) <- mu.hiv
+ 
+ # Average effect:
+ mu.hiv ~ dnorm(0, 1 / 10)
+ # Random effect:
+ delta.hiv ~ dnorm(nu.hiv, prec.hiv)
+ 
+ # Hyperpriors on delta.hiv:
+ nu.hiv ~ dnorm(0, 1 / 10)
+ prec.hiv <- 1 / psi.hiv * psi.hiv
+ psi.hiv ~ dunif(0, 1)
+ 
+ HIV_odds <- exp(nu.hiv)
+ HIV_risk <- psi.hiv / (1 + psi.hiv)
+}
+
