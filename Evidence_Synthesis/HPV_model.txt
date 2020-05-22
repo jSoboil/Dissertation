@@ -1,0 +1,126 @@
+
+model {
+  
+# SUB-MODEL 1: VACCINE-EFFICACY.
+  # model parameters abbreviated by .vac
+  for (i in 1:Nstud.vac) {
+    # Likelihood
+    rA.vac[i] ~ dbin(pA.vac[i], nA.vac[i])
+    rB.vac[i] ~ dbin(pB.vac[i], nB.vac[i])
+    # Logistic function:
+    logit(pA.vac[i]) <- mu.vac[i]
+    logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
+    
+    # Average effect:
+    mu.vac[i] ~ dnorm(0, 1.0e-2)
+    # Random population effect:
+    delta.vac[i] ~ dnorm(psi.vac, prec.vac)
+  }
+  # Priors for sub-model 2:
+  psi.vac ~ dnorm(0, 1.0e-1)
+  tau.vac ~ dunif(0, 1)
+  prec.vac <- 1 / pow(tau.vac, 2)
+  # Odds ratio:
+  OR.vac <- exp(psi.vac)
+  # Probability of no protection given
+  # vaccine:
+  pEfficacy.vac <- (OR.vac / 1 + OR.vac)
+
+
+# SUB-MODEL 2: AVERAGE VACCINE COVERAGE.
+ mu.vac_coverage ~ dbeta(mu.vac_alpha, mu.vac_beta)
+
+ 
+# SUB-MODEL 3: VACCINE COMPLIANCE.
+ iota.compli ~ dbeta(iota.comp_alpha, iota.comp_beta)
+ 
+# SUB-MODEL 4: CROSS-PROTECTION EFFECT.
+ chi.xProtect ~ dlnorm(chi.crossPro_mu, chi.crossPro_sigma)
+
+
+# SUB-MODEL 5: SCREENING PROBABILITY BY AGE
+# GROUP.
+ # model parameters abbreviated by .screen
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior.
+ for (i in 1:76) {
+  sigma.screenCov[i] ~ dbeta(sigma.screening_alpha[i], sigma.screening_beta[i])
+ }
+
+
+# SUB-MODEL 6: AGE-SPECIFIC INFECTION.
+  # model parameters abbreviated by .age
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior.
+  for (i in 1:76) {
+    omega.age[i] ~ dlnorm(omega.mu.log[i], omega.sigma.log[i])
+  }
+    
+
+# SUB-MODEL 7: CERVICAL CANCER.
+# the distribution of invidiuals who have 
+# cancer according to FIGO stages I-IV, and 
+# the associated survival probabilities according 
+# to each stage, over 4 years.
+
+  # Note: equivalent to standard PSA, as it is 
+  # sampling direclty from the prior.
+    
+# Distribution of Cervical Cancer stages: 
+ FIGO ~ ddirch(alpha.c)
+ 
+# Surivival probabilities:
+ # Year 1:
+ FIGO_I.year_1 ~ dbeta(alphaI.year_1, betaI.year_1)
+ FIGO_II.year_1 ~ dbeta(alphaII.year_1, betaII.year_1)
+ FIGO_III.year_1 ~ dbeta(alphaIII.year_1, betaIII.year_1)
+ FIGO_IV.year_1 ~ dbeta(alphaIV.year_1, betaIV.year_1)
+ 
+ # Year 2:
+ FIGO_I.year_2 ~ dbeta(alphaI.year_2, betaI.year_2)
+ FIGO_II.year_2 ~ dbeta(alphaII.year_2, betaII.year_2)
+ FIGO_III.year_2 ~ dbeta(alphaIII.year_2, betaIII.year_2)
+ FIGO_IV.year_2 ~ dbeta(alphaIV.year_2, betaIV.year_2)
+ 
+ # Year 3:
+ FIGO_I.year_3 ~ dbeta(alphaI.year_3, betaI.year_3)
+ FIGO_II.year_3 ~ dbeta(alphaII.year_3, betaII.year_3)
+ FIGO_III.year_3 ~ dbeta(alphaIII.year_3, betaIII.year_3)
+ FIGO_IV.year_3 ~ dbeta(alphaIV.year_3, betaIV.year_3)
+ 
+ # Year 4:
+ FIGO_I.year_4 ~ dbeta(alphaI.year_4, betaI.year_4)
+ FIGO_II.year_4 ~ dbeta(alphaII.year_4, betaII.year_4)
+ FIGO_III.year_4 ~ dbeta(alphaIII.year_4, betaIII.year_4)
+ FIGO_IV.year_4 ~ dbeta(alphaIV.year_4, betaIV.year_4)
+ 
+
+# SUB-MODEL 8: POPULATION AT INCREASED RISK 
+# DUE TO HIV+.
+
+# Binomial Likelihood:
+ rHIV_pos ~ dbin(pHIV_pos, nHIV_pos)
+ rHIV_neg ~ dbin(pHIV_neg, nHIV_neg)
+ # Logistic function:
+ logit(pHIV_pos) <- mu.hiv + delta.hiv
+ logit(pHIV_neg) <- mu.hiv
+ 
+  # Average effect:
+  mu.hiv ~ dnorm(0, 1 / 10)
+  # Random effect:
+  delta.hiv ~ dnorm(nu.hiv, prec.hiv)
+ 
+ # Hyperpriors on delta.hiv:
+ nu.hiv ~ dnorm(0, 1 / 10)
+ prec.hiv <- 1 / psi.hiv * psi.hiv
+ psi.hiv ~ dunif(0, 1)
+ 
+  HIV_odds <- exp(nu.hiv)
+  HIV_RR <- psi.hiv / (1 + psi.hiv)
+ 
+  # Proportion of population at
+  # increased risk:
+  zeta.HIVpop ~ dbeta(zeta_alpha, zeta_beta)
+ 
+}
+
