@@ -49,8 +49,7 @@ model {
  
 # Surivival probabilities:
  # Year 1:
- FIGO_I.year_1 ~ dbeta(alphaI.year_1, betaI)
- betaI ~ dgamma(.1, .1)
+ FIGO_I.year_1 ~ dbeta(alphaI.year_1, betaI.year_1)
  FIGO_II.year_1 ~ dbeta(alphaII.year_1, betaII.year_1)
  FIGO_III.year_1 ~ dbeta(alphaIII.year_1, betaIII.year_1)
  FIGO_IV.year_1 ~ dbeta(alphaIV.year_1, betaIV.year_1)

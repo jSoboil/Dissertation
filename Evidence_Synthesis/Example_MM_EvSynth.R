@@ -359,8 +359,9 @@ ggplot(melt(apply(m_M_ad, c(1, 2), mean)), aes(x = Var1, y = value,
  geom_line(size = 1) +
  scale_colour_manual(name = "Health state", 
                      values = cols) +
- scale_linetype_manual(name = "Health state",
+  scale_linetype_manual(name = "Health state",
                        values = lty) +
+  scale_y_continuous(labels = scales::percent) +
   xlab("Cycle") +
   ylab("Proportion of the cohort") +
   theme_light(base_size = 14) +
@@ -374,6 +375,21 @@ barplot(apply(m_M_ad, c(2, 1), mean), space = 1,
 legend("topright", legend = c("Stable", "Response", "Progrssion", "Death"), 
        fill = cols, cex = .5, box.lwd = 2,
        horiz = FALSE)
+
+# Survival curve:
+v_S_ad <- rowSums(m_M_ad[, -4, ]) / n.sims # vector with survival curve
+v_S_ad
+ggplot(data.frame(Cycle = 0:n_t, Survival = v_S_ad), 
+       aes(x = Cycle, y = Survival)) +
+  geom_line(size = 1.3) +
+  xlab("Cycle") +
+  ylab("Proportion alive") +
+  theme_bw(base_size = 14) +
+  theme()
+
+# Life expectancy
+le_ad <- sum(v_S_ad)
+le_ad
 
 # Cost-effectiveness analysis ---------------------------------------------
 

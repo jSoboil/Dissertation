@@ -8,26 +8,25 @@ library(RColorBrewer)
 library(ggplot2)
 
 # Load data:
-nodes <- data.frame(id = 1:15, label = c("Healthy", "Exposure", "Infection", 
-                                        "Condyloma", "Clearance", "Reinfection", 
-                                        "LSIL", "HSIL", "Clearance", "Reinfection",
-                                        "Cervical Cancer", "Year 1", "Year 2", "Year 3", 
+nodes <- data.frame(id = 1:12, label = c("Healthy", "Exposure", "Infection",
+                                        "LSIL", "HSIL", "Cervical Cancer", "Year 1", 
+                                        "Year 2", "Year 3", "Clearance", "Reinfection", 
                                         "Death"), 
-                    shadow = TRUE,  font.color = "black", font.size = 25, 
+                    shadow = FALSE,  font.color = "black", font.size = 30, 
                     font.bold = TRUE) 
 
-edges <- data.frame(from = c(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 3, 7, 3, 7, 8, 8, 7, 8, 
-                             9, 10, 10, 10, 8, 11, 12, 13, 14, 15),
-                    to = c(1, 2, 2, 3, 2, 4, 4, 5, 5, 6, 5, 4, 7, 7, 8, 8, 7, 8, 9, 9, 
-                           10, 9, 7, 8, 11, 12, 13, 14, 9, 15), 
-                    smooth = TRUE,  length = 1, width = 1.5)
+edges <- data.frame(from = c(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 5, 6, 7, 8, 9, 4, 
+                             5, 10, 11, 11, 11, 12),
+                    to = c(1, 2, 2, 3, 4, 5, 4, 5, 4, 5, 6, 7, 8, 9, 10, 10, 
+                           10, 11, 10, 4, 5, 12), 
+                    smooth = FALSE,  length = 1, width = 2)
 
 visNetwork(nodes, edges, shadow = FALSE, width = "100%", height = "350px") %>% 
- visNodes(size = 22, color = alpha("black", .85), borderWidth = 3) %>% 
- visEdges(selfReferenceSize = 24, shadow = FALSE, smooth = TRUE,
-          color = list(color = alpha("darkgrey", 1)), 
-          arrows = list(to = list(scaleFactor = 1.5))) %>%
- visIgraphLayout(layout = "layout_nicely", smooth = TRUE, randomSeed = 22)
+ visNodes(size = 18, color = alpha("grey", .85), borderWidth = ) %>% 
+ visEdges(selfReferenceSize = 24, shadow = TRUE, smooth = FALSE,
+          color = list(color = alpha("black", 1)), 
+          arrows = list(to = list(scaleFactor = .85))) %>%
+ visIgraphLayout(layout = "layout_nicely", smooth = TRUE, randomSeed = 2)
 # Seed options: 22, 50.
 
 # End file ----------------------------------------------------------------

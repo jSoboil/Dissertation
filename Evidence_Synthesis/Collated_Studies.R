@@ -5,8 +5,6 @@ library(readxl)
 # ==========================================================================================
 # Misc --------------------------------------------------------------------
 # ==========================================================================================
-# COMPARISON GROUPS: VACCINE(B) AND PLACEBO (A).
-
 # Function to convert rate to probability assuming cons. rate over time:
 rateConversionCons <- function(r, t) {
  for (i in 1:t) {
@@ -34,12 +32,30 @@ rateConversionCons <- function(r, t) {
 # Note: the included statistics for HPV-6, HPV-11, HPV-16, and HPV-18 as model assesses
 # quadrivalent vaccine efficacy.
 
+# ==========================================================================================
+# Age-specific all cause mortality --------------------------------------------------
+# ==========================================================================================
+# Import ASSA mortality table:
+mort_data <- read_excel("mortality tables.xls", 
+                        sheet = "ASSA data", range = "B3:C94")
+
+# Total Pop. divided by total deaths:
+v_r_mort_by_age <- mort_data[, 2] / mort_data[, 1]
+v_r_mort_by_age[1:90, ]
+
+# Therefore, all-less HPV mortality calculated as All-cause mortality - HPV mortality, i.e.
+# the number of people who die due to cervical cancer.
+
+# Vector of probabilities directly computed with model.
+
 # ===========================================================================================
 # Vaccine efficacy --------------------------------------------------------
 # ===========================================================================================
 # Vaccine efficacy is expressed as the reduction in the occurrence of HPV due to vaccination.
 # Individuals who are vaccinated fully experience a rate of occurrence of HPV that is 
 # (1 – alpha) times that of those who are not vaccinated (Favato G., et al. 2012).
+
+# COMPARISON GROUPS: PLACEBO (A) AND VACCINE(B)
 
 # Study 1: Munoz N., et al. 2009 ------------------------------------------
 # Safety, immunogenicity, and eðcacy of quadrivalent human papillomavirus (types 6, 11, 16, 
@@ -159,7 +175,7 @@ rateConversionCons <- function(r, t) {
 # Used age groups 15-20:
 beta_params(mean = .8, sigma = .05)
 # Assumes 80% coverage
-plot(density(rbeta(n = 1000, shape1 = 50.4, shape2 = 12.6)))
+plot(density(rbeta(n = 10000, shape1 = 50.4, shape2 = 12.6)))
 
 # ===========================================================================================
 # Vaccine compliance --------------------------------------------------------
@@ -168,40 +184,70 @@ plot(density(rbeta(n = 1000, shape1 = 50.4, shape2 = 12.6)))
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 # Used age groups 15-20:
-beta_params(mean = .95, sigma = .05)
-# Assume full compliance.
 
-# ===========================================================================================
-# Efficacy decrease due to non-compliance ------------------------------------
-# ===========================================================================================
-# Informative prior -------------------------------------------------------
-# 1. Favato G., et al. 2012. Bayesian HPV model:
-beta_params(mean = .5040, sigma = .05)
-# Assume full compliance.
+# Assume full compliance; chi = 1
 
 # ===========================================================================================
 # Cross-protection effect --------------------------------------------------------
 # ===========================================================================================
 # Informative prior -------------------------------------------------------
-# 1. Favato G., et al. 2012. Bayesian HPV model.
+# Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
+# Prevent HPV-related Diseases.
 lnorm_params(m = .0740, v = .05)
 
-# ==========================================================================================
-# Age-specific all cause mortality --------------------------------------------------
-# ==========================================================================================
-# Import ASSA mortality table:
-mort_data <- read_excel("Evidence_Synthesis/mortality tables.xls", 
-                        sheet = "ASSA data", range = "B3:C94")
+# ===========================================================================================
+# Annual Screening Coverage  --------------------------------------------------------
+# ===========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. HPV and Related Diseases Report
+# Proportion of pop. screening coverage every three years according to age group, converted 
+# to an annual rate, and then annual probability:
 
-# Total Pop. divided by total deaths:
-v_r_mort_by_age <- mort_data[, 2] / mort_data[, 1]
-v_r_mort_by_age
+# 12.9% (18-29 years)
+- (1 / 3) * log(1 - .129)
+1 - exp(-.04603777 * 1)
+beta_params(mean = .05, sigma = .05)
 
-# Therefore, all-less HPV mortality calculated as All-cause mortality - HPV mortality, i.e.
-# the number of people who die due to cervical cancer.
+# 21.4% (30-39 years)
+- (1 / 3) * log(1 - .214)
+1 - exp(-.08026616 * 1)
+beta_params(mean = .08, sigma = .05)
+
+# 11.5% (40-49 years)
+- (1 / 3) * log(1 - .115)
+1 - exp(-.04072254 * 1)
+beta_params(mean = .04, sigma = .05)
+
+# 7.7% (50-59 years)
+- (1 / 3) * log(1 - .077)
+1 - exp(-.02670868 * 1)
+beta_params(mean = .03,sigma = .05)
+
+# 5.8% (60-69 years)
+- (1 / 3) * log(1 - .058)
+1 - exp(-.01991667 * 1)
+beta_params(mean = .02, sigma = .05)
 
 # ==========================================================================================
-# Age-specific infection ----------------------------------------------------
+# Age-specific Exposure Probability ------------------------------------
+# ==========================================================================================
+# Informative prior -------------------------------------------------------
+# Anne Bakilana (2005) Age at sexual debut in South Africa, African Journal ofAIDS Research, 
+# 4:1, 1-5, DOI: 10.2989/16085900509490335
+
+# Assumes cons. rate.
+
+# From Healthy to Exposed:
+p_Sexual_Activity <- rateConversionCons(r = .09, t = 75)
+p_Sexual_Activity
+
+plot(p_Sexual_Activity, type = "l", lwd = 2, ylab = "Cum. Pr(Sexual Activity)", 
+     xlab = "Ages 15-85", xgap.axis = 100)
+
+# Vector of probabilities directly computed with model.
+
+# ==========================================================================================
+# Age-specific Infection Prevalence ----------------------------------------------------
 # ==========================================================================================
 # Note: will use a relative risk parameter for proportion of HIV+ population who have 
 # increased risk of being reinfected rather than clearing HPV. See Italian study.
@@ -212,11 +258,11 @@ v_r_mort_by_age
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 # Used age groups 15-20:
 
-# 2. Data collected from HPV and Related Diseases Report. Used age groups 25+.
+# 2. Data collected from HPV and Related Diseases Report. Used age groups ≥=25.
 
 # Age groups:
 age_group <- c("15-16", "17", "18", "19", "20", "≤25", "25-34", 
-               "35-44", "45-54", "55-64")
+               "35-44", "45-54", "55≥")
 # Estimated Prevalence:
 1 - exp(-.17)
 Prevalence <- c(0.09516258, 0.1130796, 0.139292, 0.1563352, 0.139292, 
@@ -231,54 +277,87 @@ cbind(age_group, Prevalence)
 # omega.age[i] ~ dlnorm(mu.log[i], sigma.log[i])
 
 # ==========================================================================================
-# Condyloma (Genital Warts) -----------------------------------------------------------
+# Age-specific Regression of Infection to Exposure -------------------------------
 # ==========================================================================================
-# Probability of Condyloma.
+# Informative prior:
 
-# Informative prior: Sinanovic, E., et al. 2009 -------------------------------------
-# The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
-# cancer screening programme in South Africa.
+# Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
+# Prevent HPV-related Diseases.
+
+# Ages 15-24 years:
+beta_params(mean = .719, sigma = .05)
+# Ages 25-29 years:
+beta_params(mean = .699, sigma = .05)
+# Ages 30-39 years:
+beta_params(mean = .35, sigma = .05)
+# Ages 40-49 years:
+beta_params(mean = .201, sigma = .05)
+# Ages ≥50 years:
+beta_params(mean = .099, sigma = .05)
 
 # ==========================================================================================
 # LSIL -----------------------------------------------------
 # ==========================================================================================
-# Low-Grade Squamous Intraepithelial Lesions
+# Informative prior -------------------------------------------------------
+# Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
+# Prevent HPV-related Diseases.
 
-# Informative prior: Sinanovic, E., et al. 2009 -------------------------------------
-# The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
-# cancer screening programme in South Africa.
-
-# Regression probability LSIL to Cleared:
-beta_params(mean = .9, sigma = .01)
-plot(density(rbeta(n = 100000, shape1 = 809.1, 89.9)))
+# From Infection progression to Low-Grade Squamous Intraepithelial Lesions:
+beta_params(mean = .11, sigma = .1)
 
 # ==========================================================================================
 # HSIL -----------------------------------------------------
 # ==========================================================================================
-# High-Grade Squamous Intraepithelial Lesions.
+# Informative prior -------------------------------------------------------
+# Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
+# Prevent HPV-related Diseases.
 
-# Informative prior: Sinanovic, E., et al. 2009 -------------------------------------
-# The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical
-# cancer screening programme in South Africa.
+# From Infection progression to High-Grade Squamous Intraepithelial Lesions:
+beta_params(mean = .022, sigma = .01)
 
-# Regression probability from HSIL to LSIL:
-# 1 year transition probability (Miller and Homan, 1994)
-1 - exp(-.35 / 6)
-# Beta parameters:
-beta_params(mean = 0.05666455, sigma = .01)
-plot(density(rbeta(n = 10000, shape1 = 30.23262, shape2 = 503.3042)))
+# ===========================================================================================
+# Subject to No-Treatment  --------------------------------------------------------
+# ===========================================================================================
+# Informative prior -------------------------------------------------------
+# 1.Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
+# Prevent HPV-related Diseases.
 
-# Progression probability from HSIL to Cancer:
-# 1 year transition probability (Miller and Homan, 1994)
-1 - exp(-.4 / 12)
-# Beta parameters:
-beta_params(mean = 0.0327839, sigma = .01)
-plot(density(rbeta(n = 10000, shape1 = 10.3627, shape2 = 305.7285)))
+# From LSIL to Clearance:
+beta_params(mean = .71, sigma = .05)
+# From LSIL to HSIL:
+beta_params(mean = .224, sigma = .05)
+# From HSIL to Clearance:
+beta_params(mean = .355, sigma = .05)
+# From HSIL to LSIL:
+beta_params(mean = .25, sigma = .05)
+# From HSIL to Cancer:
+beta_params(mean = .05, sigma = .05)
+
+# ===========================================================================================
+# Subject to Treatment (Conization)  --------------------------------------------------
+# ===========================================================================================
+# Informative prior -------------------------------------------------------
+# Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
+# Prevent HPV-related Diseases.
+
+# From LSIL to Clearance:
+beta_params(mean = .8990, sigma = .05)
+# From LSIL to HSIL:
+beta_params(mean = .12, sigma = .05)
+# From HSIL to Clearance:
+beta_params(mean = .861, sigma = .05)
+# From HSIL to cancer:
+beta_params(mean = .015, sigma = .05)
+
+# Probability of Conization
+# Immediate:
+beta_params(mean = .302, sigma = .05)
+# Delayed:
+beta_params(mean = .17, sigma = .05)
 
 # ==========================================================================================
 # Cervical Adenocarcinoma -------------------------------------------------
 # ==========================================================================================
-
 # Informative prior -------------------------------------------------------
 # Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
 # Prevent HPV-related Diseases.
@@ -355,7 +434,6 @@ betaIV.year_4 <- beta_params(mean = .9250, sigma = .05)$beta
 # ==========================================================================================
 # Risk Increase (HIV+) ------------------------------------------------------
 # ==========================================================================================
-
 # Study: Mbulawa Z., et al. 2015 ------------------------------------------
 # Human papillomavirus prevalence in South African women and men according to age and human 
 # immunodeficiency virus status.
@@ -366,5 +444,16 @@ betaIV.year_4 <- beta_params(mean = .9250, sigma = .05)$beta
 # 161 HIV-positive men between the ages of 18–66 years. HPV types were determined in cervical
 # and penile cells by Roche Linear Array HPV genotyping assay.
 
+# HIV+ women positive to HPV: 205/277
+# HIV- women positive to HPV: 76/207
+
+rHIV_pos <- 205
+nHIV_pos <- 277
+rHIV_neg <- 76
+nHIV_neg <- 207
+
+# Proportion of pop. at increased risk due to HIV:
+zeta_alpha <- beta_params(mean = .131, sigma = .05)$alpha
+zeta_beta <- beta_params(mean = .131, sigma = .05)$beta
 
 # End file ----------------------------------------------------------------

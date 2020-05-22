@@ -17,5 +17,10 @@ model {
  
  HIV_odds <- exp(nu.hiv)
  HIV_risk <- psi.hiv / (1 + psi.hiv)
+ 
+ # Proportion of population at
+ # increased risk:
+ zeta_HIVpos ~ dbeta(zeta_alpha, zeta_beta)
+ 
 }
 
