@@ -119,16 +119,32 @@ cbind(Age = 15:90, Prevalence)
 # Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
 # Prevent HPV-related Diseases.
 
-# Ages 15-24 years:
-beta_params(mean = .719, sigma = .05)
-# Ages 25-29 years:
-beta_params(mean = .699, sigma = .05)
-# Ages 30-39 years:
-beta_params(mean = .35, sigma = .05)
-# Ages 40-49 years:
-beta_params(mean = .201, sigma = .05)
-# Ages ≥50 years:
-beta_params(mean = .099, sigma = .05)
+delta.regr_alpha <- c(
+  # Ages 15-24:
+  rep(beta_params(mean = .719, sigma = .05)$alpha, length(15:24)), 
+  # Ages 25-29:
+  rep(beta_params(mean = .699, sigma = .05)$alpha, length(25:29)),
+  # Ages 30-39:
+  rep(beta_params(mean = .35, sigma = .05)$alpha, length(30:39)),
+  # Ages 40-49:
+  rep(beta_params(mean = .201, sigma = .05)$alpha, length(40:49)),
+  # Ages 50:90:
+  rep(beta_params(mean = .099, sigma = .05)$alpha, length(50:90))
+  )
+
+delta.regr_beta <- c(
+  # Ages 15-24:
+  rep(beta_params(mean = .719, sigma = .05)$beta, length(15:24)), 
+  # Ages 25-29:
+  rep(beta_params(mean = .699, sigma = .05)$beta, length(25:29)),
+  # Ages 30-39:
+  rep(beta_params(mean = .35, sigma = .05)$beta, length(30:39)),
+  # Ages 40-49:
+  rep(beta_params(mean = .201, sigma = .05)$beta, length(40:49)),
+  # Ages 50:90:
+  rep(beta_params(mean = .099, sigma = .05)$beta, length(50:90))
+  )
+
 
 # ==========================================================================================
 # LSIL -----------------------------------------------------
@@ -138,7 +154,8 @@ beta_params(mean = .099, sigma = .05)
 # Prevent HPV-related Diseases.
 
 # From Infection progression to Low-Grade Squamous Intraepithelial Lesions:
-beta_params(mean = .11, sigma = .1)
+delta.LSIL_alpha <- beta_params(mean = .11, sigma = .1)$alpha
+delta.LSIL_beta <- beta_params(mean = .11, sigma = .1)$beta
 
 # ==========================================================================================
 # HSIL -----------------------------------------------------
@@ -148,7 +165,8 @@ beta_params(mean = .11, sigma = .1)
 # Prevent HPV-related Diseases.
 
 # From Infection progression to High-Grade Squamous Intraepithelial Lesions:
-beta_params(mean = .022, sigma = .01)
+delta.HSIL_alpha <- beta_params(mean = .022, sigma = .01)$alpha
+delta.HSIL_beta <- beta_params(mean = .022, sigma = .01)$beta
 
 # ===========================================================================================
 # Subject to No-Treatment  --------------------------------------------------------
@@ -158,15 +176,20 @@ beta_params(mean = .022, sigma = .01)
 # Prevent HPV-related Diseases.
 
 # From LSIL to Clearance:
-beta_params(mean = .71, sigma = .05)
+pi.I.LSIL_Clear_alpha <- beta_params(mean = .71, sigma = .05)$alpha
+pi.I.LSIL_Clear_beta <- beta_params(mean = .71, sigma = .05)$beta
 # From LSIL to HSIL:
-beta_params(mean = .224, sigma = .05)
+pi.I.LSIL_HSIL_alpha <- beta_params(mean = .224, sigma = .05)$alpha
+pi.I.LSIL_HSIL_beta <- beta_params(mean = .224, sigma = .05)$beta
 # From HSIL to Clearance:
-beta_params(mean = .355, sigma = .05)
+pi.I.HSIL_Clear_alpha <- beta_params(mean = .355, sigma = .05)$alpha
+pi.I.HSIL_Clear_beta <- beta_params(mean = .355, sigma = .05)$beta
 # From HSIL to LSIL:
-beta_params(mean = .25, sigma = .05)
+pi.I.HSIL_LSIL_alpha <- beta_params(mean = .25, sigma = .05)$alpha
+pi.I.HSIL_LSIL_beta <- beta_params(mean = .25, sigma = .05)$beta
 # From HSIL to Cancer:
-beta_params(mean = .05, sigma = .05)
+pi.I.HSIL_Cancer_alpha <- beta_params(mean = .05, sigma = .05)$alpha
+pi.I.HSIL_Cancer_beta <- beta_params(mean = .05, sigma = .05)$beta
 
 # ===========================================================================================
 # Subject to Treatment (Conization)  --------------------------------------------------
@@ -207,7 +230,7 @@ beta_params(mean = .17, sigma = .05)
 # dDirc(.1200)
 # FIGO IV
 # dDirc(.1800)
-alpha.c <- list(.55, .15, .12, .18)
+cancer_alpha <- list(.55, .15, .12, .18)
 
 # Survival probabilities for each FIGO stage, over 5 years.
 
@@ -313,49 +336,89 @@ model {
     mu.vac[i] ~ dnorm(0, 1.0e-2)
     # Random population effect:
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
-  }
+ }
   # Priors for sub-model 2:
-  psi.vac ~ dnorm(0, 1.0e-1)
-  tau.vac ~ dunif(0, 1)
-  prec.vac <- 1 / pow(tau.vac, 2)
-  # Odds ratio:
-  OR.vac <- exp(psi.vac)
-  # Probability of no protection given
-  # vaccine:
-  pEfficacy.vac <- (OR.vac / 1 + OR.vac)
-
+   psi.vac ~ dnorm(0, 1.0e-1)
+   tau.vac ~ dunif(0, 1)
+   prec.vac <- 1 / pow(tau.vac, 2)
+   # Odds ratio:
+   OR.vac <- exp(psi.vac)
+   # Probability of no protection given
+   # vaccine:
+   pEfficacy.vac <- (OR.vac / 1 + OR.vac)
 
 # SUB-MODEL 2: AVERAGE VACCINE COVERAGE.
- mu.vac_coverage ~ dbeta(mu.vac_alpha, mu.vac_beta)
+  # model parameters abbreviated by mu.vac
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior:
+    
+  mu.vac_coverage ~ dbeta(mu.vac_alpha, mu.vac_beta)
 
- 
 # SUB-MODEL 3: VACCINE COMPLIANCE.
- iota.compli ~ dbeta(iota.comp_alpha, iota.comp_beta)
+  # model parameters abbreviated by iota.
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior:
+    
+  iota.compli ~ dbeta(iota.comp_alpha, iota.comp_beta)
  
 # SUB-MODEL 4: CROSS-PROTECTION EFFECT.
- chi.xProtect ~ dlnorm(chi.crossPro_mu, chi.crossPro_sigma)
-
+  # model parameters abbreviated by chi.
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior:
+    
+  chi.xProtect ~ dlnorm(chi.crossPro_mu, chi.crossPro_sigma)
 
 # SUB-MODEL 5: SCREENING PROBABILITY BY AGE
 # GROUP.
- # model parameters abbreviated by .screen
+  # model parameters abbreviated by .screen
     # Note: equivalent to standard PSA, as it is 
-    # sampling direclty from the prior.
+    # sampling direclty from the prior:
+    
  for (i in 1:76) {
   sigma.screenCov[i] ~ dbeta(sigma.screening_alpha[i], sigma.screening_beta[i])
  }
 
-
 # SUB-MODEL 6: AGE-SPECIFIC INFECTION.
   # model parameters abbreviated by .age
     # Note: equivalent to standard PSA, as it is 
-    # sampling direclty from the prior.
-  for (i in 1:76) {
-    omega.age[i] ~ dlnorm(omega.mu.log[i], omega.sigma.log[i])
-  }
+    # sampling direclty from the prior:
     
+ for (i in 1:76) {
+   omega.age[i] ~ dlnorm(omega.mu.log[i], omega.sigma.log[i])
+ }
+  
+# SUB-MODEL 7: AGE-SPECIFIC REGRESSION OF
+# INFECTION.
+  # model parameters abbreviated by .regr
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior:
+    
+ for (i in 1:76) {
+    delta.regr[i] ~ dbeta(delta.regr_alpha[i], delta.regr_beta[i])  
+ }
+ 
+# SUB-MODEL 8: PROGRESSION TP LSIL OR
+# HSIL.
+  # model parameters abbreviated by .regr
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior:
+    
+ delta.LSIL ~ dbeta(delta.LSIL_alpha, delta.LSIL_beta)
+ delta.HSIL ~ dbeta(delta.HSIL_alpha, delta.HSIL_beta)
 
-# SUB-MODEL 7: CERVICAL CANCER.
+# SUB-MODEL 9: PROGRESSION AND REGRESSION GIVEN 
+# NO TREATMENT.
+  # model parameters abbreviated by pi.I.
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior:
+    
+ pi.I.LSIL_Clear ~ dbeta(pi.I.LSIL_Clear_alpha, pi.I.LSIL_Clear_beta)
+ pi.I.LSIL_HSIL ~ dbeta(pi.I.LSIL_HSIL_alpha, pi.I.LSIL_HSIL_beta)
+ pi.I.HSIL_Clear ~ dbeta(pi.I.HSIL_Clear_alpha, pi.I.HSIL_Clear_beta)
+ pi.I.HSIL_LSIL ~ dbeta(pi.I.HSIL_LSIL_alpha, pi.I.HSIL_LSIL_beta)
+ pi.I.HSIL_Cancer ~ dbeta(pi.I.HSIL_Cancer_alpha, pi.I.HSIL_Cancer_beta)
+
+# SUB-MODEL 10: CERVICAL CANCER.
 # the distribution of invidiuals who have 
 # cancer according to FIGO stages I-IV, and 
 # the associated survival probabilities according 
@@ -365,7 +428,7 @@ model {
   # sampling direclty from the prior.
     
 # Distribution of Cervical Cancer stages: 
- FIGO ~ ddirch(alpha.c)
+ FIGO ~ ddirch(cancer_alpha)
  
 # Surivival probabilities:
  # Year 1:
@@ -392,26 +455,24 @@ model {
  FIGO_III.year_4 ~ dbeta(alphaIII.year_4, betaIII.year_4)
  FIGO_IV.year_4 ~ dbeta(alphaIV.year_4, betaIV.year_4)
  
-
-# SUB-MODEL 8: POPULATION AT INCREASED RISK 
+# SUB-MODEL 11: POPULATION AT INCREASED RISK 
 # DUE TO HIV+.
-
-# Binomial Likelihood:
- rHIV_pos ~ dbin(pHIV_pos, nHIV_pos)
- rHIV_neg ~ dbin(pHIV_neg, nHIV_neg)
- # Logistic function:
- logit(pHIV_pos) <- mu.hiv + delta.hiv
- logit(pHIV_neg) <- mu.hiv
+ # Binomial Likelihood:
+  rHIV_pos ~ dbin(pHIV_pos, nHIV_pos)
+  rHIV_neg ~ dbin(pHIV_neg, nHIV_neg)
+  # Logistic function:
+  logit(pHIV_pos) <- mu.hiv + delta.hiv
+  logit(pHIV_neg) <- mu.hiv
  
-  # Average effect:
-  mu.hiv ~ dnorm(0, 1 / 10)
-  # Random effect:
-  delta.hiv ~ dnorm(nu.hiv, prec.hiv)
+   # Average effect:
+   mu.hiv ~ dnorm(0, 1 / 10)
+   # Random effect:
+   delta.hiv ~ dnorm(nu.hiv, prec.hiv)
  
- # Hyperpriors on delta.hiv:
- nu.hiv ~ dnorm(0, 1 / 10)
- prec.hiv <- 1 / psi.hiv * psi.hiv
- psi.hiv ~ dunif(0, 1)
+  # Hyperpriors on delta.hiv:
+  nu.hiv ~ dnorm(0, 1 / 10)
+  prec.hiv <- 1 / psi.hiv * psi.hiv
+  psi.hiv ~ dunif(0, 1)
  
   HIV_odds <- exp(nu.hiv)
   HIV_RR <- psi.hiv / (1 + psi.hiv)
@@ -441,7 +502,20 @@ data_JAGS <- list(
  # SUB-MODEL 6 DATA:
  omega.mu.log = omega.mu.log, omega.sigma.log = omega.sigma.log,
  # SUB-MODEL 7 DATA:
- alpha.c = alpha.c, 
+ delta.regr_alpha = delta.regr_alpha, delta.regr_beta = delta.regr_beta,
+ # SUB-MODEL 8 DATA:
+ delta.LSIL_alpha = delta.LSIL_alpha, delta.LSIL_beta = delta.LSIL_beta,
+ delta.HSIL_alpha = delta.HSIL_alpha, delta.HSIL_beta = delta.HSIL_beta,
+ # SUB-MODEL 9 DATA:
+ pi.I.LSIL_Clear_alpha = pi.I.LSIL_Clear_alpha, pi.I.LSIL_Clear_beta = pi.I.LSIL_Clear_beta,
+ pi.I.LSIL_HSIL_alpha = pi.I.LSIL_HSIL_alpha, pi.I.LSIL_HSIL_beta = pi.I.LSIL_HSIL_beta,
+ pi.I.HSIL_Clear_alpha = pi.I.HSIL_Clear_alpha, pi.I.HSIL_Clear_beta = pi.I.HSIL_Clear_beta,
+ pi.I.HSIL_LSIL_alpha = pi.I.HSIL_LSIL_alpha, pi.I.HSIL_LSIL_beta = pi.I.HSIL_LSIL_beta,
+ pi.I.HSIL_Cancer_alpha = pi.I.HSIL_Cancer_alpha,
+ pi.I.HSIL_Cancer_beta = pi.I.HSIL_Cancer_beta,
+ 
+ # SUB-MODEL 10 DATA:
+ cancer_alpha = cancer_alpha, 
  alphaI.year_1 = alphaI.year_1, betaI.year_1 = betaI.year_1,
  alphaI.year_2 = alphaI.year_2, betaI.year_2 = betaI.year_2, 
  alphaI.year_3 = alphaI.year_3, betaI.year_3 = betaI.year_3, 
@@ -458,28 +532,35 @@ data_JAGS <- list(
  alphaIV.year_2 = alphaIV.year_2, betaIV.year_2 = betaIV.year_2,
  alphaIV.year_3 = alphaIV.year_3, betaIV.year_3 = betaIV.year_3,
  alphaIV.year_4 = alphaIV.year_4, betaIV.year_4 = betaIV.year_4,
- # SUB-MODEL 8 DATA:
+ # SUB-MODEL 11 DATA:
  rHIV_pos = rHIV_pos, rHIV_neg = rHIV_neg, 
  nHIV_pos = nHIV_pos, nHIV_neg = nHIV_neg, 
  zeta_alpha = zeta_alpha, zeta_beta = zeta_beta
  
  )
 
-# Initial JAGS sampler values:
-# Parameters to monitor:
+# Set parameters to be monitored:
 params <- c(
-  # Vaccine efficacy parameters:
+  # Vaccine efficacy probability and Odds:
   "OR.vac", "pEfficacy.vac",
-  # Average vaccine coverage:
+  # Average vaccine coverage probability:
   "mu.vac_coverage",
   # Average vaccine compliance:
   "iota.compli",
-  # Cross protection effect:
+  # Cross protection effect probability:
   "chi.xProtect",
-  # Screening coverage parameters:
+  # Screening coverage probability:
   "sigma.screenCov",
   # Age-specific infection probability:
   "omega.age",
+  # Age-specific regression from infection
+  # to exposure:
+  "delta.regr",
+  # Progression from Infection to LSIL or HSIL:
+  "delta.LSIL", "delta.HSIL",
+  # Progression and regression from LSIL and HSIL:
+  "pi.I.LSIL_Clear", "pi.I.LSIL_HSIL", "pi.I.HSIL_Clear", 
+  "pi.I.HSIL_LSIL", "pi.I.HSIL_Cancer",
   # Cervical cancer parameters:
   "FIGO", 
   "FIGO_I.year_1", "FIGO_II.year_1", "FIGO_III.year_1", "FIGO_IV.year_1", 
@@ -497,5 +578,6 @@ n.thin <- floor((n.iter - n.burnin) / 250)
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
                  model.file = "HPV_model.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+options(max.print = 4000)
 mod_JAGS
 attach.jags(mod_JAGS)
