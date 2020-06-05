@@ -16,7 +16,7 @@ rateConversionCons <- function(r, t) {
 # Each cohort collected from each study's end-point. All data extracted only includes 
 # estimates from per-protocol pop. However, the per protocol analysis strategy may be 
 # subject to bias as the reasons for non-compliance may be related to treatment 
-# (Cochrane.org/glossary)
+# (Cochrane.org/glossary).
 
 # Note on conversion between rates and probabilities (Fleurence R., 2007):
 # If an event occurs at a constant rate r per time unit t, then the probability that an 
