@@ -15,49 +15,89 @@ model {
     mu.vac[i] ~ dnorm(0, 1.0e-2)
     # Random population effect:
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
-  }
+ }
   # Priors for sub-model 2:
-  psi.vac ~ dnorm(0, 1.0e-1)
-  tau.vac ~ dunif(0, 1)
-  prec.vac <- 1 / pow(tau.vac, 2)
-  # Odds ratio:
-  OR.vac <- exp(psi.vac)
-  # Probability of no protection given
-  # vaccine:
-  pEfficacy.vac <- (OR.vac / 1 + OR.vac)
-
+   psi.vac ~ dnorm(0, 1.0e-1)
+   tau.vac ~ dunif(0, 1)
+   prec.vac <- 1 / pow(tau.vac, 2)
+   # Odds ratio:
+   OR.vac <- exp(psi.vac)
+   # Probability of no protection given
+   # vaccine:
+   pEfficacy.vac <- (OR.vac / 1 + OR.vac)
 
 # SUB-MODEL 2: AVERAGE VACCINE COVERAGE.
- mu.vac_coverage ~ dbeta(mu.vac_alpha, mu.vac_beta)
+  # model parameters abbreviated by mu.vac
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior:
+    
+  mu.vac_coverage ~ dbeta(mu.vac_alpha, mu.vac_beta)
 
- 
 # SUB-MODEL 3: VACCINE COMPLIANCE.
- iota.compli ~ dbeta(iota.comp_alpha, iota.comp_beta)
+  # model parameters abbreviated by iota.
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior:
+    
+  iota.compli ~ dbeta(iota.comp_alpha, iota.comp_beta)
  
 # SUB-MODEL 4: CROSS-PROTECTION EFFECT.
- chi.xProtect ~ dlnorm(chi.crossPro_mu, chi.crossPro_sigma)
-
+  # model parameters abbreviated by chi.
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior:
+    
+  chi.xProtect ~ dlnorm(chi.crossPro_mu, chi.crossPro_sigma)
 
 # SUB-MODEL 5: SCREENING PROBABILITY BY AGE
 # GROUP.
- # model parameters abbreviated by .screen
+  # model parameters abbreviated by .screen
     # Note: equivalent to standard PSA, as it is 
-    # sampling direclty from the prior.
+    # sampling direclty from the prior:
+    
  for (i in 1:76) {
   sigma.screenCov[i] ~ dbeta(sigma.screening_alpha[i], sigma.screening_beta[i])
  }
 
-
 # SUB-MODEL 6: AGE-SPECIFIC INFECTION.
   # model parameters abbreviated by .age
     # Note: equivalent to standard PSA, as it is 
-    # sampling direclty from the prior.
-  for (i in 1:76) {
-    omega.age[i] ~ dlnorm(omega.mu.log[i], omega.sigma.log[i])
-  }
+    # sampling direclty from the prior:
     
+ for (i in 1:76) {
+   omega.age[i] ~ dlnorm(omega.mu.log[i], omega.sigma.log[i])
+ }
+  
+# SUB-MODEL 7: AGE-SPECIFIC REGRESSION OF
+# INFECTION.
+  # model parameters abbreviated by .regr
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior:
+    
+ for (i in 1:76) {
+    delta.regr[i] ~ dbeta(delta.regr_alpha[i], delta.regr_beta[i])  
+ }
+ 
+# SUB-MODEL 8: PROGRESSION TP LSIL OR
+# HSIL.
+  # model parameters abbreviated by .regr
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior:
+    
+ delta.LSIL ~ dbeta(delta.LSIL_alpha, delta.LSIL_beta)
+ delta.HSIL ~ dbeta(delta.HSIL_alpha, delta.HSIL_beta)
 
-# SUB-MODEL 7: CERVICAL CANCER.
+# SUB-MODEL 9: PROGRESSION AND REGRESSION GIVEN 
+# NO TREATMENT.
+  # model parameters abbreviated by pi.I.
+    # Note: equivalent to standard PSA, as it is 
+    # sampling direclty from the prior:
+    
+ pi.I.LSIL_Clear ~ dbeta(pi.I.LSIL_Clear_alpha, pi.I.LSIL_Clear_beta)
+ pi.I.LSIL_HSIL ~ dbeta(pi.I.LSIL_HSIL_alpha, pi.I.LSIL_HSIL_beta)
+ pi.I.HSIL_Clear ~ dbeta(pi.I.HSIL_Clear_alpha, pi.I.HSIL_Clear_beta)
+ pi.I.HSIL_LSIL ~ dbeta(pi.I.HSIL_LSIL_alpha, pi.I.HSIL_LSIL_beta)
+ pi.I.HSIL_Cancer ~ dbeta(pi.I.HSIL_Cancer_alpha, pi.I.HSIL_Cancer_beta)
+
+# SUB-MODEL 10: CERVICAL CANCER.
 # the distribution of invidiuals who have 
 # cancer according to FIGO stages I-IV, and 
 # the associated survival probabilities according 
@@ -67,7 +107,7 @@ model {
   # sampling direclty from the prior.
     
 # Distribution of Cervical Cancer stages: 
- FIGO ~ ddirch(alpha.c)
+ FIGO ~ ddirch(cancer_alpha)
  
 # Surivival probabilities:
  # Year 1:
@@ -94,26 +134,24 @@ model {
  FIGO_III.year_4 ~ dbeta(alphaIII.year_4, betaIII.year_4)
  FIGO_IV.year_4 ~ dbeta(alphaIV.year_4, betaIV.year_4)
  
-
-# SUB-MODEL 8: POPULATION AT INCREASED RISK 
+# SUB-MODEL 11: POPULATION AT INCREASED RISK 
 # DUE TO HIV+.
-
-# Binomial Likelihood:
- rHIV_pos ~ dbin(pHIV_pos, nHIV_pos)
- rHIV_neg ~ dbin(pHIV_neg, nHIV_neg)
- # Logistic function:
- logit(pHIV_pos) <- mu.hiv + delta.hiv
- logit(pHIV_neg) <- mu.hiv
+ # Binomial Likelihood:
+  rHIV_pos ~ dbin(pHIV_pos, nHIV_pos)
+  rHIV_neg ~ dbin(pHIV_neg, nHIV_neg)
+  # Logistic function:
+  logit(pHIV_pos) <- mu.hiv + delta.hiv
+  logit(pHIV_neg) <- mu.hiv
  
-  # Average effect:
-  mu.hiv ~ dnorm(0, 1 / 10)
-  # Random effect:
-  delta.hiv ~ dnorm(nu.hiv, prec.hiv)
+   # Average effect:
+   mu.hiv ~ dnorm(0, 1 / 10)
+   # Random effect:
+   delta.hiv ~ dnorm(nu.hiv, prec.hiv)
  
- # Hyperpriors on delta.hiv:
- nu.hiv ~ dnorm(0, 1 / 10)
- prec.hiv <- 1 / psi.hiv * psi.hiv
- psi.hiv ~ dunif(0, 1)
+  # Hyperpriors on delta.hiv:
+  nu.hiv ~ dnorm(0, 1 / 10)
+  prec.hiv <- 1 / psi.hiv * psi.hiv
+  psi.hiv ~ dunif(0, 1)
  
   HIV_odds <- exp(nu.hiv)
   HIV_RR <- psi.hiv / (1 + psi.hiv)

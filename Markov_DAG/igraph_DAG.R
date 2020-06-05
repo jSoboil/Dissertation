@@ -2,7 +2,7 @@ library(igraph)
 library(tidyverse)
 library(readxl)
 
-Clinical_states <- read_excel("Markov_DAG/Clinical_states.xlsx", col_names = FALSE)
+Clinical_states <- read_excel("Clinical_states.xlsx", col_names = FALSE)
 
 nodes <- Clinical_states
 nodes
@@ -12,14 +12,13 @@ links
 
 net <- graph_from_data_frame(d = links, directed = TRUE)
 
-# 57
-# 58
-# 59
-# 10
-set.seed(58)
-plot(net, layout = layout.fruchterman.reingold, edge.arrow.size=.18, edge.arrow.width = 0.75,
-     vertex.color = alpha("navyblue", .3), vertex.label.color = "black", 
-     vertex.size = 19, vertex.label.cex = 0.75, edge.curved = .075,
-     edge.color = "black")
+set.seed(25)
+plot(net, layout = layout.davidson.harel, edge.arrow.size=.12, edge.arrow.width = 0.65,
+     vertex.color = alpha("lightgrey", .25), vertex.label.color = "black", 
+     vertex.label.font = 4, vertex.size = 27, vertex.label.cex = 0.75, edge.curved = .075,
+     edge.color = "black", mark.groups = 1, mark.col = alpha("lightgreen", .2))
+title(cex.main = 1.1, main = "Human Papillomavirus:
+      a model of its health states and possible transitions")
+
 
 # End file ----------------------------------------------------------------

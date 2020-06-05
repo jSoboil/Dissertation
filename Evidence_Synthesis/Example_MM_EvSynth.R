@@ -9,7 +9,7 @@ library(tidyverse) # for general data wrangling and vis
 library(reshape2) # data wrangling
 library(BCEA) # bayesian CEA package
 library(bayesplot) # tools for posterior inspection
-library(parallel) # used for parrallel processing of Markov chains
+library(parallel) # used for parallel processing of Markov chains
 
 options(mc.cores = detectCores())
 
@@ -161,7 +161,10 @@ model_string <- "model {
 "
 writeLines(text = model_string, con = "EvSynthMMExample.txt")
 
-data_JAGS <- ls()[-1]
+data_JAGS <- c("N_res", "n_res1", "n_res2", "N_surv", "N_tox", "n_tox1", "n_tox2",
+               "N_tp", "phi_surv1", "phi_surv2", "phi_tp1", "phi_tp2", "phi_tr",
+               "r_res1", "r_res2", "r_tox1", "r_tox2", "tau", "x_surv1", "x_surv2",
+               "x_tp1", "x_tp2", "x_tr")
 data_JAGS
 
 params <- c("pi_res", "pi_tox", "beta_tr", "beta_tp", "beta_surv", "mu_dth")
@@ -318,7 +321,7 @@ m_M_ad[1, , ] <- v_s_init
 # Check:
 m_M_ad[1:2, ,  ]
 
-## Initialize transition array for each cycle, for each sim
+## Initialize transition array for each cycle, for each n.sim:
 a_A <- array(0,
              dim = c(n_states, n_states, n_t + 1, n.sims),
              dimnames = list(v_n, v_n, 0:n_t, 1:n.sims))
@@ -330,7 +333,7 @@ for (i in 1:n.sims) {
 # Check (first state, all states, for all cycles, across all n.sims):
 a_A[1, 1:4, , ]
 
-## Iterative solution of age-dependent cSTM
+# Iterative solution of age-dependent cSTM
 for (t in 1:n_t) {
  for(i in 1:n.sims) {
   # Fill in cohort trace

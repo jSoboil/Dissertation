@@ -1,5 +1,5 @@
 model {
-# SUB-MODEL 2: AGE-SPECIFIC PREVALENCE,
+# SUB-MODEL 1: AGE-SPECIFIC PREVALENCE,
   # model parameters abbreviated by .age
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior.
@@ -8,7 +8,7 @@ model {
     }
   
   
-# SUB-MODEL 3: VACCINE-EFFICACY,
+# SUB-MODEL 2: VACCINE-EFFICACY,
   # model parameters abbreviated by .vac
   for (i in 1:Nstud.vac) {
     # Likelihood
@@ -35,7 +35,7 @@ model {
   pEfficacy.vac <- (OR.vac / 1 + OR.vac)
   
 
-# SUB-MODEL 4: CERVICAL CANCER,
+# SUB-MODEL 3: CERVICAL CANCER,
 # the distribution of invidiuals who have 
 # cancer according to FIGO stages I-IV, and 
 # the associated survival probabilities according 

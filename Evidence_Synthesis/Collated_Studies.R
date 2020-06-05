@@ -14,9 +14,9 @@ rateConversionCons <- function(r, t) {
 }
 
 # Each cohort collected from each study's end-point. All data extracted only includes 
-# estimates from per-protocol pop and susceptible population. This is due to the fact that
-# the per protocol analysis strategy may be subject to bias as the reasons for non-compliance
-# may be related to treatment (Cochrane.org/glossary)
+# estimates from per-protocol pop. However, the per protocol analysis strategy may be 
+# subject to bias as the reasons for non-compliance may be related to treatment 
+# (Cochrane.org/glossary)
 
 # Note on conversion between rates and probabilities (Fleurence R., 2007):
 # If an event occurs at a constant rate r per time unit t, then the probability that an 
@@ -42,7 +42,6 @@ mort_data <- read_excel("mortality tables.xls",
 # Total Pop. divided by total deaths:
 v_r_mort_by_age <- mort_data[, 2] / mort_data[, 1]
 v_r_mort_by_age[1:90, ]
-
 # Therefore, all-less HPV mortality calculated as All-cause mortality - HPV mortality, i.e.
 # the number of people who die due to cervical cancer.
 
@@ -174,8 +173,7 @@ v_r_mort_by_age[1:90, ]
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 # Used age groups 15-20:
 beta_params(mean = .8, sigma = .05)
-# Assumes 80% coverage
-plot(density(rbeta(n = 10000, shape1 = 50.4, shape2 = 12.6)))
+# Assumes 80% coverage with an se of 5%.
 
 # ===========================================================================================
 # Vaccine compliance --------------------------------------------------------
@@ -186,47 +184,6 @@ plot(density(rbeta(n = 10000, shape1 = 50.4, shape2 = 12.6)))
 # Used age groups 15-20:
 
 # Assume full compliance; chi = 1
-
-# ===========================================================================================
-# Cross-protection effect --------------------------------------------------------
-# ===========================================================================================
-# Informative prior -------------------------------------------------------
-# Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
-# Prevent HPV-related Diseases.
-lnorm_params(m = .0740, v = .05)
-
-# ===========================================================================================
-# Annual Screening Coverage  --------------------------------------------------------
-# ===========================================================================================
-# Informative prior -------------------------------------------------------
-# 1. HPV and Related Diseases Report
-# Proportion of pop. screening coverage every three years according to age group, converted 
-# to an annual rate, and then annual probability:
-
-# 12.9% (18-29 years)
-- (1 / 3) * log(1 - .129)
-1 - exp(-.04603777 * 1)
-beta_params(mean = .05, sigma = .05)
-
-# 21.4% (30-39 years)
-- (1 / 3) * log(1 - .214)
-1 - exp(-.08026616 * 1)
-beta_params(mean = .08, sigma = .05)
-
-# 11.5% (40-49 years)
-- (1 / 3) * log(1 - .115)
-1 - exp(-.04072254 * 1)
-beta_params(mean = .04, sigma = .05)
-
-# 7.7% (50-59 years)
-- (1 / 3) * log(1 - .077)
-1 - exp(-.02670868 * 1)
-beta_params(mean = .03,sigma = .05)
-
-# 5.8% (60-69 years)
-- (1 / 3) * log(1 - .058)
-1 - exp(-.01991667 * 1)
-beta_params(mean = .02, sigma = .05)
 
 # ==========================================================================================
 # Age-specific Exposure Probability ------------------------------------
@@ -277,159 +234,287 @@ cbind(age_group, Prevalence)
 # omega.age[i] ~ dlnorm(mu.log[i], sigma.log[i])
 
 # ==========================================================================================
-# Age-specific Regression of Infection to Exposure -------------------------------
+# Age-specific Regression of Infection to Normal -------------------------------
 # ==========================================================================================
-# Informative prior:
-
-# Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
-# Prevent HPV-related Diseases.
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
 # Ages 15-24 years:
-beta_params(mean = .719, sigma = .05)
+1 - exp(-.7 * 1.5)
+beta_params(mean = .65, sigma = .05)
 # Ages 25-29 years:
-beta_params(mean = .699, sigma = .05)
-# Ages 30-39 years:
-beta_params(mean = .35, sigma = .05)
-# Ages 40-49 years:
-beta_params(mean = .201, sigma = .05)
-# Ages ≥50 years:
-beta_params(mean = .099, sigma = .05)
+1 - exp(-5 * 1.5)
+beta_params(mean = 0.9994, sigma = .05)
+# Ages ≥30 years:
+1 - exp(-.15 * 1.5)
+beta_params(mean = 0.2014838, sigma = .05)
 
 # ==========================================================================================
-# LSIL -----------------------------------------------------
+# From Infection to LSIL -----------------------------------------------------
 # ==========================================================================================
 # Informative prior -------------------------------------------------------
-# Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
-# Prevent HPV-related Diseases.
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
-# From Infection progression to Low-Grade Squamous Intraepithelial Lesions:
-beta_params(mean = .11, sigma = .1)
+1 - exp(-.2 * 3)
+beta_params(mean = 0.4511884, sigma = .05)
 
 # ==========================================================================================
-# HSIL -----------------------------------------------------
+# From Infection to HSIL -----------------------------------------------------
 # ==========================================================================================
 # Informative prior -------------------------------------------------------
-# Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
-# Prevent HPV-related Diseases.
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
-# From Infection progression to High-Grade Squamous Intraepithelial Lesions:
-beta_params(mean = .022, sigma = .01)
+beta_params(mean = .1, sigma = .05)
+
+# ==========================================================================================
+# From LSIL to Infection or Normal ----------------------------------------
+# ==========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+
+# Ages 15-34:
+1 - exp(-.65 * 6)
+beta_params(mean = 0.9797581, sigma = .05)
+# Proportion reverting to Normal is .9:
+1 - ((0.9797581 - 0.9797581 * .9) + 0.9797581 * .9)
+
+# Ages ≥ 35:
+1 - exp(-.4 * 6)
+beta_params(mean = 0.909282, sigma = .05)
+# Proportion reverting to Normal is .9:
+1 - ((0.909282 - 0.909282 * .9) + 0.909282 * .9)
+
+# ==========================================================================================
+# From LSIL to HSIL -------------------------------------------------------
+# ==========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+
+# Ages 15-34:
+1 - exp(-.1 * 6)
+beta_params(mean = 0.4511884, sigma = .05)
+
+# Ages ≥ 35:
+1 - exp(-.35 * 6)
+beta_params(mean = 0.8775436, sigma = .05)
+
+# ==========================================================================================
+# From HSIL to LSIL or Normal ---------------------------------------------
+# ==========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+
+1 - exp(-.35 * 6)
+# Proportion reverting to Normal is .5:
+1 - ((0.8775436 - 0.8775436 * .5) + 0.8775436 * .5)
+
+# ==========================================================================================
+# From HSIL to Stage I Cancer -----------------------------------------------------
+# ==========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+1 - exp(-.4 * 10)
+
+# ==========================================================================================
+# From Stage I Cancer to Treatment or Stage II Cancer ---------------------
+# ==========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+
+# Probability of symptoms every 4 years = .9
+# Convert to yearly rate
+- (1 / 4) * log(1 - .9)
+# Convert to yearly transition probability to treatment
+1 - exp(-.5756463 * 1)
+
+# Yearly probability of progression to Stage II Cancer:
+1 - exp(-.15 * 1)
+
+# ==========================================================================================
+# From Stage II Cancer to Treatment or Stage III Cancer -------------------
+# ==========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+
+# Probability of symptoms and therefore treatment every 4 years = .9
+# Convert to yearly rate
+- (1 / 3) * log(1 - .9)
+# Convert to yearly transition probability to treatment
+1 - exp(-.7675284 * 1)
+
+# Yearly probability of progression to Stage III Cancer:
+1 - exp(-.225 * 1)
+
+# ==========================================================================================
+# From Stage III Cancer to Treatment or Stage IV Cancer -------------------
+# ==========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+
+# Probability of symptoms and therefore treatment every 4 years = .9
+# Convert to yearly rate
+- (1 / 2) * log(1 - .9)
+# Convert to yearly transition probability to treatment
+1 - exp(-1.151293 * 1)
+
+# Yearly probability of progression to Stage IV Cancer:
+1 - exp(-.6 * 1)
+
+# ==========================================================================================
+# From Stage IV Cancer to Treatment -------------------
+# ==========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+
+# Probability of symptoms and therefore treatment every 4 years = .9
+# Convert to yearly rate
+- (1 / 2) * log(1 - .9)
+# Convert to yearly transition probability to treatment
+1 - exp(-1.151293 * 1)
+
+# ==========================================================================================
+# From Stage I to Survival for Years 1-5 -----------------------------------
+# ==========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+
+# Year 1
+.9688
+beta_params(mean = .9688, sigma = .05)
+# Year 2
+.9525
+beta_params(mean = .9525, sigma = .05)
+# Year 3
+.9544
+beta_params(mean = .9544, sigma = .05)
+# Year 4
+.9760
+beta_params(mean = .9760, sigma = .05)
+# Year 5
+.9761
+beta_params(mean = .9761, sigma = .05)
+
+# ==========================================================================================
+# From Stage II to Survival for Years 1-5 -----------------------------------
+# ==========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+
+# Year 1
+.9066
+beta_params(mean = .9066, sigma = .05)
+# Year 2
+.8760
+beta_params(mean = .8760, sigma = .05)
+# Year 3
+.9225
+beta_params(mean = .9225, sigma = .05)
+# Year 4
+.9332
+beta_params(mean = .9332, sigma = .05)
+# Year 5
+.9604
+beta_params(mean = .9604, sigma = .05)
+
+# ==========================================================================================
+# From Stage III to Survival for Years 1-5 -----------------------------------
+# ==========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+
+# Year 1
+.7064
+beta_params(mean = .7064, sigma = .05)
+# Year 2
+.7378
+beta_params(mean = .7378, sigma = .05)
+# Year 3
+.8610
+beta_params(mean = .8610, sigma = .05)
+# Year 4
+.9231
+beta_params(mean = .9231, sigma = .05)
+# Year 5
+.9142
+beta_params(mean = .9142, sigma = .05)
+
+# ==========================================================================================
+# From Stage IV to Survival for Years 1-5 -----------------------------------
+# ==========================================================================================
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+
+# Year 1
+.3986
+beta_params(mean = .3986, sigma = .05)
+# Year 2
+.4982
+beta_params(mean = .4982, sigma = .05)
+# Year 3
+.7638
+beta_params(mean = .7638, sigma = .05)
+# Year 4
+.8652
+beta_params(mean = .8652, sigma = .05)
+# Year 5
+.8592
+beta_params(mean = .8592, sigma = .05)
 
 # ===========================================================================================
-# Subject to No-Treatment  --------------------------------------------------------
+# Annual Cancer Screening Coverage  --------------------------------------------------------
 # ===========================================================================================
 # Informative prior -------------------------------------------------------
-# 1.Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
-# Prevent HPV-related Diseases.
+# 1. HPV and Related Diseases Report
+# Proportion of pop. screening coverage every three years according to age group, converted 
+# to an annual rate, and then annual probability:
 
-# From LSIL to Clearance:
-beta_params(mean = .71, sigma = .05)
-# From LSIL to HSIL:
-beta_params(mean = .224, sigma = .05)
-# From HSIL to Clearance:
-beta_params(mean = .355, sigma = .05)
-# From HSIL to LSIL:
-beta_params(mean = .25, sigma = .05)
-# From HSIL to Cancer:
-beta_params(mean = .05, sigma = .05)
+# 12.9% (18-29 years)
+- (1 / 3) * log(1 - .129) # 3-year Probability converted to 1-year Rate.
+1 - exp(-.04603777 * 1) # 1-year Probability
+beta_params(mean = .04499411, sigma = .05)
+
+# 21.4% (30-39 years)
+- (1 / 3) * log(1 - .214) # 3-year Probability converted to 1-year Rate.
+1 - exp(-.08026616 * 1) # 1-year Probability
+beta_params(mean = .07712932, sigma = .05)
+
+# 11.5% (40-49 years)
+- (1 / 3) * log(1 - .115) # 3-year Probability converted to 1-year Rate.
+1 - exp(-.04072254 * 1) # 1-year Probability
+beta_params(mean = .03990452, sigma = .05)
+
+# 7.7% (50-59 years)
+- (1 / 3) * log(1 - .077) # 3-year Probability converted to 1-year Rate.
+1 - exp(-.02670868 * 1) # 1-year Probability
+beta_params(mean = .02635516,sigma = .05)
+
+# 5.8% (60-69 years)
+- (1 / 3) * log(1 - .058) # 3-year Probability converted to 1-year Rate.
+1 - exp(-.01991667 * 1) # 1-year Probability
+beta_params(mean = .01971964, sigma = .05)
 
 # ===========================================================================================
-# Subject to Treatment (Conization)  --------------------------------------------------
+# Loss to Follow-Up -------------------------------------------------------
 # ===========================================================================================
 # Informative prior -------------------------------------------------------
-# Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
-# Prevent HPV-related Diseases.
-
-# From LSIL to Clearance:
-beta_params(mean = .8990, sigma = .05)
-# From LSIL to HSIL:
-beta_params(mean = .12, sigma = .05)
-# From HSIL to Clearance:
-beta_params(mean = .861, sigma = .05)
-# From HSIL to cancer:
-beta_params(mean = .015, sigma = .05)
-
-# Probability of Conization
-# Immediate:
-beta_params(mean = .302, sigma = .05)
-# Delayed:
-beta_params(mean = .17, sigma = .05)
-
-# ==========================================================================================
-# Cervical Adenocarcinoma -------------------------------------------------
-# ==========================================================================================
-# Informative prior -------------------------------------------------------
-# Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
-# Prevent HPV-related Diseases.
-
-# Proportion of inviduals in each of the four FIGO stages who progress to cancer, in one
-# cycle:
-# FIGO I 
-# dDirc(.5500)
-# FIGO II
-# dDirc(.1500)
-# FIGO III
-# dDirc(.1200)
-# FIGO IV
-# dDirc(.1800)
-alpha.c <- list(.55, .15, .12, .18)
-
-# Survival probabilities over four years, according to each FIGO stage:
-# Year 1 survival by stage:
-# FIGO I
-alphaI.year_1 <- beta_params(mean = .9770, sigma = .05)$alpha
-betaI.year_1 <- beta_params(mean = .9770, sigma = .05)$beta
-# FIGO II
-alphaII.year_1 <- beta_params(mean = .8290, sigma = .05)$alpha
-betaII.year_1 <- beta_params(mean = .8290, sigma = .05)$beta
-# FIGO III
-alphaIII.year_1 <- beta_params(mean = .59, sigma = .05)$alpha
-betaIII.year_1 <- beta_params(mean = .59, sigma = .05)$beta
-# FIGO IV
-alphaIV.year_1 <- beta_params(mean = .5020, sigma = .05)$alpha
-betaIV.year_1 <- beta_params(mean = .5020, sigma = .05)$beta
-
-# Year 2 survival by stage:
-# FIGO I
-alphaI.year_2 <- beta_params(mean = .9790, sigma = .05)$alpha
-betaI.year_2 <- beta_params(mean = .9790, sigma = .05)$beta
-# FIGO II
-alphaII.year_2 <- beta_params(mean = .8330, sigma = .05)$alpha
-betaII.year_2 <- beta_params(mean = .8330, sigma = .05)$beta
-# FIGO III
-alphaIII.year_2 <- beta_params(mean = .6930, sigma = .05)$alpha
-betaIII.year_2 <- beta_params(mean = .6930, sigma = .05)$beta
-# FIGO IV
-alphaIV.year_2 <- beta_params(mean = .7820, sigma = .05)$alpha
-betaIV.year_2 <- beta_params(mean = .7820, sigma = .05)$beta
-
-# Year 3 survival by stage:
-# FIGO I
-alphaI.year_3 <- beta_params(mean = .9630, sigma = .05)$alpha
-betaI.year_3 <- beta_params(mean = .9630, sigma = .05)$beta
-# FIGO II
-alphaII.year_3 <- beta_params(mean = .7550, sigma = .05)$alpha
-betaII.year_3 <- beta_params(mean = .7550, sigma = .05)$beta
-# FIGO III
-alphaIII.year_3 <- beta_params(mean = .7780, sigma = .05)$alpha
-betaIII.year_3 <- beta_params(mean = .7780, sigma = .05)$beta
-# FIGO IV
-alphaIV.year_3 <- beta_params(mean = .7220, sigma = .05)$alpha
-betaIV.year_3 <- beta_params(mean = .7220, sigma = .05)$beta
-
-# Year 4 survival by stage:
-# FIGO I
-alphaI.year_4 <- beta_params(mean = .9890, sigma = .05)$alpha
-betaI.year_4 <- beta_params(mean = .9890, sigma = .05)$beta
-# FIGO II
-alphaII.year_4 <- beta_params(mean = .8690, sigma = .05)$alpha
-betaII.year_4 <- beta_params(mean = .8690, sigma = .05)$beta
-# FIGO III
-alphaIII.year_4 <- beta_params(mean = .9290, sigma = .05)$alpha
-betaIII.year_4 <- beta_params(mean = .9290, sigma = .05)$beta
-# FIGO IV
-alphaIV.year_4 <- beta_params(mean = .9250, sigma = .05)$alpha
-betaIV.year_4 <- beta_params(mean = .9250, sigma = .05)$beta
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+beta_params(mean = .15, sigma = .05)
 
 # ==========================================================================================
 # Risk Increase (HIV+) ------------------------------------------------------

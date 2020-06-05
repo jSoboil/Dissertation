@@ -37,7 +37,7 @@ mu.vac_beta <- beta_params(mean = .8, sigma = .1)$beta
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 # Used age groups 15-20:
 
-# Assume roughly 99.99% compliance:
+# Assume roughly 100% compliance:
 iota.comp_alpha <- beta_params(mean = .9999, sigma = .009)$alpha
 iota.comp_beta <- beta_params(mean = .9999, sigma = .009)$beta
 
@@ -337,7 +337,7 @@ model {
     # Random population effect:
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
  }
-  # Priors for sub-model 2:
+  # Priors for sub-model 1:
    psi.vac ~ dnorm(0, 1.0e-1)
    tau.vac ~ dunif(0, 1)
    prec.vac <- 1 / pow(tau.vac, 2)
@@ -394,11 +394,11 @@ model {
     # sampling direclty from the prior:
     
  for (i in 1:76) {
-    delta.regr[i] ~ dbeta(delta.regr_alpha[i], delta.regr_beta[i])  
+  delta.regr[i] ~ dbeta(delta.regr_alpha[i], delta.regr_beta[i])  
  }
  
-# SUB-MODEL 8: PROGRESSION TP LSIL OR
-# HSIL.
+# SUB-MODEL 8: PROGRESSION TO LSIL OR
+# HSIL FROM INFECTION.
   # model parameters abbreviated by .regr
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior:
@@ -406,8 +406,8 @@ model {
  delta.LSIL ~ dbeta(delta.LSIL_alpha, delta.LSIL_beta)
  delta.HSIL ~ dbeta(delta.HSIL_alpha, delta.HSIL_beta)
 
-# SUB-MODEL 9: PROGRESSION AND REGRESSION GIVEN 
-# NO TREATMENT.
+# SUB-MODEL 9: PROGRESSION AND REGRESSION FROM
+# LSIL AND HSIL GIVEN NO TREATMENT.
   # model parameters abbreviated by pi.I.
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior:
@@ -457,6 +457,8 @@ model {
  
 # SUB-MODEL 11: POPULATION AT INCREASED RISK 
 # DUE TO HIV+.
+  # model parameters abbreviated by HIV.
+    
  # Binomial Likelihood:
   rHIV_pos ~ dbin(pHIV_pos, nHIV_pos)
   rHIV_neg ~ dbin(pHIV_neg, nHIV_neg)
