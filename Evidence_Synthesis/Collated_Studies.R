@@ -186,24 +186,6 @@ beta_params(mean = .8, sigma = .05)
 # Assume full compliance; chi = 1
 
 # ==========================================================================================
-# Age-specific Exposure Probability ------------------------------------
-# ==========================================================================================
-# Informative prior -------------------------------------------------------
-# Anne Bakilana (2005) Age at sexual debut in South Africa, African Journal ofAIDS Research, 
-# 4:1, 1-5, DOI: 10.2989/16085900509490335
-
-# Assumes cons. rate.
-
-# From Healthy to Exposed:
-p_Sexual_Activity <- rateConversionCons(r = .09, t = 75)
-p_Sexual_Activity
-
-plot(p_Sexual_Activity, type = "l", lwd = 2, ylab = "Cum. Pr(Sexual Activity)", 
-     xlab = "Ages 15-85", xgap.axis = 100)
-
-# Vector of probabilities directly computed with model.
-
-# ==========================================================================================
 # Age-specific Infection Prevalence ----------------------------------------------------
 # ==========================================================================================
 # Note: will use a relative risk parameter for proportion of HIV+ population who have 
@@ -483,27 +465,27 @@ beta_params(mean = .8592, sigma = .05)
 # Proportion of pop. screening coverage every three years according to age group, converted 
 # to an annual rate, and then annual probability:
 
-# 12.9% (18-29 years)
+# 18-29 years = 12.9%
 - (1 / 3) * log(1 - .129) # 3-year Probability converted to 1-year Rate.
 1 - exp(-.04603777 * 1) # 1-year Probability
 beta_params(mean = .04499411, sigma = .05)
 
-# 21.4% (30-39 years)
+# 30-39 years = 21.4%
 - (1 / 3) * log(1 - .214) # 3-year Probability converted to 1-year Rate.
 1 - exp(-.08026616 * 1) # 1-year Probability
 beta_params(mean = .07712932, sigma = .05)
 
-# 11.5% (40-49 years)
+# 40-49 years = 11.5%
 - (1 / 3) * log(1 - .115) # 3-year Probability converted to 1-year Rate.
 1 - exp(-.04072254 * 1) # 1-year Probability
 beta_params(mean = .03990452, sigma = .05)
 
-# 7.7% (50-59 years)
+# 50-59 years = 7.7%
 - (1 / 3) * log(1 - .077) # 3-year Probability converted to 1-year Rate.
 1 - exp(-.02670868 * 1) # 1-year Probability
 beta_params(mean = .02635516,sigma = .05)
 
-# 5.8% (60-69 years)
+# 60-69 years = 5.8%
 - (1 / 3) * log(1 - .058) # 3-year Probability converted to 1-year Rate.
 1 - exp(-.01991667 * 1) # 1-year Probability
 beta_params(mean = .01971964, sigma = .05)

@@ -12,13 +12,12 @@ links
 
 net <- graph_from_data_frame(d = links, directed = TRUE)
 
-set.seed(25)
-plot(net, layout = layout.davidson.harel, edge.arrow.size=.12, edge.arrow.width = 0.65,
+set.seed(1)
+plot(net, layout = layout_as_tree, edge.arrow.size=.075, edge.arrow.width = 0.65,
      vertex.color = alpha("lightgrey", .25), vertex.label.color = "black", 
-     vertex.label.font = 4, vertex.size = 27, vertex.label.cex = 0.75, edge.curved = .075,
-     edge.color = "black", mark.groups = 1, mark.col = alpha("lightgreen", .2))
-title(cex.main = 1.1, main = "Human Papillomavirus:
-      a model of its health states and possible transitions")
-
+     vertex.frame.color = alpha("darkgrey", .35), vertex.label.font = 4, vertex.size = 15, 
+     vertex.label.cex = 0.4, edge.curved = 0, edge.color = alpha("black", .75), 
+     mark.groups = 1, mark.col = alpha("lightgreen", .025))
+title(cex.main = .75, main = "Human Papillomavirus: a Markov Model of its natural history")
 
 # End file ----------------------------------------------------------------
