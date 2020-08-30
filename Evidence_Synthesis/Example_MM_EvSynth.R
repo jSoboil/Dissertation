@@ -9,9 +9,6 @@ library(tidyverse) # for general data wrangling and vis
 library(reshape2) # data wrangling
 library(BCEA) # bayesian CEA package
 library(bayesplot) # tools for posterior inspection
-library(parallel) # used for parallel processing of Markov chains
-
-options(mc.cores = detectCores())
 
 # ==========================================================================================
 # Evidence Synthesis ------------------------------------------------------
@@ -169,8 +166,8 @@ data_JAGS
 
 params <- c("pi_res", "pi_tox", "beta_tr", "beta_tp", "beta_surv", "mu_dth")
 jags_mod <- jags(data = data_JAGS, parameters.to.save = params, 
-                 model.file = "EvSynthMMExample.txt", n.iter = 10000, n.chains = 2,
-                 n.thin = 10)
+                 model.file = "EvSynthMMExample.txt", n.iter = 40000, n.chains = 4,
+                 n.thin = 80)
 jags_mod
 attach.jags(jags_mod)
 
