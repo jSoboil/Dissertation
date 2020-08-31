@@ -3,6 +3,9 @@ library(R2jags)
 library(bayesplot)
 library(tidyverse)
 library(dampack)
+library(parallel)
+
+options(mc.cores = detectCores())
 
 # The following sub-model simulates age-specific prevalence and average vaccine efficiacy 
 # using data from multiple RCTs. Assumed any end-point - infection or disease - signalling 
@@ -195,9 +198,6 @@ length(rB.vac) == length(nB.vac)
 
 # 2. Data collected from HPV and Related Diseases Report. Used age groups 25+.
 
-# Informative prior sampling model:
-# omega.age[i] ~ dlnorm(mu.log[i], sigma.log[i])
-
 # Age groups:
 age_group <- c("15-16", "17", "18", "19", "20", "≤25", "25-34", 
                "35-44", "45-54", "55-64")
@@ -205,18 +205,97 @@ age_group <- c("15-16", "17", "18", "19", "20", "≤25", "25-34",
 # Estimated Prevalence:
 Prevalence <- c(0.09516258, 0.1130796, 0.139292, 0.1563352, 0.139292, 
                 .435, .3643, 0.2051, 0.1852, 0.1654)
-mu.a.log <- lnorm_params(m = Prevalence, v = 0.25)$mu
-sigma.a.log <- lnorm_params(m = Prevalence, v = 0.25)$sigma
+mu.a.log <- lnorm_params(m = Prevalence, v = .1)$mu
+sigma.a.log <- 1 / (lnorm_params(m = Prevalence, v = .1)$sigma) ^ 2
 mu.a.log
 sigma.a.log
 cbind(age_group, Prevalence)
+# Informative prior sampling model:
+# omega.age[i] ~ dlnorm(mu.log[i], sigma.log[i])
 
 # ==========================================================================================
-# Sub-model 1 ------------------------------------------------------
+# Cervical Adenocarcinoma -------------------------------------------------
+# ==========================================================================================
+
+# Informative prior -------------------------------------------------------
+# Favato G., et al. 2012: Novel Health Economic Evaluation of a Vaccination Strategy to 
+# Prevent HPV-related Diseases.
+
+# Proportion of inviduals in the four stages who progress to cancer:
+# FIGO I 
+# dDirc(.5500)
+# FIGO II
+# dDirc(.1500)
+# FIGO III
+# dDirc(.1200)
+# FIGO IV
+# dDirc(.1800)
+alpha.c <- list(.55, .15, .12, .18)
+
+# Survival probabilities for each FIGO stage, over 5 years.
+
+# Year 1 survival by stage:
+# FIGO I
+alphaI.year_1 <- beta_params(mean = .9770, sigma = .05)$alpha
+betaI.year_1 <- beta_params(mean = .9770, sigma = .05)$beta
+# FIGO II
+alphaII.year_1 <- beta_params(mean = .8290, sigma = .05)$alpha
+betaII.year_1 <- beta_params(mean = .8290, sigma = .05)$beta
+# FIGO III
+alphaIII.year_1 <- beta_params(mean = .59, sigma = .05)$alpha
+betaIII.year_1 <- beta_params(mean = .59, sigma = .05)$beta
+# FIGO IV
+alphaIV.year_1 <- beta_params(mean = .5020, sigma = .05)$alpha
+betaIV.year_1 <- beta_params(mean = .5020, sigma = .05)$beta
+
+# Year 2 survival by stage:
+# FIGO I
+alphaI.year_2 <- beta_params(mean = .9790, sigma = .05)$alpha
+betaI.year_2 <- beta_params(mean = .9790, sigma = .05)$beta
+# FIGO II
+alphaII.year_2 <- beta_params(mean = .8330, sigma = .05)$alpha
+betaII.year_2 <- beta_params(mean = .8330, sigma = .05)$beta
+# FIGO III
+alphaIII.year_2 <- beta_params(mean = .6930, sigma = .05)$alpha
+betaIII.year_2 <- beta_params(mean = .6930, sigma = .05)$beta
+# FIGO IV
+alphaIV.year_2 <- beta_params(mean = .7820, sigma = .05)$alpha
+betaIV.year_2 <- beta_params(mean = .7820, sigma = .05)$beta
+
+# Year 3 survival by stage:
+# FIGO I
+alphaI.year_3 <- beta_params(mean = .9630, sigma = .05)$alpha
+betaI.year_3 <- beta_params(mean = .9630, sigma = .05)$beta
+# FIGO II
+alphaII.year_3 <- beta_params(mean = .7550, sigma = .05)$alpha
+betaII.year_3 <- beta_params(mean = .7550, sigma = .05)$beta
+# FIGO III
+alphaIII.year_3 <- beta_params(mean = .7780, sigma = .05)$alpha
+betaIII.year_3 <- beta_params(mean = .7780, sigma = .05)$beta
+# FIGO IV
+alphaIV.year_3 <- beta_params(mean = .7220, sigma = .05)$alpha
+betaIV.year_3 <- beta_params(mean = .7220, sigma = .05)$beta
+
+# Year 4 survival by stage:
+# FIGO I
+alphaI.year_4 <- beta_params(mean = .9890, sigma = .05)$alpha
+betaI.year_4 <- beta_params(mean = .9890, sigma = .05)$beta
+# FIGO II
+alphaII.year_4 <- beta_params(mean = .8690, sigma = .05)$alpha
+betaII.year_4 <- beta_params(mean = .8690, sigma = .05)$beta
+# FIGO III
+alphaIII.year_4 <- beta_params(mean = .9290, sigma = .05)$alpha
+betaIII.year_4 <- beta_params(mean = .9290, sigma = .05)$beta
+# FIGO IV
+alphaIV.year_4 <- beta_params(mean = .9250, sigma = .05)$alpha
+betaIV.year_4 <- beta_params(mean = .9250, sigma = .05)$beta
+
+# ==========================================================================================
+# Sub-models 3 ------------------------------------------------------
 # ==========================================================================================
 model_String <- "model {
 # SUB-MODEL 1: AGE-SPECIFIC PREVALENCE,
-  # model parameters abbreviated by omega.age[i]
+  # model parameters abbreviated by .age
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior.
   for (i in 1:10) {
@@ -235,21 +314,59 @@ model_String <- "model {
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
     # Average effect:
-    mu.vac[i] ~ dnorm(0, 1e-04)
+    mu.vac[i] ~ dnorm(0, 1.0e-2)
     # Random population effect:
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
   }
   
   # Priors for sub-model 2:
-  psi.vac ~ dnorm(0, 1.0e-4)
+  psi.vac ~ dnorm(0, 1.0e-1)
   tau.vac ~ dunif(0, 1)
   prec.vac <- 1 / pow(tau.vac, 2)
-  # Convert LOR to OR:
+  # Odds ratio:
   OR.vac <- exp(psi.vac)
-  # Coverting OR to probability
-  # for vaccine efficacy:
-  pEfficacy.vac <- 1 / (1 + OR.vac)
+  # Probability of no protection given
+  # vaccine:
+  pEfficacy.vac <- (OR.vac / 1 + OR.vac)
+  
 
+# SUB-MODEL 3: CERVICAL CANCER,
+# the distribution of invidiuals who have 
+# cancer according to FIGO stages I-IV, and 
+# the associated survival probabilities according 
+# to each stage, over 4 years.
+
+  # Note: equivalent to standard PSA, as it is 
+  # sampling direclty from the prior.
+    
+# Distribution of Cervical Cancer stages: 
+ FIGO ~ ddirch(alpha.c)
+ 
+# Surivival probabilities:
+ # Year 1:
+ FIGO_I.year_1 ~ dbeta(alphaI.year_1, betaI.year_1)
+ FIGO_II.year_1 ~ dbeta(alphaII.year_1, betaII.year_1)
+ FIGO_III.year_1 ~ dbeta(alphaIII.year_1, betaIII.year_1)
+ FIGO_IV.year_1 ~ dbeta(alphaIV.year_1, betaIV.year_1)
+ 
+ # Year 2:
+ FIGO_I.year_2 ~ dbeta(alphaI.year_2, betaI.year_2)
+ FIGO_II.year_2 ~ dbeta(alphaII.year_2, betaII.year_2)
+ FIGO_III.year_2 ~ dbeta(alphaIII.year_2, betaIII.year_2)
+ FIGO_IV.year_2 ~ dbeta(alphaIV.year_2, betaIV.year_2)
+ 
+ # Year 3:
+ FIGO_I.year_3 ~ dbeta(alphaI.year_3, betaI.year_3)
+ FIGO_II.year_3 ~ dbeta(alphaII.year_3, betaII.year_3)
+ FIGO_III.year_3 ~ dbeta(alphaIII.year_3, betaIII.year_3)
+ FIGO_IV.year_3 ~ dbeta(alphaIV.year_3, betaIV.year_3)
+ 
+ # Year 4:
+ FIGO_I.year_4 ~ dbeta(alphaI.year_4, betaI.year_4)
+ FIGO_II.year_4 ~ dbeta(alphaII.year_4, betaII.year_4)
+ FIGO_III.year_4 ~ dbeta(alphaIII.year_4, betaIII.year_4)
+ FIGO_IV.year_4 ~ dbeta(alphaIV.year_4, betaIV.year_4)
+ 
 }
 "
 writeLines(text = model_String, con = "Age_and_Efficacy.txt")
@@ -257,25 +374,45 @@ writeLines(text = model_String, con = "Age_and_Efficacy.txt")
 # Transform data into list format so that can be read by JAGS:
 data_JAGS <- list(
  # Vaccine efficacy data:
-  Nstud.vac = Nstud.vac, 
-  rA.vac = rA.vac, nA.vac = nA.vac, 
-  rB.vac = rB.vac, nB.vac = nB.vac,
-  # Population prevalence:
-  mu.a.log = mu.a.log, sigma.a.log = sigma.a.log
-)
+ Nstud.vac = Nstud.vac, rA.vac = rA.vac, rB.vac = rB.vac, 
+                  nA.vac = nA.vac, nB.vac = nB.vac,
+ # Population prevalence data:
+ mu.a.log = mu.a.log, sigma.a.log = sigma.a.log,
+ # Cancer data:
+ alpha.c = alpha.c, 
+ alphaI.year_1 = alphaI.year_1, betaI.year_1 = betaI.year_1,
+ alphaI.year_2 = alphaI.year_2, betaI.year_2 = betaI.year_2, 
+ alphaI.year_3 = alphaI.year_3, betaI.year_3 = betaI.year_3, 
+ alphaI.year_4 = alphaI.year_4, betaI.year_4 = betaI.year_4,
+ alphaII.year_1 = alphaII.year_1, betaII.year_1 = betaII.year_1, 
+ alphaII.year_2 = alphaII.year_2, betaII.year_2 = betaII.year_2, 
+ alphaII.year_3 = alphaII.year_3, betaII.year_3 = betaII.year_3, 
+ alphaII.year_4 = alphaII.year_4, betaII.year_4 = betaII.year_4,
+ alphaIII.year_1 = alphaIII.year_1, betaIII.year_1 = betaIII.year_1,
+ alphaIII.year_2 = alphaIII.year_2, betaIII.year_2 = betaIII.year_2,
+ alphaIII.year_3 = alphaII.year_3, betaIII.year_3 = betaIII.year_3,
+ alphaIII.year_4 = alphaIII.year_4, betaIII.year_4 = betaIII.year_4,
+ alphaIV.year_1 = alphaIV.year_1, betaIV.year_1 = betaIV.year_1,
+ alphaIV.year_2 = alphaIV.year_2, betaIV.year_2 = betaIV.year_2,
+ alphaIV.year_3 = alphaIV.year_3, betaIV.year_3 = betaIV.year_3,
+ alphaIV.year_4 = alphaIV.year_4, betaIV.year_4 = betaIV.year_4
+ )
 
 # Initial JAGS sampler values:
 # Parameters to monitor:
 params <- c(
   # Vaccine efficacy parameters:
-  "OR.vac", "pEfficacy.vac", 
-  # Age prevalence:
-  "omega.age"
-  )
-
+  "OR.vac", "pEfficacy.vac", "omega.age", 
+  # Cervical cancer parameters:
+  "FIGO", 
+  "FIGO_I.year_1", "FIGO_II.year_1", "FIGO_III.year_1", "FIGO_IV.year_1", 
+  "FIGO_I.year_2", "FIGO_II.year_2", "FIGO_III.year_2", "FIGO_IV.year_2", 
+  "FIGO_I.year_3", "FIGO_II.year_3", "FIGO_III.year_3", "FIGO_IV.year_3", 
+  "FIGO_I.year_4", "FIGO_II.year_4", "FIGO_III.year_4", "FIGO_IV.year_4"
+            )
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 50000
-n.burnin <- 10000
+n.iter <- 40000
+n.burnin <- 5000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
@@ -292,7 +429,9 @@ dimnames(posterior)
 # Inspect trace of chain for each parameter:
 color_scheme_set("viridisB")
 theme_set(theme_minimal())
-mcmc_trace(posterior, pars = c("OR.vac", "pEfficacy.vac"),
+mcmc_trace(posterior, pars = c("pEfficacy.vac", "omega.age[1]", "omega.age[2]", 
+                               "omega.age[3]", "omega.age[4]", "omega.age[5]", 
+                               "FIGO_IV.year_3", "FIGO[1]", "FIGO[3]"),
            facet_args = list(ncol = 1, strip.position = "left"))
 
 color_scheme_set("viridisA")
@@ -302,20 +441,25 @@ mcmc_trace(posterior[, , ], window = c(100, 150), size = 1) +
   legend_move("top")
 
 color_scheme_set("mix-teal-pink")
-mcmc_dens_overlay(posterior, pars = c("pEfficacy.vac", "OR.vac")
-                  )
+mcmc_dens_overlay(posterior, pars = c("pEfficacy.vac", "omega.age[1]", "omega.age[2]", 
+                               "omega.age[3]", "omega.age[4]", "omega.age[5]", 
+                               "FIGO_III.year_4", "FIGO[1]", "FIGO[3]"))
 
 color_scheme_set("mix-blue-brightblue")
-mcmc_acf(posterior, pars = c("pEfficacy.vac", "OR.vac"),
+mcmc_acf(posterior, pars = c("pEfficacy.vac", "omega.age[1]", "omega.age[2]", 
+                               "omega.age[3]", "omega.age[4]", "omega.age[5]",
+                             "FIGO_II.year_3", "FIGO[1]", "FIGO[3]"),
          lags = 150)
 
 # Calibration: ------------------------------------------------------------
 # Age-specific HPV prevalence:
-plot(apply(omega.age, 2, mean), type = "b", ylab = "Prevalence", xlab = "By Age",
-     col = "grey", lwd = 3)
-
-# Example: say 21% of some age pop. group at has HPV:
+plot(apply(omega.age, 2, mean), type = "l", ylab = "Prevalence", xlab = "By Age",
+     col = "red", lwd = 2)
+# Distribution of cancer stages:
+plot(apply(FIGO, 2, mean), type = "l")
+# Vaccine efficacy probability:
+1 - (apply(pEfficacy.vac, 2, mean))
+# Example: say 21% of some age pop. group has HPV:
 .21 * apply(pEfficacy.vac, 2, mean)
-# ≈ 19.5% protected by vaccine.
 
 # End file ----------------------------------------------------------------

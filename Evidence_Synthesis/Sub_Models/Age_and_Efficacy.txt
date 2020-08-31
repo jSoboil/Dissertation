@@ -1,6 +1,6 @@
 model {
 # SUB-MODEL 1: AGE-SPECIFIC PREVALENCE,
-  # model parameters abbreviated by .age
+  # model parameters abbreviated by omega.age[i]
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior.
   for (i in 1:10) {
@@ -19,58 +19,20 @@ model {
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
     # Average effect:
-    mu.vac[i] ~ dnorm(0, 1.0e-2)
+    mu.vac[i] ~ dnorm(0, 1e-04)
     # Random population effect:
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
   }
   
-  # Priors for sub-model 3:
-  psi.vac ~ dnorm(0, 1.0e-1)
+  # Priors for sub-model 2:
+  psi.vac ~ dnorm(0, 1.0e-4)
   tau.vac ~ dunif(0, 1)
   prec.vac <- 1 / pow(tau.vac, 2)
-  # Odds ratio:
+  # Converting LOR back to OR:
   OR.vac <- exp(psi.vac)
-  # Probability of no protection given
-  # vaccine:
-  pEfficacy.vac <- (OR.vac / 1 + OR.vac)
-  
+  # Coverting OR to probability
+  # for vaccine efficacy:
+  pEfficacy.vac <- 1 / (1 + OR.vac)
 
-# SUB-MODEL 3: CERVICAL CANCER,
-# the distribution of invidiuals who have 
-# cancer according to FIGO stages I-IV, and 
-# the associated survival probabilities according 
-# to each stage, over 4 years.
-
-  # Note: equivalent to standard PSA, as it is 
-  # sampling direclty from the prior.
-    
-# Distribution of Cervical Cancer stages: 
- FIGO ~ ddirch(alpha.c)
- 
-# Surivival probabilities:
- # Year 1:
- FIGO_I.year_1 ~ dbeta(alphaI.year_1, betaI.year_1)
- FIGO_II.year_1 ~ dbeta(alphaII.year_1, betaII.year_1)
- FIGO_III.year_1 ~ dbeta(alphaIII.year_1, betaIII.year_1)
- FIGO_IV.year_1 ~ dbeta(alphaIV.year_1, betaIV.year_1)
- 
- # Year 2:
- FIGO_I.year_2 ~ dbeta(alphaI.year_2, betaI.year_2)
- FIGO_II.year_2 ~ dbeta(alphaII.year_2, betaII.year_2)
- FIGO_III.year_2 ~ dbeta(alphaIII.year_2, betaIII.year_2)
- FIGO_IV.year_2 ~ dbeta(alphaIV.year_2, betaIV.year_2)
- 
- # Year 3:
- FIGO_I.year_3 ~ dbeta(alphaI.year_3, betaI.year_3)
- FIGO_II.year_3 ~ dbeta(alphaII.year_3, betaII.year_3)
- FIGO_III.year_3 ~ dbeta(alphaIII.year_3, betaIII.year_3)
- FIGO_IV.year_3 ~ dbeta(alphaIV.year_3, betaIV.year_3)
- 
- # Year 4:
- FIGO_I.year_4 ~ dbeta(alphaI.year_4, betaI.year_4)
- FIGO_II.year_4 ~ dbeta(alphaII.year_4, betaII.year_4)
- FIGO_III.year_4 ~ dbeta(alphaIII.year_4, betaIII.year_4)
- FIGO_IV.year_4 ~ dbeta(alphaIV.year_4, betaIV.year_4)
- 
 }
 

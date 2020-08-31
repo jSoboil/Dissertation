@@ -6,7 +6,7 @@ library(readxl)
 # Misc --------------------------------------------------------------------
 # ==========================================================================================
 # Function to convert rate to probability assuming cons. rate over time:
-rateConversionCons <- function(r, t) {
+rateConv.consR <- function(r, t) {
  for (i in 1:t) {
   P <- 1 - exp(-r * 1:i)
  }
@@ -23,14 +23,14 @@ rateConversionCons <- function(r, t) {
 # event will occur during time t is given by equation 1 (note that the unit of time used
 # in r and t must be the same):
 
-#      p = 1 - exp(-r * t)
+#    p = 1 - exp(-r * t)
 
 # On the other hand, if we have a probability and we want to convert it to a rate,
 
-#      r = - (1 / t) * log(1 - p)
+#    r = - (1 / t) * log(1 - p)
 
-# Note: the included statistics for HPV-6, HPV-11, HPV-16, and HPV-18 as model assesses
-# quadrivalent vaccine efficacy.
+# Note: the included statistics are for HPV-16 and HPV-18 as model assesses bivalent vaccine 
+# efficacy.
 
 # ==========================================================================================
 # Age-specific all cause mortality --------------------------------------------------
@@ -56,114 +56,165 @@ v_r_mort_by_age[1:90, ]
 
 # COMPARISON GROUPS: PLACEBO (A) AND VACCINE(B)
 
-# Study 1: Munoz N., et al. 2009 ------------------------------------------
-# Safety, immunogenicity, and eðcacy of quadrivalent human papillomavirus (types 6, 11, 16, 
-# 18) recombinant vaccine in women aged 24–45 years: a randomised, double-blind trial.
+# Study 1: Apter et al. (2015)   ------------------------------------------
+# Efficacy of Human Papillomavirus 16 and 18 (HPV-16/18) AS04- Adjuvanted Vaccine against 
+# Cervical Infection and Precancer in Young Women: Final Event-Driven Analysis of the 
+# Randomized, Double- Blind PATRICIA Trial.
 
-# Women aged 24–45 years with no history of genital warts or cervical disease were enrolled 
-# from community health centres, academic health centres, and primary health-care providers 
-# into an ongoing multicentre, parallel, randomised, placebo-controlled, double-blind study.
+# Data collected from 6-month HPV 16/18 ATP cohort.
 
-# Efficacy against the incidence of infection .
+# Control (A):
+# n = 5375
+# cases = 435
 
-# Events by group:
-# tA:41
-# nA:1607
-# tB:4
-# nB:1615
+# Vaccine (B):
+# n = 5406
+# cases = 32
 
- # Study 2: Villa L, et al. 2006 -------------------------------------------
-# High sustained efficacy of a prophylactic quadrivalent human papillomavirus types 
-# 6/11/16/18 L1 virus-like particle vaccine through 5 years of follow-up.
+# Study 2: Harper et al. (2004) -------------------------------------------
+# Efficacy of a bivalent L1 virus-like particle vaccine in prevention of infection with human 
+# papillomavirus types 16 and 18 in young women: a randomised controlled trial.
 
-# The study enrolled nonpregnant, healthy women who had no prior abnormal Pap smears, and 
-# reported a lifetime history of four or fewer male sex partners. By end point persistent 
-# infection.
+# Data collected from 27 month HPV 16/18 ATP cohort.
 
-# Events by group:
-# tA:35
-# nA:233
-# tB:4
-# nB:235
+# Control (A):
+# n = 355
+# cases = 41
 
-# Study 3: Catellsague X., et al. 2011 ------------------------------------
-# End-of-study safety, immunogenicity, and efficacy of quadrivalent HPV (types 6, 11, 16, 
-# 18) recombinant vaccine in adult women 24–45 years of age.
+# Vaccine (B):
+# n = 366
+# cases = 12
 
-# Study enrolled 3819 24–45-year-old women with no history of cervical disease or genital 
-# warts in the past 5 years. By end point persistent infection.
+# Study 3: Harper et al. (2006) -------------------------------------------
+# Sustained efficacy up to 4·5 years of a bivalent L1 virus-like particle vaccine against 
+# human papillomavirus types 16 and 18: follow-up from a randomised control trial.
 
-# Events by group:
-# tA:38
-# nA:1583
-# tB:1
-# nB:1578
+# Data collected from 54 month HPV 16/18 ATP cohort.
 
-# Study 4: Wei L., et al. 2018 --------------------------------------------
-# Efficacy of quadrivalent human papillomavirus vaccine against persistent infection and 
-# genital disease in Chinese women: A randomized, placebo-controlled trial with 78-month 
-# follow-up.
+# Control (A):
+# n = 277
+# cases = 28
 
-# Pregnant women and those with a history of genital warts or significant cervical disease, 
-# active cervical disease, or prior HPV vaccine recipients were excluded. 12-Month cervical
-# Persisitent Infection.
+# Vaccine (B):
+# n = 310
+# cases = 1
 
-# Events by group:
-# tA:53
-# nA:1245
-# tB:5
-# nB:1276
+# Study 4: Herrero et al. (2011) ------------------------------------------
+# Prevention of Persistent Human Papillomavirus Infection by an HPV16/18 Vaccine: A 
+# Community-Based Randomized Clinical Trial in Guanacaste, Costa Rica.
 
-# Study 5: Yoshikawa H., et al. 2013 --------------------------------------
-# Efficacy of quadrivalent human papillomavirus (types 6, 11, 16 and 18) vaccine (GARDASIL) 
-# in Japanese women aged 18–26 years.
+# Data collected from 22-34 month follow-up HPV 16/18 ATP cohort.
 
-# A randomized double-blind placebo-controlled phase II trial was conducted to evaluate the 
-# efficacy of a prophylactic quadrivalent vaccine targeting the human papillomavirus (HPV) 
-# types most fre- quently associated with cervical cancer (types 16 ⁄ 18) and genital warts 
-# (types 6 ⁄ 11) in Japanese women aged 18–26 years.
+# Control (A):
+# n = 2239
+# cases = 38
 
-# Events by group:
-# tA:24
-# nA:422
-# tB:3
-# nB:419
+# Vaccine (B):
+# n = 2190
+# cases = 3
 
-# Study 6: Garland S., et al 2007 -----------------------------------------
-# Quadrivalent Vaccine against Human Papillomavirus to Prevent Anogenital Diseases.
 
-# A phase 3 trial was conducted to evaluate the efficacy of a prophylactic quadrivalent 
-# vaccine in preventing anogenital diseases associated with human papillomavirus (HPV) types
-# 6, 11, 16, and 18.
+# Study 5: Herrero et al. (2013) ------------------------------------------
+# Reduced Prevalence of Oral Human Papillomavirus (HPV) 4 Years after Bivalent HPV Vaccination
+# in a Randomized Clinical Trial in Costa Rica.
 
-# Events by group:
-# tA:60
-# nA:2279
-# tB:0
-# nB:2261
+# Data collected from 48 month 16/18 group. Note!: likely need to discount this study study has
+# combined ATP and other cohorts.
 
-# Study 7: Koutsky L., et al. 2007 ----------------------------------------
-# Quadrivalent Vaccine against Human Papillomavirus to Prevent High-Grade Cervical Lesions
+# Control (A):
+# n = 2924
+# cases = 219
 
-# Randomized, double-blind trial, we assigned 12,167 women between the ages of 15 and 26 
-# years to receive three doses of either HPV-6/11/16/18 vaccine or placebo, administered at 
-# day 1, month 2, and month 6.
+# Vaccine (B):
+# n = 2910
+# cases = 61
 
-# Events by group:
-# tA:42
-# nA:5260
-# tB:1
-# nB:5305
+# Study 6: Konno et al. (2010) --------------------------------------------
+# Efficacy of Human Papillomavirus Type 16/18 AS04YAdjuvanted Vaccine in Japanese Women Aged 
+# 20 to 25 Years.
 
-# Study 8: Perez G., et al. 2008 ------------------------------------------
-# Safety, immunogenicity, and efficacy of quadrivalent human papillomavirus (types 6, 11, 
-# 16, 18) L1 virus-like-particle vaccine in Latin American women.
+# Data collected from 6 month HPV 16/18 ATP cohort.
 
-# Events by group:
-# tA:41
-# nA:2377
-# tB:3
-# nB:2415
+# Control (A):
+# n = 392
+# cases = 15
+
+# Vaccine (B):
+# n = 387
+# cases = 0
+
+# Study 7: Naud et al. (2014) ---------------------------------------------
+# Sustained efficacy, immunogenicity, and safety of the HPV-16/18 AS04-adjuvanted vaccine: 
+# Final analysis of a long-term follow-up study up to 9.4 years post-vaccination.
+
+# Data collected from 12 month persistent infection HPV 16/18 ATP cohort, using the combined
+# analysis from all follow-up studies, HPV-001/007/023.
+
+# Control (A):
+# n = 175
+# cases = 10
+
+# Vaccine (B):
+# n = 193
+# cases = 0
+
+# Study 8: Paavonen et al. (2007) -----------------------------------------
+# Efficacy of a prophylactic adjuvanted bivalent L1 virus-like-particle vaccine against 
+# infection with human papillomavirus types 16 and 18 in young women: an interim analysis of a
+# phase III double-blind, randomised controlled trial.
+
+# Data collected from primary endpoint CIN2+ HPV 16/18.
+
+# Control (A):
+# n = 7838
+# cases = 21
+
+# Vaccine (B):
+# n = 7788
+# cases = 2
+
+# Study 9: Paavonen et al. (2009) -----------------------------------------
+# Efficacy of human papillomavirus (HPV)-16/18 AS04-adjuvanted vaccine against cervical 
+# infection and precancer caused by oncogenic HPV types (PATRICIA): final analysis of a 
+# double-blind, randomised study in young women.
+
+# Data collected from 34·9 month HPB 16/18 ATP cohort. Indicator used CIN2+.
+
+# Control (A):
+# n = 7312
+# cases = 56
+
+# Vaccine (B):
+# n = 7344
+# cases = 4
+
+# Study 10: Romanowski et al. (2009) --------------------------------------
+# Sustained efficacy and immunogenicity of the human papillomavirus (HPV)-16/18 AS04-adjuvanted
+# vaccine: analysis of a randomised placebo-controlled trial up to 6·4 years.
+
+# Data collected from 12-month persistent infection HPV 16/18 ATP cohort.
+
+# Control (A):
+# n = 372
+# cases = 20
+
+# Vaccine (B):
+# n = 401
+# cases = 0
+
+# Study 11: Zhu et al. (2014) ---------------------------------------------
+# Efficacy, immunogenicity and safety of the HPV-16/18 AS04- adjuvanted vaccine in healthy 
+# Chinese women aged 18–25 years: Results from a randomized controlled trial.
+
+# Data collected from 6-Month PI and/or CIN1+ (primary endpoint) HPV 16/18 ATP cohort.
+
+# Control (A):
+# n = 2502
+# cases = 17
+
+# Vaccine (B):
+# n = 2497
+# cases = 1
 
 # ===========================================================================================
 # Vaccine coverage --------------------------------------------------------
