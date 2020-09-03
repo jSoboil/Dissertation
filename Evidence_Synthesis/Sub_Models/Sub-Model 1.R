@@ -205,10 +205,11 @@ age_group <- c("15-16", "17", "18", "19", "20", "≤25", "25-34",
 # Estimated Prevalence:
 Prevalence <- c(0.09516258, 0.1130796, 0.139292, 0.1563352, 0.139292, 
                 .435, .3643, 0.2051, 0.1852, 0.1654)
-mu.a.log <- lnorm_params(m = Prevalence, v = 0.25)$mu
-sigma.a.log <- lnorm_params(m = Prevalence, v = 0.25)$sigma
+
+mu.a.log <- lnorm_params(m = Prevalence)$mu
+# sigma.a.log <- lnorm_params(m = Prevalence)$sigma
 mu.a.log
-sigma.a.log
+# sigma.a.log
 cbind(age_group, Prevalence)
 
 # ==========================================================================================
@@ -220,8 +221,10 @@ model_String <- "model {
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior.
   for (i in 1:10) {
-    omega.age[i] ~ dlnorm(mu.a.log[i], sigma.a.log[i])
-    }
+    omega.age[i] ~ dlnorm(mu.a.log[i], sigma.a.log)
+  }
+  
+  sigma.a.log ~ dt(0, 1.0e-6, 1)T(0, )
   
   
 # SUB-MODEL 2: VACCINE-EFFICACY,
@@ -235,14 +238,14 @@ model_String <- "model {
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
     # Average effect:
-    mu.vac[i] ~ dnorm(0, 1e-04)
+    mu.vac[i] ~ dnorm(0, 1e-06)
     # Random population effect:
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
   }
   
   # Priors for sub-model 2:
-  psi.vac ~ dnorm(0, 1.0e-4)
-  tau.vac ~ dunif(0, 1)
+  psi.vac ~ dnorm(0, 1.0e-6)
+  tau.vac ~ dunif(0, 100)
   prec.vac <- 1 / pow(tau.vac, 2)
   # Convert LOR to OR:
   OR.vac <- exp(psi.vac)
@@ -261,7 +264,7 @@ data_JAGS <- list(
   rA.vac = rA.vac, nA.vac = nA.vac, 
   rB.vac = rB.vac, nB.vac = nB.vac,
   # Population prevalence:
-  mu.a.log = mu.a.log, sigma.a.log = sigma.a.log
+  mu.a.log = mu.a.log#, sigma.a.log = sigma.a.log
 )
 
 # Initial JAGS sampler values:
@@ -274,8 +277,8 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 30000
-n.burnin <- 5000
+n.iter <- 50000
+n.burnin <- 25000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
@@ -292,7 +295,7 @@ dimnames(posterior)
 # Inspect trace of chain for each parameter:
 color_scheme_set("viridisB")
 theme_set(theme_minimal())
-mcmc_trace(posterior, pars = c("OR.vac", "pEfficacy.vac"),
+mcmc_trace(posterior, pars = c("OR.vac", "pEfficacy.vac", "omega.age[1]", "omega.age[2]"),
            facet_args = list(ncol = 1, strip.position = "left"))
 
 color_scheme_set("viridisA")
@@ -302,12 +305,21 @@ mcmc_trace(posterior[, , ], window = c(100, 150), size = 1) +
   legend_move("top")
 
 color_scheme_set("mix-teal-pink")
-mcmc_dens_overlay(posterior, pars = c("pEfficacy.vac", "OR.vac")
+mcmc_dens_overlay(posterior, pars = c("pEfficacy.vac", "OR.vac", 
+                                      "omega.age[1]", "omega.age[2]", "omega.age[6]")
                   )
 
 color_scheme_set("mix-blue-brightblue")
-mcmc_acf(posterior, pars = c("pEfficacy.vac", "OR.vac"),
+mcmc_acf(posterior, pars = c("pEfficacy.vac", "OR.vac", 
+                             "omega.age[1]", "omega.age[2]"),
          lags = 150)
+
+# Add plot for meta analysis results: found in BCEA pg 52:
+# ggplot(tr.eff) + 
+#  geom_point(aes(y=mean,x=interventions)) + 
+#  geom_errorbar(aes(x=interventions,ymin=low,ymax=high),width =0.15) + 
+#  coord_flip() + theme_bw() + 
+#  labs(x="",y="Probability of smoking cessation",title="Meta-analysis results")
 
 # Calibration: ------------------------------------------------------------
 # Age-specific HPV prevalence:

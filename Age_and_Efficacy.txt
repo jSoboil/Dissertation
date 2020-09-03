@@ -4,8 +4,10 @@ model {
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior.
   for (i in 1:10) {
-    omega.age[i] ~ dlnorm(mu.a.log[i], sigma.a.log[i])
-    }
+    omega.age[i] ~ dlnorm(mu.a.log[i], sigma.a.log)
+  }
+  
+  sigma.a.log ~ dt(0, 1.0e-6, 1)T(0, )
   
   
 # SUB-MODEL 2: VACCINE-EFFICACY,
@@ -19,14 +21,14 @@ model {
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
     # Average effect:
-    mu.vac[i] ~ dnorm(0, 1e-04)
+    mu.vac[i] ~ dnorm(0, 1e-06)
     # Random population effect:
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
   }
   
   # Priors for sub-model 2:
-  psi.vac ~ dnorm(0, 1.0e-4)
-  tau.vac ~ dunif(0, 1)
+  psi.vac ~ dnorm(0, 1.0e-6)
+  tau.vac ~ dunif(0, 100)
   prec.vac <- 1 / pow(tau.vac, 2)
   # Convert LOR to OR:
   OR.vac <- exp(psi.vac)
