@@ -243,23 +243,19 @@ beta_params(mean = .8, sigma = .05)
 # increased risk of being reinfected rather than clearing HPV. See Italian study.
 
 # Informative prior -------------------------------------
-# Mix of the following two sources:
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
-# Used age groups 15-20:
-
-# 2. Data collected from HPV and Related Diseases Report. Used age groups ≥=25.
 
 # Age groups:
-age_group <- c("15-16", "17", "18", "19", "20", "≤25", "25-34", 
-               "35-44", "45-54", "55≥")
+age_group <- c("15-16", "17", "18", "19", "20", "≤21", "22-23", 
+               "24-29", "30-49", "≥55")
 # Estimated Prevalence:
-1 - exp(-.17)
-Prevalence <- c(0.09516258, 0.1130796, 0.139292, 0.1563352, 0.139292, 
-                .435, .3643, 0.2051, 0.1852, 0.1654)
-
-mu.a.log <- lnorm_params(m = Prevalence, v = .1)$mu
-sigma.a.log <- 1 / (lnorm_params(m = Prevalence, v = .1)$sigma) ^ 2
+1 - exp(-.005)
+Prevalence <- c(.09516258, .1130796, .139292, .1563352, .139292, 
+                .1130796, .09516258, .04877058, .009950166, .004987521)
+length(Prevalence)
+mu.a.log <- lnorm_params(m = Prevalence, v = .025)$mu
+sigma.a.log <- lnorm_params(m = Prevalence, v = .025)$sigma
 mu.a.log
 sigma.a.log
 cbind(age_group, Prevalence)

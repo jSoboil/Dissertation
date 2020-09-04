@@ -188,28 +188,26 @@ length(rB.vac) == length(nB.vac)
 # increased risk of being reinfected rather than clearing HPV. See Italian study.
 
 # Informative prior -------------------------------------
-# Mix of the following two sources:
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 # Used age groups 15-20:
 
-# 2. Data collected from HPV and Related Diseases Report. Used age groups 25+.
-
 # Informative prior sampling model:
-# omega.age[i] ~ dlnorm(mu.log[i], sigma.log[i])
+# omega.age[i] ~ dlnorm(mu.log[i], prec.log[i])
 
 # Age groups:
 age_group <- c("15-16", "17", "18", "19", "20", "≤25", "25-34", 
                "35-44", "45-54", "55-64")
 
 # Estimated Prevalence:
-Prevalence <- c(0.09516258, 0.1130796, 0.139292, 0.1563352, 0.139292, 
-                .435, .3643, 0.2051, 0.1852, 0.1654)
+Prevalence <- c(.09516258, .1130796, .139292, .1563352, .139292, 
+                .1130796, .09516258, .04877058, .009950166, .004987521)
 
-mu.a.log <- lnorm_params(m = Prevalence)$mu
-# sigma.a.log <- lnorm_params(m = Prevalence)$sigma
+mu.a.log <- lnorm_params(m = Prevalence, 1.0e-4)$mu
+sigma.a.log <- lnorm_params(m = Prevalence, 1.0e-4)$sigma
+prec.age <- 1 / (sigma.a.log * sigma.a.log)
 mu.a.log
-# sigma.a.log
+prec.age
 cbind(age_group, Prevalence)
 
 # ==========================================================================================
@@ -221,11 +219,9 @@ model_String <- "model {
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior.
   for (i in 1:10) {
-    omega.age[i] ~ dlnorm(mu.a.log[i], sigma.a.log)
+    omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
+    
   }
-  
-  sigma.a.log ~ dt(0, 1.0e-6, 1)T(0, )
-  
   
 # SUB-MODEL 2: VACCINE-EFFICACY,
   # model parameters abbreviated by .vac
@@ -264,7 +260,7 @@ data_JAGS <- list(
   rA.vac = rA.vac, nA.vac = nA.vac, 
   rB.vac = rB.vac, nB.vac = nB.vac,
   # Population prevalence:
-  mu.a.log = mu.a.log#, sigma.a.log = sigma.a.log
+  mu.a.log = mu.a.log, prec.age = prec.age
 )
 
 # Initial JAGS sampler values:
@@ -277,8 +273,8 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 50000
-n.burnin <- 25000
+n.iter <- 20000
+n.burnin <- 1000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 

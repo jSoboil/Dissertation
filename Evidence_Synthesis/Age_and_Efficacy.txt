@@ -4,9 +4,11 @@ model {
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior.
   for (i in 1:10) {
-    omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
-    
+    omega.age[i] ~ dlnorm(mu.a.log[i], sigma.a.log[i])
+    sigma.a.log[i] ~ dgamma(0.5, .5)
   }
+  
+  
   
 # SUB-MODEL 2: VACCINE-EFFICACY,
   # model parameters abbreviated by .vac
