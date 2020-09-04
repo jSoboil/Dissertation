@@ -13,7 +13,7 @@ library(dampack)
 # ===========================================================================================
 # Study 1: Apter et al. (2015)   ------------------------------------------
 # Efficacy of Human Papillomavirus 16 and 18 (HPV-16/18) AS04- Adjuvanted Vaccine against 
-# Cervical Infection and Precancer in Young Women: Final Event-Driven Analysis of the 
+# Cervical Infection and Pre-cancer in Young Women: Final Event-Driven Analysis of the 
 # Randomized, Double- Blind PATRICIA Trial.
 
 # Data collected from 6-month HPV 16/18 ATP cohort.
@@ -196,15 +196,15 @@ length(rB.vac) == length(nB.vac)
 # omega.age[i] ~ dlnorm(mu.log[i], prec.log[i])
 
 # Age groups:
-age_group <- c("15-16", "17", "18", "19", "20", "≤25", "25-34", 
-               "35-44", "45-54", "55-64")
+age_group <- c("15-16", "17", "18", "19", "20", "≤21", "22-23", 
+               "24-29", "30-49", "≥55")
 
 # Estimated Prevalence:
 Prevalence <- c(.09516258, .1130796, .139292, .1563352, .139292, 
                 .1130796, .09516258, .04877058, .009950166, .004987521)
 
-mu.a.log <- lnorm_params(m = Prevalence, 1.0e-4)$mu
-sigma.a.log <- lnorm_params(m = Prevalence, 1.0e-4)$sigma
+mu.a.log <- lnorm_params(m = Prevalence, v = .05^2)$mu
+sigma.a.log <- lnorm_params(m = Prevalence, v = .05^2)$sigma
 prec.age <- 1 / (sigma.a.log * sigma.a.log)
 mu.a.log
 prec.age
@@ -220,9 +220,9 @@ model_String <- "model {
     # sampling direclty from the prior.
   for (i in 1:10) {
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
-    
+
   }
-  
+
 # SUB-MODEL 2: VACCINE-EFFICACY,
   # model parameters abbreviated by .vac
   for (i in 1:Nstud.vac) {
@@ -234,15 +234,15 @@ model_String <- "model {
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
     # Average effect:
-    mu.vac[i] ~ dnorm(0, 1e-06)
+    mu.vac[i] ~ dnorm(0, 1e-4)
     # Random population effect:
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
   }
   
   # Priors for sub-model 2:
-  psi.vac ~ dnorm(0, 1.0e-6)
-  tau.vac ~ dunif(0, 100)
+  psi.vac ~ dnorm(0, 1.0e-4)
   prec.vac <- 1 / pow(tau.vac, 2)
+  tau.vac ~ dt(0, (1 / 100 ^ 2), 1)T(0, )
   # Convert LOR to OR:
   OR.vac <- exp(psi.vac)
   # Coverting OR to probability
@@ -263,7 +263,6 @@ data_JAGS <- list(
   mu.a.log = mu.a.log, prec.age = prec.age
 )
 
-# Initial JAGS sampler values:
 # Parameters to monitor:
 params <- c(
   # Vaccine efficacy parameters:
@@ -273,7 +272,7 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 20000
+n.iter <- 10000
 n.burnin <- 1000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
