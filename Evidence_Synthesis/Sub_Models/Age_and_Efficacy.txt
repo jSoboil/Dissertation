@@ -27,7 +27,7 @@ model {
   # Priors for sub-model 2:
   psi.vac ~ dnorm(0, 1.0e-4)
   prec.vac <- 1 / pow(tau.vac, 2)
-  tau.vac ~ dt(0, (1 / 100 ^ 2), 1)T(0, )
+  tau.vac ~ dt(0, (1 / 10000 ^ 2), 1)T(0, )
   # Convert LOR to OR:
   OR.vac <- exp(psi.vac)
   # Coverting OR to probability

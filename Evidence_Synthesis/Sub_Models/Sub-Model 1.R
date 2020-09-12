@@ -215,7 +215,7 @@ cbind(age_group, Prevalence)
 # ==========================================================================================
 model_String <- "model {
 # SUB-MODEL 1: AGE-SPECIFIC PREVALENCE,
-  # model parameters abbreviated by omega.age[i]
+  # model parameters abbreviated by .age
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior.
   for (i in 1:10) {
@@ -242,7 +242,7 @@ model_String <- "model {
   # Priors for sub-model 2:
   psi.vac ~ dnorm(0, 1.0e-4)
   prec.vac <- 1 / pow(tau.vac, 2)
-  tau.vac ~ dt(0, (1 / 100 ^ 2), 1)T(0, )
+  tau.vac ~ dt(0, (1 / 10000 ^ 2), 1)T(0, )
   # Convert LOR to OR:
   OR.vac <- exp(psi.vac)
   # Coverting OR to probability
@@ -272,8 +272,8 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 10000
-n.burnin <- 1000
+n.iter <- 12000
+n.burnin <- 4000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
@@ -307,7 +307,7 @@ mcmc_dens_overlay(posterior, pars = c("pEfficacy.vac", "OR.vac",
 color_scheme_set("mix-blue-brightblue")
 mcmc_acf(posterior, pars = c("pEfficacy.vac", "OR.vac", 
                              "omega.age[1]", "omega.age[2]"),
-         lags = 150)
+         lags = 50)
 
 # Add plot for meta analysis results: found in BCEA pg 52:
 # ggplot(tr.eff) + 
