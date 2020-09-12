@@ -20,17 +20,25 @@ det(R)
 # and we can invert the matrix
 inv(R)
 
-# Here we give some numerical states to each event with probability pn:
+# Here we give some arbitrary numerical stakes to each event with probability p_{n}:
 s <- c(5, 2, 1)
 # Accordingly, if we solve for the system of linear equations, the gains for each bet
 # equal:
 G <- solve(a = inv(R), b = s)
-# Notice the sum have positive gains:
+# Notice the sum have positive gains of 2:
 round(sum(G))
 
 # Because this series of bets is inconsistent, we can solve for s again:
 s_solved <- solve(a = R, b = G)
 s_solved
+
+# and this will work for any arbitrary size of stakes (bets):
+s <- c(20291, 213, 13512)
+# Accordingly, if we solve for the system of linear equations, the gains for each bet
+# equal:
+G <- solve(a = inv(R), b = s)
+# Again, notice the sum have positive gains:
+round(sum(G))
 
 # ================================================================================
 # A coherent bet ----------------------------------------------------------
@@ -53,12 +61,21 @@ det(R)
 # and we cannot invert the matrix
 inv(R)
 
-# Here we give some numerical states to each event with probability pn:
+# Here we give assign numerical stakes to each event with probability pn:
 s <- c(5, 2, 1)
+# Accordingly, if we solve for the system of linear equations, the gains for each bet
+# equal (we even have to revert to the %*% matrix operator)
+G <- R%*%s
+# Notice the net overall gains are 0:
+round(sum(G))
+# ... and we cannot solve for s = R^-1 * g
+
+# and this will always result in a net gain of 0 for any arbitrary size of stakes (bets):
+s <- c(20291, 213, 13512)
 # Accordingly, if we solve for the system of linear equations, the gains for each bet
 # equal:
 G <- R%*%s
-# Notice the net 0 gains:
+# Again, notice the net overall gains are 0:
 round(sum(G))
 
 # End file ----------------------------------------------------------------
