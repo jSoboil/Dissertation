@@ -24,19 +24,19 @@ inv(R)
 s <- c(5, 2, 1)
 # Accordingly, if we solve for the system of linear equations, the gains for each bet
 # equal:
-G <- solve(a = inv(R), b = s)
+G <- solve(a = R, b = s)
 # Notice the sum have positive gains of 2:
 round(sum(G))
 
 # Because this series of bets is inconsistent, we can solve for s again:
-s_solved <- solve(a = R, b = G)
+s_solved <- solve(a = inv(R), b = G)
 s_solved
 
 # and this will work for any arbitrary size of stakes (bets):
 s <- c(20291, 213, 13512)
 # Accordingly, if we solve for the system of linear equations, the gains for each bet
 # equal:
-G <- solve(a = inv(R), b = s)
+G <- solve(a = R, b = s)
 # Again, notice the sum have positive gains:
 round(sum(G))
 
