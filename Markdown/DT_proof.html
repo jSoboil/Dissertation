@@ -396,7 +396,7 @@ summary {
 
 <div id="an-incoherent-dutch-book-series-of-bets" class="section level2">
 <h2>An incoherent (Dutch Book) series of bets:</h2>
-<p>Suppose we are asked to assign the probabilities for three, mutually exclusive events. Let <span class="math inline">\(E_{1}\)</span>, <span class="math inline">\(E_{2}\)</span>, <span class="math inline">\(E_{3}\)</span> be the disjoint events and <span class="math inline">\(p_{1}\)</span>, <span class="math inline">\(p_{2}\)</span>, and <span class="math inline">\(p_3\)</span> the probabilities we associate with each event. More simply, let <span class="math inline">\(p_{i}\)</span> simply be the probability of event <span class="math inline">\(E_{i}\)</span> occurring:</p>
+<p>Suppose we are asked to assign the probabilities for <span class="math inline">\(3\)</span>, mutually exclusive events. Let <span class="math inline">\(E_{1}\)</span>, <span class="math inline">\(E_{2}\)</span>, <span class="math inline">\(E_{3}\)</span> be the disjoint events and <span class="math inline">\(p_{1}\)</span>, <span class="math inline">\(p_{2}\)</span>, and <span class="math inline">\(p_3\)</span> the probabilities we associate with each event. More simply, let <span class="math inline">\(p_{i}\)</span> simply be the probability of event <span class="math inline">\(E_{i}\)</span> occurring:</p>
 <pre class="r"><code>p1 &lt;- .3
 p2 &lt;- .1
 p3 &lt;- .4</code></pre>
@@ -415,15 +415,15 @@ R</code></pre>
 <pre class="r"><code>s &lt;- c(5, 2, 7)
 s</code></pre>
 <pre><code>## [1] 5 2 7</code></pre>
-<p>we have a set <span class="math inline">\(p_{i}\)</span> of probabilities corresponding to a set <span class="math inline">\(s_{n}\)</span> of stakes, and can then solve for a system of linear equations. This will provide a corresponding gain <span class="math inline">\(G\)</span>, the product of <span class="math inline">\(Rs\)</span>, such that <span class="math inline">\(G = Rs\)</span>.</p>
+<p>we have a set <span class="math inline">\(R\)</span> of probabilities corresponding to a set <span class="math inline">\(s_{n}\)</span> of stakes, and can then solve for a system of linear equations. This will provide a corresponding gain <span class="math inline">\(G\)</span>, the product of <span class="math inline">\(Rs\)</span>, such that <span class="math inline">\(G = Rs\)</span>.</p>
 <pre class="r"><code>G &lt;- solve(a = R, b = s)
 G</code></pre>
 <pre><code>## [1] 26  9 35</code></pre>
 <p>Note that our net gain <span class="math inline">\(G\)</span> is equal to</p>
 <pre class="r"><code>round(sum(G))</code></pre>
 <pre><code>## [1] 70</code></pre>
-<p>However, this series of bets do seem to be very lucky.</p>
-<p>We have managed to obtain a net positive gain <span class="math inline">\(G\)</span>. It can actually be shown that no matter the outcome, nor the size of the bet, we will <em>always</em> have a positive net gain value. Yet, this is not a result of clairvoyance. Rather, this is due to the fact that our initial probability judgements of the <span class="math inline">\(3\)</span> disjoint events <span class="math inline">\(E_{i}\)</span> were <em>incoherent</em> with respect to Kolmogorov’s probability axiom <span class="math inline">\(P(A\cap, ...,\cap A) = 1\)</span>. Critically, the set of probabilities that we assigned to each event <span class="math inline">\(E_{i}\)</span> evidently do not sum to <span class="math inline">\(1\)</span>:</p>
+<p>However, this is an incredibly odd set of circumstances. Something is clearly amiss.</p>
+<p>We have managed to obtain a net positive gain <span class="math inline">\(G\)</span> despite placing a stake on all the possible series of bets. It can actually be shown that no matter the outcome, nor the size of the bet, we will <em>always</em> have a positive net gain value. Yet, this is obviously not a result of clairvoyance. Rather, this is due to the fact that our initial probability judgements of the <span class="math inline">\(3\)</span> disjoint events <span class="math inline">\(E_{i}\)</span> were <em>incoherent</em> with respect to Kolmogorov’s probability axiom <span class="math inline">\(P(A\cap, ...,\cap A) = 1\)</span>. Critically, the set of probabilities that we assigned to each event <span class="math inline">\(E_{i}\)</span> evidently do not sum to <span class="math inline">\(1\)</span>:</p>
 <pre class="r"><code>sum(p1 + p2 + p3)</code></pre>
 <pre><code>## [1] 0.8</code></pre>
 <p>This, in turn, means that our <span class="math inline">\(n\times n\)</span> matrix <span class="math inline">\(R\)</span> is invertible,</p>
@@ -431,15 +431,15 @@ G</code></pre>
 ## [1,]  2.5  1.5  1.5
 ## [2,]  0.5  1.5  0.5
 ## [3,]  2.0  2.0  3.0</code></pre>
-<p>Consequently, if an <span class="math inline">\(n\times n\)</span> identity matrix <span class="math inline">\(I\)</span> can be formed from the multiplication of the <span class="math inline">\(n\times n\)</span> matrix <span class="math inline">\(R\)</span> with its inverse <span class="math inline">\(R^{-1}\)</span>, it means that the judged probabilities for each event is incoherent.</p>
-<p>For those unaware, an identity matrix is a matrix where all diagonals of a matrix are <span class="math inline">\(1\)</span>’s, and the rest of the elements contain only <span class="math inline">\(0\)</span>’s, and is a convenient tool used for matrix manipulations. Below is a clear example of what a standard <span class="math inline">\(n\times n\)</span> identity matrix <span class="math inline">\(I\)</span> looks like:</p>
+<p>Consequently, this means that an <span class="math inline">\(n\times n\)</span> identity matrix <span class="math inline">\(I\)</span> can be formed from the multiplication of the <span class="math inline">\(n\times n\)</span> matrix <span class="math inline">\(R\)</span> with its inverse <span class="math inline">\(R^{-1}\)</span>, which, in turn, provides a clear proof that the judged probabilities we assigned to each event are, as a whole, incoherent.</p>
+<p>For those unaware, an identity matrix is a matrix where all the diagonals of a matrix are <span class="math inline">\(1\)</span>’s, and the rest of the elements contain only <span class="math inline">\(0\)</span>’s. It is, broadly speaking, a convenient tool used for matrix manipulations. Below is a clear example of what a standard <span class="math inline">\(n\times n\)</span> identity matrix <span class="math inline">\(I\)</span> looks like:</p>
 <pre><code>##      [,1] [,2] [,3]
 ## [1,]    1    0    0
 ## [2,]    0    1    0
 ## [3,]    0    0    1</code></pre>
-<p>and is shown to be a ‘do nothing’ matrix, as</p>
+<p>and can be shown to be a ‘do nothing’ matrix by, for example,</p>
 <pre><code>## [1] 5 2 7</code></pre>
-<p>does not change is, such that <span class="math inline">\(I\times s = s\)</span>.</p>
+<p>as the multiplication does not change the values of <span class="math inline">\(s\)</span>, such that <span class="math inline">\(I\times s = s\)</span>.</p>
 <p>To return to the point of this section, however, if our set of event probabilities - represented by the <span class="math inline">\(n\times n\)</span> matrix <span class="math inline">\(R\)</span> - conform to this specific type of matrix behaviour, such that <span class="math inline">\(I = R^{-1}R\)</span>, we can confirm <span class="math inline">\(R\)</span> to be an invertible matrix as follows,</p>
 <pre class="r"><code>I &lt;- round(inv(R)%*%R)
 I</code></pre>
@@ -458,7 +458,7 @@ G</code></pre>
 <p>Intuitively speaking, we can interpret the consequence of this in a geometric sense: the total ‘area’ of our set of disjoint probabilities fails to induce a single, whole sample space, where <span class="math inline">\(P(A\cap, ...,\cap A) \neq 1\)</span>. Thus, this means that the rows and columns of our matrix are not dependent and, as a corollary, the determinant of the matrix <span class="math inline">\(R\)</span> is <span class="math inline">\(|{R}| &gt; 0\)</span>, as evidence by</p>
 <pre class="r"><code>det(R)</code></pre>
 <pre><code>## [1] 0.2</code></pre>
-<p>Accordingly, our net gain <span class="math inline">\(\sum_{1}^{n}G_{i}\)</span> is constantly net positive. Interestingly, this process often used by sports bookkeepers and casinos to ensure a net gain, regardless of their losses.</p>
+<p>Accordingly, our net gain <span class="math inline">\(\sum_{1}^{n}G_{i}\)</span> is constantly net positive. Interestingly, this process is often used by sports bookkeepers and casinos to ensure a net gain, regardless of their losses.</p>
 </div>
 <div id="a-coherent-series-of-bets" class="section level2">
 <h2>A coherent series of bets:</h2>
@@ -480,7 +480,7 @@ R</code></pre>
 ## [1,]  0.7 -0.3 -0.3
 ## [2,] -0.3  0.7 -0.3
 ## [3,] -0.4 -0.4  0.6</code></pre>
-<p>However, because we ensured that <span class="math inline">\(P(A\cap, ...,\cap A) = 1\)</span>, where all disjoint events sum to a probability of <span class="math inline">\(1\)</span>, the matrix <span class="math inline">\(R\)</span> is now not invertible. An identity matrix <span class="math inline">\(I\)</span> cannot, therefore, be formed, where <span class="math inline">\(I = R^{-1}R\)</span>, and is evident from the below calculation:</p>
+<p>However, because we ensured that <span class="math inline">\(P(A\cap, ...,\cap A) = 1\)</span>, where all disjoint events sum to a probability of <span class="math inline">\(1\)</span>, the matrix <span class="math inline">\(R\)</span> is now not invertible. An identity matrix <span class="math inline">\(I\)</span> cannot, therefore, be formed, where <span class="math inline">\(I \ne R^{-1}R\)</span>, and is evident from the calculation below:</p>
 <pre class="r"><code>I &lt;- round(R^-1%*%R)
 I</code></pre>
 <pre><code>##      [,1] [,2] [,3]
@@ -490,14 +490,14 @@ I</code></pre>
 <p>Moreover, now that the system is coherent, it will always result in a net gain of <span class="math inline">\(0\)</span> for any arbitrary series of stakes <span class="math inline">\(s\)</span>:</p>
 <pre class="r"><code>s &lt;- sample(x = 1:10000, size = 3, replace = TRUE)
 s</code></pre>
-<pre><code>## [1] 6748 6935 3487</code></pre>
+<pre><code>## [1] 3721 7829 9998</code></pre>
 <p>Accordingly, the gains for each bet equal:</p>
 <pre class="r"><code>G &lt;- R%*%s
 G</code></pre>
-<pre><code>##       [,1]
-## [1,]  1597
-## [2,]  1784
-## [3,] -3381</code></pre>
+<pre><code>##         [,1]
+## [1,] -2743.4
+## [2,]  1364.6
+## [3,]  1378.8</code></pre>
 <p>And decisively, despite the relatively high stakes on each bet compared to the previous ones, notice the net overall gains maintain to be <span class="math inline">\(0\)</span>:</p>
 <pre class="r"><code>round(sum(G))</code></pre>
 <pre><code>## [1] 0</code></pre>
