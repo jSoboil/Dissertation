@@ -11,115 +11,80 @@ library(matlib)
 ```
 
 ##  An incoherent (Dutch Book) series of bets:
-Suppose we are asked to assign probabilities for $3$, mutually exclusive events. Let $E_{1}$, $E_{2}$, $E_{3}$ be the disjoint events and $p_{1}$, $p_{2}$, and $p_3$ the probabilities we associate with each. Simply, $p_{i}$ is the probability of event $E_{i}$ occurring. We assign the following probabilities to each corresponding event:
-```{r, echo = TRUE}
-p1 <- .3
-p2 <- .1
-p3 <- .4
-```
+Consider a hypothetical event $\theta$ and its set of possible outcomes. where $\theta = 1$ indicates that the event occurred and $\theta = 0$ indicates that it did not. We can subsequently define a bet to be worth an associated stake $S$ if $\theta$ does occur, and nothing if $\theta$ does not occur, i.e. we can either win our bet with a total payout $S$ or lose. Furthermore, we assume that the event is strictly binary, i.e. mutually exclusive. 
 
-We can construct our probabilities in an $n\times n$ matrix denoted $R$. Note that by constructing the matrix in this way we can account for the positive gain for the outcome of each event $E_{i}$, and the complement negative gains of each event $E_{i}^{c}$.
-```{r, echo = TRUE}
-R <- matrix(c(1 - p1,   - p2,   - p3,
-                - p1, 1 - p2,   - p3,
-                - p1,   - p2, 1 - p3), 
+A bookmaker is typically known to sell a bet at a price $\pi_{\theta}S$. Likewise, the ratio $\pi:(1-\pi)$ is the betting odds in favour of the event $\theta$. We can then denote the action of placing a bet on $\theta$ as $a_{S,\theta}$. From this, we are able to also define the consequences of the action. For instance, if $\theta=1$, the purchaser of the bet will have a net gain of $(1-\pi)S$, which is simply the $S$ minus the initial buy-in price $\pi S$; similarly, if $\theta = 0$, a net gain of $-\pi S$.
+
+The rules for these gains can notationally represented as
+$$
+g_{\theta} = \left\{
+    \begin{array}{ll}
+        (1-\pi_{i})S &\mbox{if } \theta=1\\
+        -\pi_{i}S &\mbox{if } \theta=0
+    \end{array}
+\right.
+$$
+However, this is from the perspective of a gambler and not a bookie. In order to fully comprehend this scenario, however, we have to invert this function. The reason for this is that, in reality, we are the bookie and, much like the bookie, we have our own probability judgements of an event's outcomes $\pi$, and associated stakes $S$ thereof. This is consequently sometimes described as being a bookmaker with 'nature'. Nevertheless, below is the same gain function $g_\theta$ inverted.
+$$
+g_{\theta} = \left\{
+    \begin{array}{ll}
+        -(1-\pi_{i})S &\mbox{if } \theta=1\\
+          \pi_{i}S &\mbox{if } \theta=0
+    \end{array}
+\right.
+$$
+
+Now consider a more complex scenario, where we place a series of separate bets on $3$ mutually exclusive events, $\theta_{1}$, $\theta_{2}$, and $\theta_3$, each with a corresponding stake $S_\theta$, forming a vector $s=(S_{\theta_{1}}, S_{\theta_{2}}, S_{\theta_{3}})$. We likewise consider the probability of each event $\theta$, and assign the following probabilities $\pi_{\theta_{1}}$, $\pi_{\theta_{2}}$, and $\pi_{\theta_{3}}$,
+```{r}
+pi1 <- .5
+pi2 <- .8
+pi3 <- .25
+```
+Because the events are mutually exclusive, we can conveniently construct our probabilities in an $n\times n$ square matrix $R$ to track all the possible realised events and the outcomes therein. Intuitively, for example, this theoretically means that $1-\pi_{\theta_{1}}=\pi_{\theta_{2}}+\pi_{\theta_{3}}$, and vice versa for the other events. 
+```{r}
+R <- matrix(
+ c(1 - pi1,   - pi2,   - pi3,
+     - pi1, 1 - pi2,   - pi3,
+     - pi1,   - pi2, 1 - pi3),
             nrow = 3)
 R
 ```
-Given this feature, we can assume that the person betting would take advantage of this information and thus place a stake $s_{n}$ on all possible bets $p_{i}$. The total gains $G_{n}$ can be subsequently defined as the difference between the sum of total stakes $s_{n}$ and the $n$ negative outcomes associated with $s_{i}$ possible stakes, i.e. it is the sum of negative bets $-p_{i}S_{n}$, such that $G_{n} = s_{n} - \sum_{1}^{n}p_{i}s_{i}$.
+Accordingly, we can use the vectors of stakes $s$ multiplied with our $n\times n$ matrix $R$  to solve for our vector gains $g_{\theta}$, such that $g_{\theta}=Rs$.
 
-Next, if we apply some arbitrary numerical stake $s$ to each possible event $p_{i}$,
+However, it is now critical to bring to light the following: our set of bets do not conform to Kolmogorov’s probability axiom $P(A\cap, ...,\cap A) = 1$ for mutually exclusive events. As the sum of the bets is
 ```{r, echo = TRUE}
-s <- c(5, 2, 7)
-s
+sum(pi1 + pi2 + pi3)
 ```
-we can then have a matrix $R$ of probabilities corresponding to an assigned vector of $s_{n}$ stakes, allowing us to solve for system of linear equations. This finally provides a corresponding gain $G$, the product of $Rs$, such that $G = Rs$.
+which clearly means that $\pi_{\theta_{1}}+\pi_{\theta_{2}}+\pi_{\theta_{3}}\neq1$. This, consequently, suggests that the matrix $R$ is invertible. Technically speaking, and using a more commonly adopted notation, there is a scalar $x$ that gives the desired output $b = Ax$. As a corollary, this also means that the determinant of the matrix $R$ is $|{R}| > 0$, as evidence by
 ```{r, echo = TRUE}
-G <- solve(a = R, b = s)
-G
+det(R)
 ```
-Note that our net gain $G$ is equal to
-```{r, echo = TRUE}
-round(sum(G))
-```
-However, this is an incredibly odd set of circumstances. Something is clearly amiss.
+It is blatantly important to prove whether our matrix $R$ does conform to this conditions, where $I = R^{-1}R$. However, we must initially digress by explaining the properties of an identity matrix $I$ for those of us who are unfamiliar. 
 
-We have managed to obtain a net positive gain $G$ despite placing a stake on all possible bets. It can actually be shown that no matter the outcome, nor the size of the bet, we will _always_ have a positive net gain value. Yet, this is obviously not a result of clairvoyance. Rather, this is due to the fact that our initial probability judgements of the $3$ disjoint events $E_{i}$ were _incoherent_ with respect to Kolmogorov’s probability axiom $P(A\cap, ...,\cap A) = 1$. Critically, the set of probabilities that we assigned to each event $E_{i}$ do not sum to $1$,
-```{r, echo = TRUE}
-sum(p1 + p2 + p3)
-```
-This implies that our $n\times n$ matrix $R$ is invertible,
-```{r, echo = TRUE}
-inv(R)
-```
-Consequently, an $n\times n$ identity matrix $I$ can be formed from the multiplication of the $n\times n$ matrix $R$ with its inverse $R^{-1}$.
-
-Note that, for those unaware, an identity matrix is a matrix where all the diagonals of a matrix are $1$'s, and the rest of the elements contain only $0$'s. It is, broadly speaking, a convenient tool used for matrix manipulations. Below is a clear example of what a standard $n\times n$ identity matrix $I$ looks like:
+An identity matrix $I$ is where all the diagonals of a matrix are $1$'s, with the rest of the elements only containing $0$'s. It is, broadly speaking, a convenient tool used for matrix manipulations. Below is an example of what a $n\times n$ identity matrix $I$ will look like:
 ```{r, echo = FALSE}
 I <- diag(c(1, 1, 1))
 I
 ```
-and can be shown to be a literal 'do nothing' matrix, for example, by solving the following,
+It is, therefore, a literal 'do nothing' matrix, as is clearly evidence by solving the following,
 ```{r, echo = TRUE}
-I%*%s
+b <- c(100, 101, 102)
+I%*%b
 ```
-as the multiplication does not change the values of $s$, such that $I\times s = s$.
+Evidently, the multiplication $I\times b$ does not change the values of $b$, such that $I\times b = b$. This, then, brings us back to the focal point of this section. 
 
-Nevertheless, let us confirm whether our matrix $R$ conforms to these conditions, such that $I = R^{-1}R$.
+If $R$ is indeed an invertible matrix, we will be able to recreate the same identity matrix $I$ as above, if $I = R^{-1}R$.
 ```{r, echo = TRUE}
-round(inv(R)%*%R)
+round(inv(R)%*%R, digits = 5)
 ```
-The result of applying $R^{-1}R$ clearly mirrors the standard identity matrix example given above. Nevertheless, this can also intuitively can be thought of as a soft proof for whether a system of linear equations is solvable if, for example, $R$ is brought to the other side of the equation, i.e. to see whether we can solve for $s$. 
-
-Regardless, and to return to the point of this section, it is crucial to note that if the series of event probabilities are incoherent, and thus do indeed lead to an invertible matrix, we can solve for an unknown set of stakes $s_{n}$, suggesting that we can structure our bets in such a way as to always obtain a net gain $G_{n}$, regardless of the outcome. First, we provide the following arbitrary definite gains $G_{n}$ for each stake $s_{n}$,
+The result of applying $R^{-1}R$ clearly mirrors the identity matrix example given above. As has already been alluded to, proving $I = R^{-1}R$ can be thought as a soft proof for whether any combination of linear equations is solvable if we wanted, for example, to bring $R$ to the other side of the equation. Consequently, if it is proven, this enables us to solve for a vector of stakes $s$, rather than $g_{\theta}$, by assigning $g_{\theta}$ a vector of desired gains. For instance, if we assign the vector $g_{\theta}$ the following values 
 ```{r, echo = TRUE}
-G <- c(3, 1, 4)
-G
+g_theta <- c(3, 1, 4)
+g_theta
 ```
-It is then possible to solve for the linear transformation of $s_{n}$, by multiplying each side of the equation by $R^{-1}$, so that $R^{-1}Rs=R^{-1}G$, and thus $I\times s = s =R^{-1}G$, which ultimately results in $s = R^{-1}G$:
+it possible to solve for the linear transformation of $s$. First we multiply each side of the equation by $R^{-1}$, so that $R^{-1}Rs=R^{-1}g$, thus $I\times s = s =R^{-1}g$, and, ultimately $s = R^{-1}g$. Accordingly, we solve for a vector of stakes $s$ that guarantees a net positive gain:
 ```{r, echo = TRUE}
-s_solved <- solve(a = inv(R), b = G)
+s_solved <- inv(R)%*%g_theta
 s_solved
 ```
-This specific set of conditions, therefore, clearly enable for the placement of a set of stakes $s_{n}$ in such a way that guarantees a positive gain, no matter the future outcome.
-
-Intuitively speaking, we can further understand this proof in a geometric sense: the total 'area' of our set of disjoint probabilities fails to induce a single, whole sample space, where $P(A\cap, ...,\cap A) \neq 1$. Thus, this means that the rows and columns of our matrix are not dependent and, as a corollary, the determinant of the matrix $R$ is $|{R}| > 0$, as evidence by
-```{r, echo = TRUE}
-det(R)
-```
-Accordingly, our net gain $\sum_{1}^{n}G_{i}$ is constantly net positive. It is interesting to note that the average person is often on the recieving end of such a betting structure, as it is often used by sports bookkeepers and casinos to ensure a net gain, regardless of their losses. 
-
-## A coherent series of bets:
-It is now clear that we are obliged to constrain the total sum area of our independent probabilities to be $= 1$. In contrast to the previous example then, here we will assign probability judgements that conform to Kolmogorov's axiom $P(A\cap, ...,\cap A) = 1$. Note that the sum of probabilities $p_{i}$ now equals to $1$.
-```{r A coherent bet, echo = TRUE}
-p1 <- .3
-p2 <- .3
-p3 <- .4
-
-sum(p1 + p2 + p3)
-```
-
-Again, we can conveniently put these event probabilities in the form of an $n\times n$ matrix $R$ to present all possible joint negative betting outcomes, while simultaneously representing the realised, positive disjoint event,
-```{r, echo = TRUE}
-R <- matrix(c(1 - p1,   - p2,   - p3,
-                - p1, 1 - p2,   - p3,
-                - p1,   - p2, 1 - p3), 
-            nrow = 3)
-R
-```
-However, because we ensured that $P(A\cap, ...,\cap A) = 1$, where all disjoint events sum to $1$, the matrix $R$ is now not invertible. An identity matrix $I$ cannot, therefore, be formed, as $I \ne R^{-1}R$.
-
-Moreover, now that the sum of probabilities is coherent, it will always result in a net gain of $0$ for any arbitrary series of stakes $s$. To illustrate this, we randomly sample $3$ values between $1:10000$,
-```{r, echo = TRUE}
-s <- sample(x = 1:10000, size = 3, replace = TRUE)
-s
-```
-so that the gains for each bet equal,
-```{r, echo = TRUE}
-G <- R%*%s
-G
-```
-and, despite the relatively high stakes on each bet compared to the previous examples, notice the net overall gain $G$ maintains to be a constant $0$:
-```{r, echo = TRUE}
-round(sum(G))
-```
+In sum then, it is obvious that this conclusively proves the fact that, if the probability matrix $R$ meets the invertible condition, such that $I = R^{-1}R$, we can solve for an unknown vector of stakes $s$ by equating it with the product of a linear combination of desired gains $g_{\theta}$ and an associated probability matrix $R$. In technical language, this means that when $R$ is an invertible matrix, the solution to $Rs=g_{\theta}$ is $s=R^{-1}g$.
