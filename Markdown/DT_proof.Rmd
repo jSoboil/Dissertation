@@ -64,25 +64,25 @@ I%*%s
 ```
 as the multiplication does not change the values of $s$, such that $I\times s = s$.
 
-Nevertheless, let us confirm whether our matrix $R$ conforms to these conditions, such that $I = R^{-1}R$. Intuitively, this can be thought of as a soft proof for whether a system of linear equations is solvable if, for example, $R$ is brought to the other side of the equation, i.e. to see whether we can solve for $s$. We multiply each side of by its inverse, resulting in $R^{-1}Rs=R^{-1}G$, and thus $I\times s = s =R^{-1}G$
+Nevertheless, let us confirm whether our matrix $R$ conforms to these conditions, such that $I = R^{-1}R$. The result of applying $R^{-1}R$ clearly mirrors the standard identity matrix example given prior. 
 ```{r, echo = TRUE}
 round(inv(R)%*%R)
 ```
-The result of applying $R^{-1}R$ clearly mirrors the standard identity matrix example given prior. 
+Intuitively, this can be thought of as a soft proof for whether a system of linear equations is solvable if, for example, $R$ is brought to the other side of the equation, i.e. to see whether we can solve for $s$. 
 
-To return to the point of this section, then, it is crucial to note that if the event probabilities are incoherent and thus do indeed lead to an invertible matrix, we can solve for an unknown set of stakes $s_{n}$ by equating it with the product of a set of definite gains $G_{n}$ and their corresponding event probabilities $R_{i}$. For example, say we want a desired net gain $G_{n}$ for each series of bets $R_{i}$, regardless of the outcome. We decide to provide the following definite gains $G_{n}$ for each stake $s_{n}$,
+Accordingly, to return to the point of this section, it is crucial to note that if the series of event probabilities are incoherent, and thus do indeed lead to an invertible matrix, we can solve for an unknown set of stakes $s_{n}$. This is achieved by equating $s_{n}$ as a product of a set of definite gains $G_{n}$ and their corresponding event probabilities $R_{i}$. For example, say we want a desired net gain $G_{n}$ for each series of bets $R_{i}$, regardless of the outcome. We decide to provide the following definite gains $G_{n}$ for each stake $s_{n}$,
 ```{r, echo = TRUE}
 G <- c(3, 1, 4)
 G
 ```
-This then enables us to solve for the linear transformation of $s_{n}$, by bringing $R$ over to the other side of the equation, inverting it, and setting $s = R^{-1}G$:
+This enables us to solve for the linear transformation of $s_{n}$, by multiplying each side of the equation by $R^{-1}$, so that $R^{-1}Rs=R^{-1}G$, and thus $I\times s = s =R^{-1}G$, which ultimately results in $s = R^{-1}G$:
 ```{r, echo = TRUE}
 s_solved <- solve(a = inv(R), b = G)
 s_solved
 ```
-This specific set of conditions enable us to set the stakes $s_{n}$ in such a way that guarantees for a positive gain, no matter the future outcome.
+This specific set of conditions, therefore, enable the for the placement of a set of stakes $s_{n}$ in such a way that guarantees a positive gain, no matter the future outcome.
 
-Intuitively speaking, we can further interpret this in a geometric sense: the total 'area' of our set of disjoint probabilities fails to induce a single, whole sample space, where $P(A\cap, ...,\cap A) \neq 1$. Thus, this means that the rows and columns of our matrix are not dependent and, as a corollary, the determinant of the matrix $R$ is $|{R}| > 0$, as evidence by
+Intuitively speaking, we can further understand this proof in a geometric sense: the total 'area' of our set of disjoint probabilities fails to induce a single, whole sample space, where $P(A\cap, ...,\cap A) \neq 1$. Thus, this means that the rows and columns of our matrix are not dependent and, as a corollary, the determinant of the matrix $R$ is $|{R}| > 0$, as evidence by
 ```{r, echo = TRUE}
 det(R)
 ```
