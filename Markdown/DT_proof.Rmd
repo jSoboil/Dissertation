@@ -11,14 +11,14 @@ library(matlib)
 ```
 
 ##  An incoherent (Dutch Book) series of bets:
-Suppose we are asked to assign the probabilities for $3$, mutually exclusive events. Let $E_{1}$, $E_{2}$, $E_{3}$ be the disjoint events and $p_{1}$, $p_{2}$, and $p_3$ the probabilities we associate with each event. More simply, $p_{i}$ is the probability of event $E_{i}$ occurring. We assign the following probabilities to each corresponding event:
+Suppose we are asked to assign probabilities for $3$, mutually exclusive events. Let $E_{1}$, $E_{2}$, $E_{3}$ be the disjoint events and $p_{1}$, $p_{2}$, and $p_3$ the probabilities we associate with each event. More simply, $p_{i}$ is the probability of event $E_{i}$ occurring. We assign the following probabilities to each corresponding event:
 ```{r, echo = TRUE}
 p1 <- .3
 p2 <- .1
 p3 <- .4
 ```
 
-We can construct our probabilities in an $n\times n$ matrix denoted $R$. Note that by constructing the matrix in this way we can account for the positive gain for the outcome of each event $E_{i}$, and the complement negative gains of each event $E_{i}^{c}$. Given this information, we can also assume that the better would take advantage of this information and thus place a stake $s_{n}$ on all possible bets $p_{i}$.
+We can construct our probabilities in an $n\times n$ matrix denoted $R$. Note that by constructing the matrix in this way we can account for the positive gain for the outcome of each event $E_{i}$, and the complement negative gains of each event $E_{i}^{c}$.
 ```{r, echo = TRUE}
 R <- matrix(c(1 - p1,   - p2,   - p3,
                 - p1, 1 - p2,   - p3,
@@ -26,7 +26,7 @@ R <- matrix(c(1 - p1,   - p2,   - p3,
             nrow = 3)
 R
 ```
-The total gains $G_{n}$ can be defined as the difference between the sum of total stakes $s_{n}$ and the $n$ negative outcomes associated with $s_{i}$ stakes, i.e. it is the sum of negative bets $-p_{i}S_{n}$, such that $G_{n} = s_{n} - \sum_{1}^{n}p_{i}s_{i}$.
+Given this feature, we can assume that the person betting would take advantage of this information and thus place a stake $s_{n}$ on all possible bets $p_{i}$. The total gains $G_{n}$ can be thus defined as the difference between the sum of total stakes $s_{n}$ and the $n$ negative outcomes associated with $s_{i}$ possible stakes, i.e. it is the sum of negative bets $-p_{i}S_{n}$, such that $G_{n} = s_{n} - \sum_{1}^{n}p_{i}s_{i}$.
 
 Next, if we apply some arbitrary numerical stake $s$ to each possible event $p_{i}$,
 ```{r, echo = TRUE}
@@ -44,7 +44,7 @@ round(sum(G))
 ```
 However, this is an incredibly odd set of circumstances. Something is clearly amiss.
 
-We have managed to obtain a net positive gain $G$ despite placing a stake on all possible bets available. It can actually be shown that no matter the outcome, nor the size of the bet, we will _always_ have a positive net gain value. Yet, this is obviously not a result of clairvoyance. Rather, this is due to the fact that our initial probability judgements of the $3$ disjoint events $E_{i}$ were _incoherent_ with respect to Kolmogorov’s probability axiom $P(A\cap, ...,\cap A) = 1$. Critically, the set of probabilities that we assigned to each event $E_{i}$ do not sum to $1$,
+We have managed to obtain a net positive gain $G$ despite placing a stake on all possible bets. It can actually be shown that no matter the outcome, nor the size of the bet, we will _always_ have a positive net gain value. Yet, this is obviously not a result of clairvoyance. Rather, this is due to the fact that our initial probability judgements of the $3$ disjoint events $E_{i}$ were _incoherent_ with respect to Kolmogorov’s probability axiom $P(A\cap, ...,\cap A) = 1$. Critically, the set of probabilities that we assigned to each event $E_{i}$ do not sum to $1$,
 ```{r, echo = TRUE}
 sum(p1 + p2 + p3)
 ```
@@ -71,7 +71,7 @@ round(inv(R)%*%R)
 ```
 The result of applying $R^{-1}R$ clearly mirrors the standard identity matrix example given above. Nevertheless, this can also intuitively can be thought of as a soft proof for whether a system of linear equations is solvable if, for example, $R$ is brought to the other side of the equation, i.e. to see whether we can solve for $s$. 
 
-Regardless, and to return to the point of this section, it is crucial to note that if the series of event probabilities are incoherent, and thus do indeed lead to an invertible matrix, we can solve for an unknown set of stakes $s_{n}$, suggesting that we can strucure our bets in such a way as to always obtain a net gain $G_{n}$, regardless of the outcome. First, we provide the following arbitrary definite gains $G_{n}$ for each stake $s_{n}$,
+Regardless, and to return to the point of this section, it is crucial to note that if the series of event probabilities are incoherent, and thus do indeed lead to an invertible matrix, we can solve for an unknown set of stakes $s_{n}$, suggesting that we can structure our bets in such a way as to always obtain a net gain $G_{n}$, regardless of the outcome. First, we provide the following arbitrary definite gains $G_{n}$ for each stake $s_{n}$,
 ```{r, echo = TRUE}
 G <- c(3, 1, 4)
 G
