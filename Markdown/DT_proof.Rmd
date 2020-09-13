@@ -1,5 +1,6 @@
 ---
-output: 
+title: "Dutch Book proof"
+output:
  html_document:
   theme: readable
 ---
@@ -43,7 +44,7 @@ round(sum(G))
 ```
 However, this is an incredibly odd set of circumstances. Something is clearly amiss.
 
-We have managed to obtain a net positive gain $G$ despite placing a stake on all possible bets available. It can actually be shown that no matter the outcome, nor the size of the bet, we will _always_ have a positive net gain value. Yet, this is obviously not a result of clairvoyance. Rather, this is due to the fact that our initial probability judgements of the $3$ disjoint events $E_{i}$ were _incoherent_ with respect to Kolmogorov’s probability axiom $P(A\cap, ...,\cap A) = 1$. Critically, the set of probabilities that we assigned to each event $E_{i}$ do not sum to $1$:
+We have managed to obtain a net positive gain $G$ despite placing a stake on all possible bets available. It can actually be shown that no matter the outcome, nor the size of the bet, we will _always_ have a positive net gain value. Yet, this is obviously not a result of clairvoyance. Rather, this is due to the fact that our initial probability judgements of the $3$ disjoint events $E_{i}$ were _incoherent_ with respect to Kolmogorov’s probability axiom $P(A\cap, ...,\cap A) = 1$. Critically, the set of probabilities that we assigned to each event $E_{i}$ do not sum to $1$,
 ```{r, echo = TRUE}
 sum(p1 + p2 + p3)
 ```
@@ -64,32 +65,32 @@ I%*%s
 ```
 as the multiplication does not change the values of $s$, such that $I\times s = s$.
 
-Nevertheless, let us confirm whether our matrix $R$ conforms to these conditions, such that $I = R^{-1}R$. The result of applying $R^{-1}R$ clearly mirrors the standard identity matrix example given prior. 
+Nevertheless, let us confirm whether our matrix $R$ conforms to these conditions, such that $I = R^{-1}R$.
 ```{r, echo = TRUE}
 round(inv(R)%*%R)
 ```
-Intuitively, this can be thought of as a soft proof for whether a system of linear equations is solvable if, for example, $R$ is brought to the other side of the equation, i.e. to see whether we can solve for $s$. 
+The result of applying $R^{-1}R$ clearly mirrors the standard identity matrix example given above. Nevertheless, this can also intuitively can be thought of as a soft proof for whether a system of linear equations is solvable if, for example, $R$ is brought to the other side of the equation, i.e. to see whether we can solve for $s$. 
 
-Accordingly, to return to the point of this section, it is crucial to note that if the series of event probabilities are incoherent, and thus do indeed lead to an invertible matrix, we can solve for an unknown set of stakes $s_{n}$. This is achieved by equating $s_{n}$ as a product of a set of definite gains $G_{n}$ and their corresponding event probabilities $R_{i}$. For example, say we want a desired net gain $G_{n}$ for each series of bets $R_{i}$, regardless of the outcome. We decide to provide the following definite gains $G_{n}$ for each stake $s_{n}$,
+Regardless, and to return to the point of this section, it is crucial to note that if the series of event probabilities are incoherent, and thus do indeed lead to an invertible matrix, we can solve for an unknown set of stakes $s_{n}$, suggesting that we can strucure our bets in such a way as to always obtain a net gain $G_{n}$, regardless of the outcome. First, we provide the following arbitrary definite gains $G_{n}$ for each stake $s_{n}$,
 ```{r, echo = TRUE}
 G <- c(3, 1, 4)
 G
 ```
-This enables us to solve for the linear transformation of $s_{n}$, by multiplying each side of the equation by $R^{-1}$, so that $R^{-1}Rs=R^{-1}G$, and thus $I\times s = s =R^{-1}G$, which ultimately results in $s = R^{-1}G$:
+It is then possible to solve for the linear transformation of $s_{n}$, by multiplying each side of the equation by $R^{-1}$, so that $R^{-1}Rs=R^{-1}G$, and thus $I\times s = s =R^{-1}G$, which ultimately results in $s = R^{-1}G$:
 ```{r, echo = TRUE}
 s_solved <- solve(a = inv(R), b = G)
 s_solved
 ```
-This specific set of conditions, therefore, enable the for the placement of a set of stakes $s_{n}$ in such a way that guarantees a positive gain, no matter the future outcome.
+This specific set of conditions, therefore, clearly enable for the placement of a set of stakes $s_{n}$ in such a way that guarantees a positive gain, no matter the future outcome.
 
 Intuitively speaking, we can further understand this proof in a geometric sense: the total 'area' of our set of disjoint probabilities fails to induce a single, whole sample space, where $P(A\cap, ...,\cap A) \neq 1$. Thus, this means that the rows and columns of our matrix are not dependent and, as a corollary, the determinant of the matrix $R$ is $|{R}| > 0$, as evidence by
 ```{r, echo = TRUE}
 det(R)
 ```
-Accordingly, our net gain $\sum_{1}^{n}G_{i}$ is constantly net positive. It is now obvious why this process is so often used by sports bookkeepers and casinos to ensure a net gain, regardless of the losses. 
+Accordingly, our net gain $\sum_{1}^{n}G_{i}$ is constantly net positive. It is interesting to note that the average person is often on the recieving end of such a betting structure, as it is often used by sports bookkeepers and casinos to ensure a net gain, regardless of their losses. 
 
 ## A coherent series of bets:
-It is clear that we are obliged to constrain the total sum area of our independent probabilities to be $= 1$, such that $P(A\cap, ...,\cap A) = 1$. In contrast to the previous example then, here we will assign probability judgements that conform to Kolmogorov's axiom $P(A\cap, ...,\cap A) = 1$. Note that the sum of probabilities $p_{i}$ now equals to $1$.
+It is now clear that we are obliged to constrain the total sum area of our independent probabilities to be $= 1$. In contrast to the previous example then, here we will assign probability judgements that conform to Kolmogorov's axiom $P(A\cap, ...,\cap A) = 1$. Note that the sum of probabilities $p_{i}$ now equals to $1$.
 ```{r A coherent bet, echo = TRUE}
 p1 <- .3
 p2 <- .3
@@ -98,7 +99,7 @@ p3 <- .4
 sum(p1 + p2 + p3)
 ```
 
-Again, we can conveniently put these event probabilities in the form of an $n\times n$ matrix $R$ to present all possible joint negative betting outcomes, while simultaneously representing the realised disjoint event,
+Again, we can conveniently put these event probabilities in the form of an $n\times n$ matrix $R$ to present all possible joint negative betting outcomes, while simultaneously representing the realised, positive disjoint event,
 ```{r, echo = TRUE}
 R <- matrix(c(1 - p1,   - p2,   - p3,
                 - p1, 1 - p2,   - p3,
@@ -106,19 +107,19 @@ R <- matrix(c(1 - p1,   - p2,   - p3,
             nrow = 3)
 R
 ```
-However, because we ensured that $P(A\cap, ...,\cap A) = 1$, where all disjoint events sum to a probability of $1$, the matrix $R$ is now not invertible. An identity matrix $I$ cannot, therefore, be formed, as $I \ne R^{-1}R$.
+However, because we ensured that $P(A\cap, ...,\cap A) = 1$, where all disjoint events sum to $1$, the matrix $R$ is now not invertible. An identity matrix $I$ cannot, therefore, be formed, as $I \ne R^{-1}R$.
 
-Moreover, now that the sum of probabilities is coherent, it will always result in a net gain of $0$ for any arbitrary series of stakes $s$. To illustrate this, we randomly sample $3$ values between $1:10000$:
+Moreover, now that the sum of probabilities is coherent, it will always result in a net gain of $0$ for any arbitrary series of stakes $s$. To illustrate this, we randomly sample $3$ values between $1:10000$,
 ```{r, echo = TRUE}
 s <- sample(x = 1:10000, size = 3, replace = TRUE)
 s
 ```
-Accordingly, the gains for each bet equal,
+so that the gains for each bet equal,
 ```{r, echo = TRUE}
 G <- R%*%s
 G
 ```
-and, decisively, despite the relatively high stakes on each bet compared to the previous examples, notice that the net overall gain $G$ maintains to be a constant $0$:
+and, despite the relatively high stakes on each bet compared to the previous examples, notice the net overall gain $G$ maintains to be a constant $0$:
 ```{r, echo = TRUE}
 round(sum(G))
 ```
