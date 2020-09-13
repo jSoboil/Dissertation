@@ -406,12 +406,12 @@ R</code></pre>
 ## [1,]  0.7 -0.3 -0.3
 ## [2,] -0.1  0.9 -0.1
 ## [3,] -0.4 -0.4  0.6</code></pre>
-<p>Thus, we can say the total gains <span class="math inline">\(G_{n}\)</span> is the difference between the sum of the total stakes <span class="math inline">\(S_{n}\)</span> and the sum of the <span class="math inline">\(n\)</span> negative outcome <span class="math inline">\(S_{n}\)</span> stakes paid to the bookkeeper, i.e. it is the sum of negative bets <span class="math inline">\(-p_{i}S_{n}\)</span>, such that <span class="math inline">\(G_{n} = S_{n} - \sum_{1}^{n}p_{i}S_{n}\)</span>.</p>
-<p>If we apply some arbitrary numerical stake <span class="math inline">\(s\)</span> to each possible event <span class="math inline">\(p_{i}\)</span>,</p>
+<p>The total gains <span class="math inline">\(G_{n}\)</span> can be defined as the difference between the sum of total stakes <span class="math inline">\(s_{n}\)</span> and the <span class="math inline">\(n\)</span> negative outcomes associated with <span class="math inline">\(s_{i}\)</span> stakes, i.e. it is the sum of negative bets <span class="math inline">\(-p_{i}S_{n}\)</span>, such that <span class="math inline">\(G_{n} = s_{n} - \sum_{1}^{n}p_{i}s_{i}\)</span>.</p>
+<p>Next, if we apply some arbitrary numerical stake <span class="math inline">\(s\)</span> to each possible event <span class="math inline">\(p_{i}\)</span>,</p>
 <pre class="r"><code>s &lt;- c(5, 2, 7)
 s</code></pre>
 <pre><code>## [1] 5 2 7</code></pre>
-<p>we then have a set <span class="math inline">\(R\)</span> of probabilities corresponding to a set <span class="math inline">\(s_{n}\)</span> of stakes, and can solve for system of linear equations. This will provide a corresponding gain <span class="math inline">\(G\)</span>, the product of <span class="math inline">\(Rs\)</span>, such that <span class="math inline">\(G = Rs\)</span>.</p>
+<p>we then have a set <span class="math inline">\(R\)</span> of probabilities corresponding to a vector <span class="math inline">\(s_{n}\)</span> of stakes, and can solve for system of linear equations. This will provide a corresponding gain <span class="math inline">\(G\)</span>, the product of <span class="math inline">\(Rs\)</span>, such that <span class="math inline">\(G = Rs\)</span>.</p>
 <pre class="r"><code>G &lt;- solve(a = R, b = s)
 G</code></pre>
 <pre><code>## [1] 26  9 35</code></pre>
@@ -422,7 +422,8 @@ G</code></pre>
 <p>We have managed to obtain a net positive gain <span class="math inline">\(G\)</span> despite placing a stake on all possible bets available. It can actually be shown that no matter the outcome, nor the size of the bet, we will <em>always</em> have a positive net gain value. Yet, this is obviously not a result of clairvoyance. Rather, this is due to the fact that our initial probability judgements of the <span class="math inline">\(3\)</span> disjoint events <span class="math inline">\(E_{i}\)</span> were <em>incoherent</em> with respect to Kolmogorov’s probability axiom <span class="math inline">\(P(A\cap, ...,\cap A) = 1\)</span>. Critically, the set of probabilities that we assigned to each event <span class="math inline">\(E_{i}\)</span> do not sum to <span class="math inline">\(1\)</span>:</p>
 <pre class="r"><code>sum(p1 + p2 + p3)</code></pre>
 <pre><code>## [1] 0.8</code></pre>
-<p>This also means that our <span class="math inline">\(n\times n\)</span> matrix <span class="math inline">\(R\)</span> is invertible,</p>
+<p>This implies that our <span class="math inline">\(n\times n\)</span> matrix <span class="math inline">\(R\)</span> is invertible,</p>
+<pre class="r"><code>inv(R)</code></pre>
 <pre><code>##      [,1] [,2] [,3]
 ## [1,]  2.5  1.5  1.5
 ## [2,]  0.5  1.5  0.5
@@ -433,22 +434,27 @@ G</code></pre>
 ## [1,]    1    0    0
 ## [2,]    0    1    0
 ## [3,]    0    0    1</code></pre>
-<p>and can be shown to be a ‘do nothing’ matrix by, for example, solving the following,</p>
-<pre><code>## [1] 5 2 7</code></pre>
+<p>and can be shown to be a literal ‘do nothing’ matrix, for example, by solving the following,</p>
+<pre class="r"><code>I%*%s</code></pre>
+<pre><code>##      [,1]
+## [1,]    5
+## [2,]    2
+## [3,]    7</code></pre>
 <p>as the multiplication does not change the values of <span class="math inline">\(s\)</span>, such that <span class="math inline">\(I\times s = s\)</span>.</p>
 <p>Nevertheless, let us confirm whether our matrix <span class="math inline">\(R\)</span> conforms to these conditions, such that <span class="math inline">\(I = R^{-1}R\)</span>. Intuitively, this can be thought of as a soft proof for whether a system of linear equations is solvable if, for example, <span class="math inline">\(R\)</span> is brought to the other side of the equation, i.e. to see whether we can solve for <span class="math inline">\(s\)</span>. We multiply each side of by its inverse, resulting in <span class="math inline">\(R^{-1}Rs=R^{-1}G\)</span>, and thus <span class="math inline">\(I\times s = s =R^{-1}G\)</span></p>
-<pre class="r"><code>I &lt;- round(inv(R)%*%R)
-I</code></pre>
+<pre class="r"><code>round(inv(R)%*%R)</code></pre>
 <pre><code>##      [,1] [,2] [,3]
 ## [1,]    1    0    0
 ## [2,]    0    1    0
 ## [3,]    0    0    1</code></pre>
 <p>The result of applying <span class="math inline">\(R^{-1}R\)</span> clearly mirrors the standard identity matrix example given prior.</p>
-<p>To return to the point of this section, then, it is crucial to note that if the event probabilities are incoherent, and thus do indeed lead to an invertible matrix, we can solve for an unknown set of stakes <span class="math inline">\(s_{n}\)</span> by equating it with the product of a set of definite gains <span class="math inline">\(G_{n}\)</span> and their corresponding event probabilities <span class="math inline">\(R_{i}\)</span>. For example, say we want a desired net gain <span class="math inline">\(G_{n}\)</span> for each series of bets <span class="math inline">\(R_{i}\)</span>, regardless of the outcome. We decide to provide the following definite gains <span class="math inline">\(G_{n}\)</span> for each stake <span class="math inline">\(s_{n}\)</span>,</p>
+<p>To return to the point of this section, then, it is crucial to note that if the event probabilities are incoherent and thus do indeed lead to an invertible matrix, we can solve for an unknown set of stakes <span class="math inline">\(s_{n}\)</span> by equating it with the product of a set of definite gains <span class="math inline">\(G_{n}\)</span> and their corresponding event probabilities <span class="math inline">\(R_{i}\)</span>. For example, say we want a desired net gain <span class="math inline">\(G_{n}\)</span> for each series of bets <span class="math inline">\(R_{i}\)</span>, regardless of the outcome. We decide to provide the following definite gains <span class="math inline">\(G_{n}\)</span> for each stake <span class="math inline">\(s_{n}\)</span>,</p>
 <pre class="r"><code>G &lt;- c(3, 1, 4)
 G</code></pre>
 <pre><code>## [1] 3 1 4</code></pre>
 <p>This then enables us to solve for the linear transformation of <span class="math inline">\(s_{n}\)</span>, by bringing <span class="math inline">\(R\)</span> over to the other side of the equation, inverting it, and setting <span class="math inline">\(s = R^{-1}G\)</span>:</p>
+<pre class="r"><code>s_solved &lt;- solve(a = inv(R), b = G)
+s_solved</code></pre>
 <pre><code>## [1] 0.6 0.2 0.8</code></pre>
 <p>This specific set of conditions enable us to set the stakes <span class="math inline">\(s_{n}\)</span> in such a way that guarantees for a positive gain, no matter the future outcome.</p>
 <p>Intuitively speaking, we can further interpret this in a geometric sense: the total ‘area’ of our set of disjoint probabilities fails to induce a single, whole sample space, where <span class="math inline">\(P(A\cap, ...,\cap A) \neq 1\)</span>. Thus, this means that the rows and columns of our matrix are not dependent and, as a corollary, the determinant of the matrix <span class="math inline">\(R\)</span> is <span class="math inline">\(|{R}| &gt; 0\)</span>, as evidence by</p>
@@ -479,14 +485,14 @@ R</code></pre>
 <p>Moreover, now that the sum of probabilities is coherent, it will always result in a net gain of <span class="math inline">\(0\)</span> for any arbitrary series of stakes <span class="math inline">\(s\)</span>. To illustrate this, we randomly sample <span class="math inline">\(3\)</span> values between <span class="math inline">\(1:10000\)</span>:</p>
 <pre class="r"><code>s &lt;- sample(x = 1:10000, size = 3, replace = TRUE)
 s</code></pre>
-<pre><code>## [1] 5132  121 9668</code></pre>
+<pre><code>## [1] 6020 1018  121</code></pre>
 <p>Accordingly, the gains for each bet equal,</p>
 <pre class="r"><code>G &lt;- R%*%s
 G</code></pre>
 <pre><code>##         [,1]
-## [1,]   655.7
-## [2,] -4355.3
-## [3,]  3699.6</code></pre>
+## [1,]  3872.3
+## [2,] -1129.7
+## [3,] -2742.6</code></pre>
 <p>and, decisively, despite the relatively high stakes on each bet compared to the previous examples, notice that the net overall gain <span class="math inline">\(G\)</span> maintains to be a constant <span class="math inline">\(0\)</span>:</p>
 <pre class="r"><code>round(sum(G))</code></pre>
 <pre><code>## [1] 0</code></pre>
