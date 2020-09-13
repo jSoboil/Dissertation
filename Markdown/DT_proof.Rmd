@@ -1,0 +1,121 @@
+---
+title: "DT_proof"
+author: "Josh Soboil"
+date: "13/09/2020"
+output: 
+ html_document:
+  theme: readable
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(matlib)
+```
+
+##  An incoherent (Dutch Book) series of bets:
+Suppose we are asked to assign the probabilities for three, mutually exclusive events. Let $E_{1}$, $E_{2}$, $E_{3}$ be the disjoint events and $p_{1}$, $p_{2}$, and $p_3$ the probabilities we associate with each event. More simply, let $p_{i}$ simply be the probability of event $E_{i}$ occurring:
+```{r, echo = TRUE}
+p1 <- .3
+p2 <- .1
+p3 <- .4
+```
+If we consider the total winning stakes as unknown, we can construct our probabilities in an $n\times n$ matrix $R$. Note that we construct the matrix in this way to account for a positive gain for the outcome of event $E_{i}$, and a negative gain for the other events of $E_{i}$ if the better placed a stake $s$ on all possible bets.
+```{r, echo = TRUE}
+R <- matrix(c(1 - p1,   - p2,   - p3,
+                - p1, 1 - p2,   - p3,
+                - p1,   - p2, 1 - p3), 
+            nrow = 3)
+R
+```
+Thus, the total gains $G$ is the difference between the sum of the set of stakes $s$ and the sum of the $n$ stakes $s$ paid to the bookkeeper of the bet, i.e. the sum of negative bets, such that $G_{n} = S_{n} - \sum_{1}^{n}p_{i}S{n}$.
+
+Let us now give some numerical stake $s$ to each possible event, according to what we see fit with respect to the probability of each event,
+```{r, echo = TRUE}
+s <- c(5, 2, 7)
+s
+```
+
+Now that we have a set $p_{i}$ of probabilities corresponding to a set $s$ of stakes, we can solve a system of linear equations which will provide a corresponding Gain $G$, the product of $Rs$, such that $G = Rs$.
+```{r, echo = TRUE}
+G <- solve(a = R, b = s)
+G
+```
+Our net gains $G$ subsequently equal:
+```{r, echo = TRUE}
+round(sum(G))
+```
+We do seem to be very lucky. No matter the outcome, nor the size of the bet, we have managed to obtain  a net positive gain $G$ of $70$. It does not matter what we do, we will _always_ have a positive net gain value. How could we always win no matter what? Sadly, it is not because we are clairvoyant.
+
+The result is due to the fact that our initial probability judgements of the $3$ disjoint events were _incoherent_, according to Kolmogorov’s probability axiom $P(A\cap, ...,\cap A) = 1$. Critically, the set of probabilities that we assigned to each event evidently did not sum to a total of $1$:
+```{r, echo = TRUE}
+sum(p1 + p2 + p3)
+```
+This, in turn, means that our matrix $R$ of event probabilities is invertible,
+```{r}
+matlib::inv(R)
+```
+Simply, an $n\times n$ identity matrix $I$ can be formed from the multiplication of the $n\times n$ matrix $R$ with its inverse $R^{-1}$. An identity matrix is a matrix where all diagonals of a matrix are $1$'s, and the rest of the elements are $0$'s. For a clear example, below is an $n\times n$ identity matrix $I$:
+```{r, echo = FALSE}
+I <- diag(c(1, 1, 1))
+I
+```
+Consequently, if our set of event probabilities, represented by the matrix $R$, conform to the above specific matrix behaviour, where we can obtain $I = R^{-1}R$, we can confirm $R$ to be invertible by multiplying the original matrix by its inverse as follows:
+```{r, echo = TRUE}
+I <- round(inv(R)%*%R)
+I
+```
+This behaviour additionally makes the determinant of the matrix $|{R}| > 0$:
+```{r, echo = TRUE}
+det(R)
+```
+and, as a consequence, our net gain $\sum_{1}^{n}G_{i}$ is a constantly positive.
+
+Moreover, and critically important, if our event probabilities are incoherent, and thus lead to an invertible matrix as described above, we can solve for an unknown set of stakes $s$ by equating the set to be the product of a desirable set of knowable gains $G_{n}$ with the corresponding event probabilities $R_{i}$. For instance, let's say we want a definite net gain $G_{n}$ for each series of bets $R_{i}$ as follows:
+```{r, echo = TRUE}
+G <- c(3, 1, 4)
+G
+```
+We can then solve for $s$, through setting $s = R^{-1}G$:
+```{r}
+s_solved <- solve(a = inv(R), b = G)
+s_solved
+```
+
+Intuitively speaking, we can interpret this in a geometric sense: the total 'area' of our set of disjoint probabilities fails to induce a single, whole sample space, where $P(A\cap, ...,\cap A) \neq 1$. In order to be coherent, we are therefore obliged to constrain the total sum area of our independent probabilities to be $= 1$, such that $P(A\cap, ...,\cap A) = 1$. We provide a proof for this below.
+
+## A coherent series of bets:
+In contrast, here we will assign probability judgements that conform to Kolmogorov's axiom $P(A\cap, ...,\cap A) = 1$. Note the sum of probabilities $p_{i}$ now equal $1$.
+```{r A coherent bet, echo = TRUE}
+p1 <- .3
+p2 <- .3
+p3 <- .4
+
+sum(p1 + p2 + p3)
+```
+Again, we can conveniently put these event probabilities in the form of a matrix $R$ to present all possible joint positive and negative betting outcomes, while representing all disjoint positive event outcomes.
+```{r, echo = TRUE}
+R <- matrix(c(1 - p1,   - p2,   - p3,
+                - p1, 1 - p2,   - p3,
+                - p1,   - p2, 1 - p3), 
+            nrow = 3)
+R
+```
+However, because we ensured that $P(A\cap, ...,\cap A) = 1$, where all disjoint events sum to a probability of $1$, the matrix $R$ is now not invertible. An identity matrix $I$ cannot, therefore, be formed, where $I = R^{-1}R$, and is evident from the below calculation:
+```{r, echo = TRUE}
+I <- round(R^-1%*%R)
+I
+```
+Moreover, now that the system is coherent, it will always result in a net gain of $0$ for any arbitrary series of stakes $s$:
+```{r, echo = TRUE}
+s <- sample(x = 1:10000, size = 3, replace = TRUE)
+s
+```
+Accordingly, the gains for each bet equal:
+```{r, echo = TRUE}
+G <- R%*%s
+G
+```
+Decisively, and despite the relatively high stakes on each bet compared to the previous ones, notice the net overall gains maintain to be $0$:
+```{r, echo = TRUE}
+round(sum(G))
+```
