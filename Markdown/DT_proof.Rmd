@@ -11,14 +11,14 @@ library(matlib)
 ```
 
 ##  An incoherent (Dutch Book) series of bets:
-Suppose we are asked to assign probabilities for $3$, mutually exclusive events. Let $E_{1}$, $E_{2}$, $E_{3}$ be the disjoint events and $p_{1}$, $p_{2}$, and $p_3$ the probabilities we associate with each. Simply, $p_{i}$ is the probability of event $E_{i}$ occurring. We assign the following probabilities to each corresponding event:
+Suppose we are asked to assign probabilities for $3$, mutually exclusive events. Let $E_{1}$, $E_{2}$, $E_{3}$ be the disjoint events and $p_{1}$, $p_{2}$, and $p_3$ the probabilities we associate with each. Simply, $p_{i}$ is the probability of the event $E_{i}$ occurring. We assign the following probabilities to each corresponding event:
 ```{r, echo = TRUE}
 p1 <- .3
 p2 <- .1
 p3 <- .4
 ```
 
-We can construct our probabilities in an $n\times n$ matrix denoted $R$. Note that by constructing the matrix in this way we can account for the positive gain for the outcome of each event $E_{i}$, and the complement negative gains of each event $E_{i}^{c}$.
+We can then construct our probabilities in an $n\times n$ matrix denoted $R$. Note that by constructing the matrix in this way we can account for the positive gain for the outcome of each event $E_{i}$ as well as its complements $E_{i}^{c}$.
 ```{r, echo = TRUE}
 R <- matrix(c(1 - p1,   - p2,   - p3,
                 - p1, 1 - p2,   - p3,
@@ -26,14 +26,12 @@ R <- matrix(c(1 - p1,   - p2,   - p3,
             nrow = 3)
 R
 ```
-Given this feature, we can assume that the person betting would take advantage of this information and thus place a stake $s_{n}$ on all possible bets $p_{i}$. The total gains $G_{n}$ can be subsequently defined as the difference between the sum of total stakes $s_{n}$ and the $n$ negative outcomes associated with $s_{i}$ possible stakes, i.e. it is the sum of negative bets $-p_{i}S_{n}$, such that $G_{n} = s_{n} - \sum_{1}^{n}p_{i}s_{i}$.
-
-Next, if we apply some arbitrary numerical stake $s$ to each possible event $p_{i}$,
+Given this feature, we can assume that the person betting would take advantage of this information and thus place a stake $s_{n}$ on all of the possible bets $p_{i}$ to maximise the probability of their gain $G$. Subsequently, we apply some arbitrary numerical stake $s_{n}$ to each possible event $p_{i}$,
 ```{r, echo = TRUE}
 s <- c(5, 2, 7)
 s
 ```
-we can then have a matrix $R$ of probabilities corresponding to an assigned vector of $s_{n}$ stakes, allowing us to solve for system of linear equations. This finally provides a corresponding gain $G$, the product of $Rs$, such that $G = Rs$.
+and we can then have a matrix $R$ of probabilities assigned to a vector of $s_{n}$ possible stakes. The net gains $\sum_{1}^{n} G_{n}$ can be thus be defined as a product of the matrix $R$ of probabilities and a corresponding vector of stakes $s$. This allows us to solve for the system of linear equations. This provides a corresponding gain $G$, the product of $Rs$, such that $G = Rs$.
 ```{r, echo = TRUE}
 G <- solve(a = R, b = s)
 G
@@ -65,18 +63,18 @@ I%*%s
 ```
 as the multiplication does not change the values of $s$, such that $I\times s = s$.
 
-Nevertheless, let us confirm whether our matrix $R$ conforms to these conditions, such that $I = R^{-1}R$.
+Nevertheless, let us confirm whether our matrix $R$ conforms to these conditions, where $I = R^{-1}R$.
 ```{r, echo = TRUE}
 round(inv(R)%*%R)
 ```
-The result of applying $R^{-1}R$ clearly mirrors the standard identity matrix example given above. Nevertheless, this can also intuitively can be thought of as a soft proof for whether a system of linear equations is solvable if, for example, $R$ is brought to the other side of the equation, i.e. to see whether we can solve for $s$. 
+The result of applying $R^{-1}R$ clearly mirrors the standard identity matrix example given above. Nevertheless, this can intuitively can be thought of as a soft proof for whether a system of linear equations is solvable if, for example, $R$ is brought to the other side of the equation, i.e. to see whether we can solve for $s$. 
 
-Regardless, and to return to the point of this section, it is crucial to note that if the series of event probabilities are incoherent, and thus do indeed lead to an invertible matrix, we can solve for an unknown set of stakes $s_{n}$, suggesting that we can structure our bets in such a way as to always obtain a net gain $G_{n}$, regardless of the outcome. First, we provide the following arbitrary definite gains $G_{n}$ for each stake $s_{n}$,
+Regardless, and to return to the focus of this section, it is crucial to note that when the series of event probabilities are incoherent, and thus do indeed lead to an invertible matrix, it suggests that we solve for an unknown set of stakes $s_{n}$ by structuring our bets in such a way that always obtains a positive net gain $G_{n}$, regardless of the outcome. First, we provide the following arbitrary definite gains $G_{n}$ for each stake $s_{n}$,
 ```{r, echo = TRUE}
 G <- c(3, 1, 4)
 G
 ```
-It is then possible to solve for the linear transformation of $s_{n}$, by multiplying each side of the equation by $R^{-1}$, so that $R^{-1}Rs=R^{-1}G$, and thus $I\times s = s =R^{-1}G$, which ultimately results in $s = R^{-1}G$:
+It is now possible to solve for the linear transformation of $s_{n}$, by multiplying each side of the equation by $R^{-1}$, so that $R^{-1}Rs=R^{-1}G$, and thus $I\times s = s =R^{-1}G$, which ultimately results in $s = R^{-1}G$:
 ```{r, echo = TRUE}
 s_solved <- solve(a = inv(R), b = G)
 s_solved
@@ -87,19 +85,21 @@ Intuitively speaking, we can further understand this proof in a geometric sense:
 ```{r, echo = TRUE}
 det(R)
 ```
-Accordingly, our net gain $\sum_{1}^{n}G_{i}$ is constantly net positive. It is interesting to note that the average person is often on the recieving end of such a betting structure, as it is often used by sports bookkeepers and casinos to ensure a net gain, regardless of their losses. 
+Accordingly, our net gain $\sum_{1}^{n}G_{i}$ is a constant net positive. It is interesting to note that the average person is often on the receiving end of such a betting structure, as it is commonly used by sports bookkeepers and casinos to ensure a net gain regardless of their losses. 
 
 ## A coherent series of bets:
-It is now clear that we are obliged to constrain the total sum area of our independent probabilities to be $= 1$. In contrast to the previous example then, here we will assign probability judgements that conform to Kolmogorov's axiom $P(A\cap, ...,\cap A) = 1$. Note that the sum of probabilities $p_{i}$ now equals to $1$.
+It is evident that we are obliged to constrain the total sum of our independent probabilities to be $= 1$. In contrast to the previous example then, we will now assign probability judgements that conform to Kolmogorov's axiom $P(A\cap, ...,\cap A) = 1$.
 ```{r A coherent bet, echo = TRUE}
 p1 <- .3
 p2 <- .3
 p3 <- .4
-
+```
+Note that the sum of probabilities $p_{i}$ now equals to $1$.
+```{r}
 sum(p1 + p2 + p3)
 ```
 
-Again, we can conveniently put these event probabilities in the form of an $n\times n$ matrix $R$ to present all possible joint negative betting outcomes, while simultaneously representing the realised, positive disjoint event,
+Again, we can conveniently place these probabilistic events in the form of an $n\times n$ matrix $R$ in order to present all possible, joint negative betting outcomes, while simultaneously representing a single realised, positive disjoint event:
 ```{r, echo = TRUE}
 R <- matrix(c(1 - p1,   - p2,   - p3,
                 - p1, 1 - p2,   - p3,
@@ -107,19 +107,19 @@ R <- matrix(c(1 - p1,   - p2,   - p3,
             nrow = 3)
 R
 ```
-However, because we ensured that $P(A\cap, ...,\cap A) = 1$, where all disjoint events sum to $1$, the matrix $R$ is now not invertible. An identity matrix $I$ cannot, therefore, be formed, as $I \ne R^{-1}R$.
+However, because we have ensured that $P(A\cap, ...,\cap A) = 1$, where all disjoint events sum to $1$, the matrix $R$ is not invertible. An identity matrix $I$ cannot, therefore, be computed, as $I \ne R^{-1}R$.
 
-Moreover, now that the sum of probabilities is coherent, it will always result in a net gain of $0$ for any arbitrary series of stakes $s$. To illustrate this, we randomly sample $3$ values between $1:10000$,
+Moreover, now that the sum of probabilities is clearly coherent, it will always result in a net gain of $0$ for any arbitrary vector set of stakes $s_{n$. To illustrate this, we randomly sample $3$ stake values between $1:10000$,
 ```{r, echo = TRUE}
 s <- sample(x = 1:10000, size = 3, replace = TRUE)
 s
 ```
-so that the gains for each bet equal,
+showing the gains for each bet equal,
 ```{r, echo = TRUE}
 G <- R%*%s
 G
 ```
-and, despite the relatively high stakes on each bet compared to the previous examples, notice the net overall gain $G$ maintains to be a constant $0$:
+and that, despite the relatively high stakes on each bet compared to the previous examples, the net overall gain $G$ maintains to be a constant $0$:
 ```{r, echo = TRUE}
 round(sum(G))
 ```
