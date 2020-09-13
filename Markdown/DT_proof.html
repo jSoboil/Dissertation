@@ -393,11 +393,11 @@ summary {
 
 <div id="an-incoherent-dutch-book-series-of-bets" class="section level2">
 <h2>An incoherent (Dutch Book) series of bets:</h2>
-<p>Suppose we are asked to assign the probabilities for <span class="math inline">\(3\)</span>, mutually exclusive events. Let <span class="math inline">\(E_{1}\)</span>, <span class="math inline">\(E_{2}\)</span>, <span class="math inline">\(E_{3}\)</span> be the disjoint events and <span class="math inline">\(p_{1}\)</span>, <span class="math inline">\(p_{2}\)</span>, and <span class="math inline">\(p_3\)</span> the probabilities we associate with each event. More simply, <span class="math inline">\(p_{i}\)</span> is the probability of event <span class="math inline">\(E_{i}\)</span> occurring. We assign the following probabilities to each corresponding event:</p>
+<p>Suppose we are asked to assign probabilities for <span class="math inline">\(3\)</span>, mutually exclusive events. Let <span class="math inline">\(E_{1}\)</span>, <span class="math inline">\(E_{2}\)</span>, <span class="math inline">\(E_{3}\)</span> be the disjoint events and <span class="math inline">\(p_{1}\)</span>, <span class="math inline">\(p_{2}\)</span>, and <span class="math inline">\(p_3\)</span> the probabilities we associate with each event. More simply, <span class="math inline">\(p_{i}\)</span> is the probability of event <span class="math inline">\(E_{i}\)</span> occurring. We assign the following probabilities to each corresponding event:</p>
 <pre class="r"><code>p1 &lt;- .3
 p2 &lt;- .1
 p3 &lt;- .4</code></pre>
-<p>We can construct our probabilities in an <span class="math inline">\(n\times n\)</span> matrix denoted <span class="math inline">\(R\)</span>. Note that by constructing the matrix in this way we can account for the positive gain for the outcome of each event <span class="math inline">\(E_{i}\)</span>, and the complement negative gains of each event <span class="math inline">\(E_{i}^{c}\)</span>. Given this information, we can also assume that the better would take advantage of this information and thus place a stake <span class="math inline">\(s_{n}\)</span> on all possible bets <span class="math inline">\(p_{i}\)</span>.</p>
+<p>We can construct our probabilities in an <span class="math inline">\(n\times n\)</span> matrix denoted <span class="math inline">\(R\)</span>. Note that by constructing the matrix in this way we can account for the positive gain for the outcome of each event <span class="math inline">\(E_{i}\)</span>, and the complement negative gains of each event <span class="math inline">\(E_{i}^{c}\)</span>.</p>
 <pre class="r"><code>R &lt;- matrix(c(1 - p1,   - p2,   - p3,
                 - p1, 1 - p2,   - p3,
                 - p1,   - p2, 1 - p3), 
@@ -407,7 +407,7 @@ R</code></pre>
 ## [1,]  0.7 -0.3 -0.3
 ## [2,] -0.1  0.9 -0.1
 ## [3,] -0.4 -0.4  0.6</code></pre>
-<p>The total gains <span class="math inline">\(G_{n}\)</span> can be defined as the difference between the sum of total stakes <span class="math inline">\(s_{n}\)</span> and the <span class="math inline">\(n\)</span> negative outcomes associated with <span class="math inline">\(s_{i}\)</span> stakes, i.e. it is the sum of negative bets <span class="math inline">\(-p_{i}S_{n}\)</span>, such that <span class="math inline">\(G_{n} = s_{n} - \sum_{1}^{n}p_{i}s_{i}\)</span>.</p>
+<p>Given this feature, we can assume that the person betting would take advantage of this information and thus place a stake <span class="math inline">\(s_{n}\)</span> on all possible bets <span class="math inline">\(p_{i}\)</span>. The total gains <span class="math inline">\(G_{n}\)</span> can be thus defined as the difference between the sum of total stakes <span class="math inline">\(s_{n}\)</span> and the <span class="math inline">\(n\)</span> negative outcomes associated with <span class="math inline">\(s_{i}\)</span> possible stakes, i.e. it is the sum of negative bets <span class="math inline">\(-p_{i}S_{n}\)</span>, such that <span class="math inline">\(G_{n} = s_{n} - \sum_{1}^{n}p_{i}s_{i}\)</span>.</p>
 <p>Next, if we apply some arbitrary numerical stake <span class="math inline">\(s\)</span> to each possible event <span class="math inline">\(p_{i}\)</span>,</p>
 <pre class="r"><code>s &lt;- c(5, 2, 7)
 s</code></pre>
@@ -420,7 +420,7 @@ G</code></pre>
 <pre class="r"><code>round(sum(G))</code></pre>
 <pre><code>## [1] 70</code></pre>
 <p>However, this is an incredibly odd set of circumstances. Something is clearly amiss.</p>
-<p>We have managed to obtain a net positive gain <span class="math inline">\(G\)</span> despite placing a stake on all possible bets available. It can actually be shown that no matter the outcome, nor the size of the bet, we will <em>always</em> have a positive net gain value. Yet, this is obviously not a result of clairvoyance. Rather, this is due to the fact that our initial probability judgements of the <span class="math inline">\(3\)</span> disjoint events <span class="math inline">\(E_{i}\)</span> were <em>incoherent</em> with respect to Kolmogorov’s probability axiom <span class="math inline">\(P(A\cap, ...,\cap A) = 1\)</span>. Critically, the set of probabilities that we assigned to each event <span class="math inline">\(E_{i}\)</span> do not sum to <span class="math inline">\(1\)</span>,</p>
+<p>We have managed to obtain a net positive gain <span class="math inline">\(G\)</span> despite placing a stake on all possible bets. It can actually be shown that no matter the outcome, nor the size of the bet, we will <em>always</em> have a positive net gain value. Yet, this is obviously not a result of clairvoyance. Rather, this is due to the fact that our initial probability judgements of the <span class="math inline">\(3\)</span> disjoint events <span class="math inline">\(E_{i}\)</span> were <em>incoherent</em> with respect to Kolmogorov’s probability axiom <span class="math inline">\(P(A\cap, ...,\cap A) = 1\)</span>. Critically, the set of probabilities that we assigned to each event <span class="math inline">\(E_{i}\)</span> do not sum to <span class="math inline">\(1\)</span>,</p>
 <pre class="r"><code>sum(p1 + p2 + p3)</code></pre>
 <pre><code>## [1] 0.8</code></pre>
 <p>This implies that our <span class="math inline">\(n\times n\)</span> matrix <span class="math inline">\(R\)</span> is invertible,</p>
@@ -449,7 +449,7 @@ G</code></pre>
 ## [2,]    0    1    0
 ## [3,]    0    0    1</code></pre>
 <p>The result of applying <span class="math inline">\(R^{-1}R\)</span> clearly mirrors the standard identity matrix example given above. Nevertheless, this can also intuitively can be thought of as a soft proof for whether a system of linear equations is solvable if, for example, <span class="math inline">\(R\)</span> is brought to the other side of the equation, i.e. to see whether we can solve for <span class="math inline">\(s\)</span>.</p>
-<p>Regardless, and to return to the point of this section, it is crucial to note that if the series of event probabilities are incoherent, and thus do indeed lead to an invertible matrix, we can solve for an unknown set of stakes <span class="math inline">\(s_{n}\)</span>, suggesting that we can strucure our bets in such a way as to always obtain a net gain <span class="math inline">\(G_{n}\)</span>, regardless of the outcome. First, we provide the following arbitrary definite gains <span class="math inline">\(G_{n}\)</span> for each stake <span class="math inline">\(s_{n}\)</span>,</p>
+<p>Regardless, and to return to the point of this section, it is crucial to note that if the series of event probabilities are incoherent, and thus do indeed lead to an invertible matrix, we can solve for an unknown set of stakes <span class="math inline">\(s_{n}\)</span>, suggesting that we can structure our bets in such a way as to always obtain a net gain <span class="math inline">\(G_{n}\)</span>, regardless of the outcome. First, we provide the following arbitrary definite gains <span class="math inline">\(G_{n}\)</span> for each stake <span class="math inline">\(s_{n}\)</span>,</p>
 <pre class="r"><code>G &lt;- c(3, 1, 4)
 G</code></pre>
 <pre><code>## [1] 3 1 4</code></pre>
@@ -486,14 +486,14 @@ R</code></pre>
 <p>Moreover, now that the sum of probabilities is coherent, it will always result in a net gain of <span class="math inline">\(0\)</span> for any arbitrary series of stakes <span class="math inline">\(s\)</span>. To illustrate this, we randomly sample <span class="math inline">\(3\)</span> values between <span class="math inline">\(1:10000\)</span>,</p>
 <pre class="r"><code>s &lt;- sample(x = 1:10000, size = 3, replace = TRUE)
 s</code></pre>
-<pre><code>## [1] 3741 5436 8068</code></pre>
+<pre><code>## [1] 8940 8548 7133</code></pre>
 <p>so that the gains for each bet equal,</p>
 <pre class="r"><code>G &lt;- R%*%s
 G</code></pre>
 <pre><code>##         [,1]
-## [1,] -1432.5
-## [2,]   262.5
-## [3,]  1170.0</code></pre>
+## [1,]  1553.7
+## [2,]  1161.7
+## [3,] -2715.4</code></pre>
 <p>and, despite the relatively high stakes on each bet compared to the previous examples, notice the net overall gain <span class="math inline">\(G\)</span> maintains to be a constant <span class="math inline">\(0\)</span>:</p>
 <pre class="r"><code>round(sum(G))</code></pre>
 <pre><code>## [1] 0</code></pre>
