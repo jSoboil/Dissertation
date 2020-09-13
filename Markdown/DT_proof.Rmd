@@ -11,7 +11,7 @@ library(matlib)
 ```
 
 ##  An incoherent (Dutch Book) series of bets:
-Suppose we are asked to assign probabilities for $3$, mutually exclusive events. Let $E_{1}$, $E_{2}$, $E_{3}$ be the disjoint events and $p_{1}$, $p_{2}$, and $p_3$ the probabilities we associate with each event. More simply, $p_{i}$ is the probability of event $E_{i}$ occurring. We assign the following probabilities to each corresponding event:
+Suppose we are asked to assign probabilities for $3$, mutually exclusive events. Let $E_{1}$, $E_{2}$, $E_{3}$ be the disjoint events and $p_{1}$, $p_{2}$, and $p_3$ the probabilities we associate with each. Simply, $p_{i}$ is the probability of event $E_{i}$ occurring. We assign the following probabilities to each corresponding event:
 ```{r, echo = TRUE}
 p1 <- .3
 p2 <- .1
@@ -26,14 +26,14 @@ R <- matrix(c(1 - p1,   - p2,   - p3,
             nrow = 3)
 R
 ```
-Given this feature, we can assume that the person betting would take advantage of this information and thus place a stake $s_{n}$ on all possible bets $p_{i}$. The total gains $G_{n}$ can be thus defined as the difference between the sum of total stakes $s_{n}$ and the $n$ negative outcomes associated with $s_{i}$ possible stakes, i.e. it is the sum of negative bets $-p_{i}S_{n}$, such that $G_{n} = s_{n} - \sum_{1}^{n}p_{i}s_{i}$.
+Given this feature, we can assume that the person betting would take advantage of this information and thus place a stake $s_{n}$ on all possible bets $p_{i}$. The total gains $G_{n}$ can be subsequently defined as the difference between the sum of total stakes $s_{n}$ and the $n$ negative outcomes associated with $s_{i}$ possible stakes, i.e. it is the sum of negative bets $-p_{i}S_{n}$, such that $G_{n} = s_{n} - \sum_{1}^{n}p_{i}s_{i}$.
 
 Next, if we apply some arbitrary numerical stake $s$ to each possible event $p_{i}$,
 ```{r, echo = TRUE}
 s <- c(5, 2, 7)
 s
 ```
-we then have a set $R$ of probabilities corresponding to a vector $s_{n}$ of stakes, and can solve for system of linear equations. This will provide a corresponding gain $G$, the product of $Rs$, such that $G = Rs$.
+we can then have a matrix $R$ of probabilities corresponding to an assigned vector of $s_{n}$ stakes, allowing us to solve for system of linear equations. This finally provides a corresponding gain $G$, the product of $Rs$, such that $G = Rs$.
 ```{r, echo = TRUE}
 G <- solve(a = R, b = s)
 G
