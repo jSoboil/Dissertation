@@ -1,0 +1,134 @@
+---
+title: "DT_proof"
+author: "Josh Soboil"
+date: "13/09/2020"
+output: word_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(matlib)
+```
+
+#  An incoherent, Dutch Book series of bets:
+```{r, echo = TRUE}
+p1 <- .3
+p2 <- .1
+p3 <- .4
+c(p1, p2, p3)
+```
+The set of probabilities do not meet the criterion P($A\cap, ...,\cap A$) = 1:
+```{r, echo = TRUE}
+sum(p1 + p2 + p3)
+```
+In matrix form:
+```{r, echo = TRUE}
+R <- matrix(c(1 - p1,   - p2,   - p3,
+                - p1, 1 - p2,   - p3,
+                - p1,   - p2, 1 - p3), 
+            nrow = 3)
+R
+```
+
+and that we can invert the matrix because it is not singular:
+```{r, echo = TRUE}
+matrixcalc::is.singular.matrix(R)
+matlib::inv(R)
+```
+Notice matrix determinant > 0:
+```{r, echo = TRUE}
+det(R)
+```
+
+Here we give some arbitrary numerical stakes to each event with probability:
+```{r, echo = TRUE}
+s <- c(5, 2, 1)
+s
+```
+Accordingly, if we solve for the system of linear equations, the gains for each bet
+equal:
+```{r, echo = TRUE}
+G <- solve(a = inv(R), b = s)
+G
+```
+Notice the sum have positive gains of 2:
+```{r, echo = TRUE}
+round(sum(G))
+```
+Because this series of bets is inconsistent, we can solve for s again:
+```{r, echo = TRUE}
+s_solved <- solve(a = R, b = G)
+s_solved
+```
+and this will work for any arbitrary size of stakes (bets):
+```{r, echo = TRUE}
+s <- c(20291, 213, 13512)
+s
+```
+Accordingly, if we solve for the system of linear equations, the gains for each bet
+equal:
+```{r, echo = TRUE}
+G <- solve(a = inv(R), b = s)
+G
+```
+Again, notice the sum have positive gains:
+```{r, echo = TRUE}
+round(sum(G))
+```
+
+# A coherent series of bets:
+```{r A coherent bet, echo = TRUE}
+p1 <- .3
+p2 <- .3
+p3 <- .4
+c(p1, p2, p3)
+```
+The set of probabilities do  meet the criterion P($A\cap, ...,\cap A$) = 1:
+```{r, echo = TRUE}
+sum(p1 + p2 + p3)
+```
+In matrix form:
+```{r, echo = TRUE}
+R <- matrix(c(1 - p1,   - p2,   - p3,
+                - p1, 1 - p2,   - p3,
+                - p1,   - p2, 1 - p3), 
+            nrow = 3)
+R
+```
+and we cannot invert the matrix, because it is a singular matrix with a determinant of zero:
+```{r, echo = TRUE}
+matrixcalc::is.singular.matrix(R)
+det(R)
+```
+Here we give assign numerical stakes to each event with probability pn:
+```{r, echo = TRUE}
+s <- c(5, 2, 1)
+s
+```
+Accordingly, if we solve for the system of linear equations, the gains for each bet
+equal (we even have to revert to the %*% matrix operator)
+```{r, echo = TRUE}
+G <- R%*%s
+G
+```
+Notice the net overall gains are 0:
+```{r, echo = TRUE}
+round(sum(G))
+```
+ ... and theefore we cannot solve "for s = R^-1 * g"
+
+This will always result in a net gain of 0 for any arbitrary size of stakes (bets):
+```{r, echo = TRUE}
+s <- c(20291, 213, 13512)
+s
+```
+Accordingly, if we solve for the system of linear equations, the gains for each bet
+equal:
+```{r, echo = TRUE}
+G <- R%*%s
+G
+```
+Again, notice the net overall gains are 0:
+```{r, echo = TRUE}
+round(sum(G))
+```
