@@ -410,7 +410,16 @@ g_{\theta} = \left\{
 \right.
 \]</span> Now that we have inverted our perspective, we can consider a more complex scenario but with less fuddled language.</p>
 <p>We decide to place a series of separate bets on <span class="math inline">\(3\)</span>, disjoint, binary events -denoted <span class="math inline">\(\theta_{1}\)</span>, <span class="math inline">\(\theta_{2}\)</span>, and <span class="math inline">\(\theta_3\)</span> - and a corresponding stake <span class="math inline">\(S_\theta\)</span> for each event, forming a vector <span class="math inline">\(s=(S_{\theta_{1}}, S_{\theta_{2}}, S_{\theta_{3}})\)</span>. We can likewise consider the probability of each event <span class="math inline">\(\pi_{\theta_{i}}\)</span>, and assign the following probabilities <span class="math inline">\(\pi_{\theta_{1}}\)</span>, <span class="math inline">\(\pi_{\theta_{2}}\)</span>, and <span class="math inline">\(\pi_{\theta_{3}}\)</span>:</p>
+<pre class="r"><code>pi1 &lt;- .2
+pi2 &lt;- .8
+pi3 &lt;- .1</code></pre>
 <p>Because the events are mutually exclusive events, we can conveniently construct our probabilities in an <span class="math inline">\(n\times n\)</span> square matrix <span class="math inline">\(R\)</span> to track all possible events and the outcomes therein. Intuitively, this theoretically means that each row, column outcome should meet the condition <span class="math inline">\(\pi_{\theta_{ij}}=\pi_{\theta_{ij}}+\pi_{\theta_{ij}}\)</span>.</p>
+<pre class="r"><code>R &lt;- matrix(
+ c(1 - pi1,   - pi2,   - pi3,
+     - pi1, 1 - pi2,   - pi3,
+     - pi1,   - pi2, 1 - pi3),
+            nrow = 3)
+R</code></pre>
 <pre><code>##      [,1] [,2] [,3]
 ## [1,]  0.8 -0.2 -0.2
 ## [2,] -0.8  0.2 -0.8
