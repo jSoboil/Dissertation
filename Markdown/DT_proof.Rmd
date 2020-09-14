@@ -34,13 +34,13 @@ $$
 Now that we have inverted our perspective, we can consider a more complex scenario but with less fuddled language. 
 
 We decide to place a series of separate bets on $3$, disjoint, binary events -denoted $\theta_{1}$, $\theta_{2}$, and $\theta_3$ - and a corresponding stake $S_\theta$ for each event, forming a vector $s=(S_{\theta_{1}}, S_{\theta_{2}}, S_{\theta_{3}})$. We can likewise consider the probability of each event $\pi_{\theta_{i}}$, and assign the following probabilities $\pi_{\theta_{1}}$, $\pi_{\theta_{2}}$, and $\pi_{\theta_{3}}$:
-```{r}
+```{r, echo = TRUE}
 pi1 <- .2
 pi2 <- .8
 pi3 <- .1
 ```
 Because the events are mutually exclusive events, we can conveniently construct our probabilities in an $n\times n$ square matrix $R$ to track all possible events and the outcomes therein. Intuitively, this theoretically means that each row, column outcome should meet the condition $\pi_{\theta_{ij}}=\pi_{\theta_{ij}}+\pi_{\theta_{ij}}$. 
-```{r}
+```{r, echo = TRUE}
 R <- matrix(
  c(1 - pi1,   - pi2,   - pi3,
      - pi1, 1 - pi2,   - pi3,
