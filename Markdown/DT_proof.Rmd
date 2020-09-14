@@ -22,7 +22,7 @@ g_{\theta} = \left\{
     \end{array}
 \right.
 $$
-Nevertheless, the problem is that this is from the perspective of a gambler and not the bookie. In order to fully comprehend this scenario, we are forced to invert this function. The reason for this is that, in reality, we are the bookie and, much like the bookie, we provide our own probability judgements of an event's outcomes $\pi$, referred to as the 'price' above, with an associated set of stakes $S$ thereof. This, consequently, is sometimes referred as being a bookie with 'nature'. Regardless, below we find the same gain function $g_\theta$ inverted.
+Nevertheless, this is from the perspective of a gambler and not the bookie. In order to fully comprehend this scenario, we are obliged to invert this function. The reason for this is that, in reality, we are the bookie and, much like the bookie, we provide our own probability judgements of an event's outcomes $\pi$ - which is referred to as the 'price' above. This, consequently, is sometimes referred as being a bookie with 'nature'. Regardless, below we find the same gain function $g_\theta$ inverted.
 $$
 g_{\theta} = \left\{
     \begin{array}{ll}
@@ -31,14 +31,15 @@ g_{\theta} = \left\{
     \end{array}
 \right.
 $$
+Now that we have inverted our perspective, we can consider a more complex scenario but with less fuddled language. 
 
-Now that we have inverted our perspective, we can consider a more complex scenario but with less fuddled language. We decide to place a series of separate bets on $3$ mutually exclusive events, $\theta_{1}$, $\theta_{2}$, and $\theta_3$, each with a corresponding stake $S_\theta$, which form a vector $s=(S_{\theta_{1}}, S_{\theta_{2}}, S_{\theta_{3}})$. We can likewise consider the probability of each event $\theta_{i}$, and assign the following probabilities $\pi_{\theta_{1}}$, $\pi_{\theta_{2}}$, and $\pi_{\theta_{3}}$ to each event,
+We decide to place a series of separate bets on $3$, disjoint, binary events -denoted $\theta_{1}$, $\theta_{2}$, and $\theta_3$ - and a corresponding stake $S_\theta$ for each event, forming a vector $s=(S_{\theta_{1}}, S_{\theta_{2}}, S_{\theta_{3}})$. We can likewise consider the probability of each event $\pi_{\theta_{i}}$, and assign the following probabilities $\pi_{\theta_{1}}$, $\pi_{\theta_{2}}$, and $\pi_{\theta_{3}}$:
 ```{r}
-pi1 <- .1
+pi1 <- .2
 pi2 <- .8
-pi3 <- .25
+pi3 <- .1
 ```
-Because the events are either-or, mutually exclusive type events, we can conveniently construct our probabilities in an $n\times n$ square matrix $R$ to track all the possible events and the outcomes therein. Intuitively, this theoretically means that each row should meet the condition $1-\pi_{\theta_{1}}=\pi_{\theta_{2}}+\pi_{\theta_{3}}$, and vice versa for all other events. 
+Because the events are mutually exclusive events, we can conveniently construct our probabilities in an $n\times n$ square matrix $R$ to track all possible events and the outcomes therein. Intuitively, this theoretically means that each row, column outcome should meet the condition $\pi_{\theta_{ij}}=\pi_{\theta_{ij}}+\pi_{\theta_{ij}}$. 
 ```{r}
 R <- matrix(
  c(1 - pi1,   - pi2,   - pi3,
@@ -49,17 +50,17 @@ R
 ```
 Accordingly, we can then use the vectors of stakes $s$ multiplied with our $n\times n$ matrix $R$ to solve for the vector of gains $g_{\theta}$, such that $g_{\theta}=Rs$.
 
-However, it is now critical to bring to light the following for the reader who has not noticed it: our set of bets do not conform to Kolmogorov’s probability axiom $P(A\cap, ...,\cap A) = 1$ for a mutually exclusive set of events. As the sum of the bets is
+However, it is now critical to bring to light the following for the reader who has not yet noticed: our set of bets do not conform to Kolmogorov’s probability axiom $P(A\cap, ...,\cap A) = 1$ for a mutually exclusive set of events. As the sum of the bets is
 ```{r, echo = TRUE}
 sum(pi1 + pi2 + pi3)
 ```
-it clearly means that $\pi_{\theta_{1}}+\pi_{\theta_{2}}+\pi_{\theta_{3}}\neq1$. This, consequently, suggests that the matrix $R$ is invertible. Technically speaking, and using a more commonly adopted notation, there is a scalar $x$ that gives the desired output $b = Ax$. As a corollary, this also means that the determinant of the matrix $R$ is $|{R}| \neq 0$, as evidence by
+it clearly implies that $\pi_{\theta_{1}}+\pi_{\theta_{2}}+\pi_{\theta_{3}}\neq0$. Consequently, the matrix $R$ is invertible. Technically speaking, and using a more commonly adopted notation, there is a scalar $x$ that gives the desired output $b = Ax$. As a corollary, this also means that the determinant of the matrix $R$ is $|{R}| \neq 0$, as evidence by
 ```{r, echo = TRUE}
 det(R)
 ```
-It is blatantly important to prove whether our matrix $R$ does conform to this conditions, where $I = R^{-1}R$. However, we must initially digress by explaining the properties of an identity matrix $I$ for those of us who are unfamiliar. 
+Thus, we are obliged to prove whether our matrix $R$ does conform to this condition, if $I = R^{-1}R$. Nevertheless, we must first digress by explaining the properties of an identity matrix $I$, for those who are unfamiliar. 
 
-An identity matrix $I$ is where all the diagonals of a matrix are $1$'s, with the rest of the elements only containing $0$'s. It is, broadly speaking, a convenient tool used for matrix manipulations. Below is an example of what a $n\times n$ identity matrix $I$ will look like:
+An identity matrix $I$ is where all the diagonals of a matrix are $1$'s, with the rest of the elements only containing $0$'s. It is, broadly speaking, a convenient tool used for matrix manipulation. Below is an example of an $n\times n$ identity matrix $I$:
 ```{r, echo = FALSE}
 I <- diag(c(1, 1, 1))
 I
@@ -69,24 +70,27 @@ It is, therefore, a literal 'do nothing' matrix, as is clearly evidence by solvi
 b <- c(1, 2, 3)
 I%*%b
 ```
-Evidently, the multiplication $I\times b$ does not change the initial values of $b$, such that $I\times b = b$. This, then, brings us back to the focal point of this section. 
+Evidently, $I\times b$ does not change the initial values of $b$, such that $I\times b = b$. This, then, brings us back to the focal point of this discussion. 
 
 If $R$ is indeed an invertible matrix, we will be able to recreate the same identity matrix $I$ as above, where $I = R^{-1}R$.
 ```{r, echo = TRUE}
 round(inv(R)%*%R, digits = 5)
 ```
-The result of applying $R^{-1}R$ clearly mirrors the identity matrix example given prior. As already alluded to, proving $I = R^{-1}R$ can be thought as a soft proof for whether any combination of linear equations is solvable if, for example, we wanted to bring $R$ to the other side of the equation and solve for $s$. Consequently, if it is proven, this  makes it possible to solve for the vector of stakes $s$, by them as an unknown, and assigning $g_{\theta}$ a vector of desired gains. For instance, if we assign the vector $g_{\theta}$ the following values 
+
+The result of applying $R^{-1}R$ clearly mirrors the identity matrix example given prior. As already alluded to, proving $I = R^{-1}R$ can be thought as a soft proof for whether any combination of linear equations is solvable if, for example, we wanted to bring $R$ to the other side of the equation and solve for $s$. Consequently, if it is proven, this makes it possible to solve for the vector of stakes $s$, by assuming them to be an unknown, and, in turn, by assigning a vector of desired gains to $g_{\theta}$. For instance, if we assign the vector $g_{\theta}$ the following positive, desired gains,
 ```{r, echo = TRUE}
-g_theta <- c(32, -1, 41)
+g_theta <- c(400, 400, 400)
 g_theta
 ```
-it is then possible to solve for the linear transformation of $s$ such that we are guaranteed our desired outcomes for $g_\theta$ above. First, multiply each side of the equation by $R^{-1}$, so that $R^{-1}Rs=R^{-1}g$, thus $I\times s = s =R^{-1}g$, and, ultimately $s = R^{-1}g$. Accordingly, we can solve for a vector of stakes $s$ that guarantees a net positive gain:
+it is then possible to solve for the linear transformation of $s$, such that we are guaranteed the desired outcomes initially assigned to $g_\theta$ above. First, multiply each side of the equation by $R^{-1}$, so that $R^{-1}Rs=R^{-1}g$, thus $I\times s = s =R^{-1}g$, and, ultimately $s = R^{-1}g$. Accordingly, we can solve for a vector of stakes $s$ that guarantees a net positive gain for each event,
 ```{r, echo = TRUE}
 s_solved <- inv(R)%*%g_theta
 s_solved
 ```
-then, as is obvious,
+and, in reverse, as is obvious from the above,
 ```{r, echo = TRUE}
 R%*%s_solved
 ```
-To conclude, it is clear that, if the probability matrix $R$ meets the invertible condition, such that $I = R^{-1}R$, we can solve for an unknown vector of stakes $s$ by equating it with the product of a linear combination of desired gains $g_{\theta}$ and an associated probability matrix $R$. In technical language, this simply means that when $R$ is an invertible matrix, the solution to $Rs=g_{\theta}$ is $s=R^{-1}g$.
+we get our desired gains $g_\theta$. 
+
+To conclude, it is clear that, if the probability matrix $R$ meets the invertible condition as has been described here, such that $I = R^{-1}R$, we can solve for an unknown vector of stakes $s$ by equating it with the product of a linear combination of desired gains $g_{\theta}$ and an associated probability matrix $R$. In technical language, this means that when $R$ is an invertible matrix, the solution to $Rs=g_{\theta}$ is simply $s=R^{-1}g$.
