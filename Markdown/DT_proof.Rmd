@@ -79,7 +79,7 @@ round(inv(R)%*%R, digits = 5)
 ```
 The result of applying $R^{-1}R$ clearly mirrors the identity matrix example given above. As has already been alluded to, proving $I = R^{-1}R$ can be thought as a soft proof for whether any combination of linear equations is solvable if we wanted, for example, to bring $R$ to the other side of the equation. Consequently, if it is proven, this enables us to solve for a vector of stakes $s$, rather than $g_{\theta}$, by assigning $g_{\theta}$ a vector of desired gains. For instance, if we assign the vector $g_{\theta}$ the following values 
 ```{r, echo = TRUE}
-g_theta <- c(3, 1, 4)
+g_theta <- c(32, -1, 41)
 g_theta
 ```
 it possible to solve for the linear transformation of $s$. First we multiply each side of the equation by $R^{-1}$, so that $R^{-1}Rs=R^{-1}g$, thus $I\times s = s =R^{-1}g$, and, ultimately $s = R^{-1}g$. Accordingly, we solve for a vector of stakes $s$ that guarantees a net positive gain:
@@ -87,4 +87,8 @@ it possible to solve for the linear transformation of $s$. First we multiply eac
 s_solved <- inv(R)%*%g_theta
 s_solved
 ```
-In sum then, it is obvious that this conclusively proves the fact that, if the probability matrix $R$ meets the invertible condition, such that $I = R^{-1}R$, we can solve for an unknown vector of stakes $s$ by equating it with the product of a linear combination of desired gains $g_{\theta}$ and an associated probability matrix $R$. In technical language, this means that when $R$ is an invertible matrix, the solution to $Rs=g_{\theta}$ is $s=R^{-1}g$.
+then, as is obvious,
+```{r, echo = TRUE}
+R%*%s_solved
+```
+In sum then, it is clear that this conclusively proves the fact that, if the probability matrix $R$ meets the invertible condition, such that $I = R^{-1}R$, we can solve for an unknown vector of stakes $s$ by equating it with the product of a linear combination of desired gains $g_{\theta}$ and an associated probability matrix $R$. In technical language, this means that when $R$ is an invertible matrix, the solution to $Rs=g_{\theta}$ is $s=R^{-1}g$.
