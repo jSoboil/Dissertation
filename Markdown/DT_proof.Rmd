@@ -13,7 +13,7 @@ library(matlib)
 ##  An incoherent (Dutch Book) series of bets:
 Consider a hypothetical event $\theta$ and its set of binary outcomes, where $\theta = 1$ indicates the event occurred and $\theta = 0$ indicates it did not. We can subsequently define a bet to be worth an associated stake $S$ if $\theta$ does occur, and nothing if $\theta$ does not occur, i.e. we can either win our bet with a total payout $S$ or lose.
 
-Further consider a scenario where we are offered a bet a bookie, who is typically known to sell a bet at a price $\pi_{\theta}S$. Likewise, the ratio $\pi:(1-\pi)$ is the betting odds in favour of the event $\theta$. We can also denote the action of placing a bet on $\theta$ as $a_{S,\theta}$. This enables us to associate consequences with an action. For instance, if $\theta=1$, the purchaser of the bet will have a net gain of $(1-\pi)S$, which is simply the stake $S$ minus the initial buy-in price $\pi S$; similarly, if $\theta = 0$, a net gain of $-\pi S$. The rules for these gains can notationally represented by the function,
+If we decide to buy-in on a bet, bookies are typically known to sell a bet at a price $\pi_{\theta}S$. Likewise, the ratio $\pi:(1-\pi)$ is a common way to denote the betting odds in favour of an event $\theta$. We can also denote the action of placing a bet on $\theta$ as $a_{S,\theta}$. This enables us to associate each action with a set of consequences, which will be referred to as a set of gains $g_\theta$. For instance, if the outcome is $\theta = 1$, the purchaser of the bet will have a net gain of $(1-\pi)S$, which is simply the stake $S$ less the initial buy-in price of $\pi S$; similarly, if $\theta = 0$, the net gain will be the loss of the initial buy-in price $-\pi S$. The rules for these gains can thus be represented in notational form with the following function,
 $$
 g_{\theta} = \left\{
     \begin{array}{ll}
@@ -22,43 +22,35 @@ g_{\theta} = \left\{
     \end{array}
 \right.
 $$
-Nevertheless, this is from the perspective of a gambler and not the bookie. In order to fully comprehend this scenario, we are obliged to invert this function. The reason for this is that, in reality, we are the bookie and, much like the bookie, we provide our own probability judgements of an event's outcomes $\pi$ - which is referred to as the 'price' above. This, consequently, is sometimes referred as being a bookie with 'nature'. Regardless, below we find the same gain function $g_\theta$ inverted.
-$$
-g_{\theta} = \left\{
-    \begin{array}{ll}
-        -(1-\pi_{i})S &\mbox{if } \theta=1\\
-          \pi_{i}S &\mbox{if } \theta=0
-    \end{array}
-\right.
-$$
-Now that we have inverted our perspective, we can consider a more complex scenario but with less fuddled language. 
+Accordingly, the above notation also allows us to systematically assign our own probability judgements $\pi_{\theta_{i}}$ to an event's $\theta$ possible outcomes, $\theta=1$ or $\theta=0$ for instance. Earlier, this was simply referred to as the 'price'. However, consider a scenario where there is no bookie and only an individual who is subjectively evaluating their own possible investment options. Such scenarios are often described as making bets with nature, where 'nature' simply acts as the bookmaker.
 
-We decide to place a series of separate bets on $3$, disjoint, binary events -denoted $\theta_{1}$, $\theta_{2}$, and $\theta_3$ - and a corresponding stake $S_\theta$ for each event, forming a vector $s=(S_{\theta_{1}}, S_{\theta_{2}}, S_{\theta_{3}})$. We can likewise consider the probability of each event $\pi_{\theta_{i}}$, and assign the following probabilities $\pi_{\theta_{1}}$, $\pi_{\theta_{2}}$, and $\pi_{\theta_{3}}$:
+Regardless of what we may call it, now that we have some familiarity with notation that allows for more precise language, we can place a series of more complex bets on $3$, disjoint events denoted $\theta_{1}$, $\theta_{2}$, and $\theta_3$. Like earlier, each bet has a corresponding stake $S_\theta$, thus forming a vector $s=(S_{\theta_{1}}, S_{\theta_{2}}, S_{\theta_{3}})$. Let us consider the probability of each event $\pi_{\theta_{i}}$, and assign the following probabilities $\pi_{\theta_{1}}$, $\pi_{\theta_{2}}$, and $\pi_{\theta_{3}}$, to each as
 ```{r, echo = TRUE}
-pi1 <- .2
+pi1 <- .1
 pi2 <- .8
-pi3 <- .1
+pi3 <- .2
 ```
-Because the events are mutually exclusive events, we can conveniently construct our probabilities in an $n\times n$ square matrix $R$ to track all possible events and the outcomes therein. Intuitively, this theoretically means that each row, column outcome should meet the condition $\pi_{\theta_{ij}}=\pi_{\theta_{ij}}+\pi_{\theta_{ij}}$. 
+Because the events are mutually exclusive, we can also conveniently construct our probabilities in an $n\times n$ square matrix $R$ to track all possible outcomes, of each event, therein. Intuitively, this theoretically means that each set of column outcomes should meet the condition $\pi_{\theta_{ij}}=\pi_{\theta_{ij}}+\pi_{\theta_{ij}}$. 
 ```{r, echo = TRUE}
 R <- matrix(
- c(1 - pi1,   - pi2,   - pi3,
-     - pi1, 1 - pi2,   - pi3,
-     - pi1,   - pi2, 1 - pi3),
-            nrow = 3)
+ c(1 -  pi1,    - pi2,    - pi3,
+      - pi1,  1 - pi2,    - pi3,
+      - pi1,    - pi2,  1 - pi3
+   ),
+            ncol = 3, nrow = 3)
 R
 ```
-Accordingly, we can then use the vectors of stakes $s$ multiplied with our $n\times n$ matrix $R$ to solve for the vector of gains $g_{\theta}$, such that $g_{\theta}=Rs$.
+Thereafter, we can then place a stake on each outcome, such that a vector of stakes $s$ multiplied with our $n\times n$ matrix $R$ can solve for a vector of gains $g_{\theta}$, where $g_{\theta}=Rs$. However, it is important to state that we are obliged to assume that the bettor can both buy and sell bets within this scenario, i.e. you can place both positive and negative stakes. The implications of this is minimal, as it is a common betting strategy adopted by bookies to 'lay off' the risk of their large bets. However, it is nevertheless critical to bring to light the one fundamental flaw in our propositions, especially for the reader who has not yet noticed.
 
-However, it is now critical to bring to light the following for the reader who has not yet noticed: our set of bets do not conform to Kolmogorov’s probability axiom $P(A\cap, ...,\cap A) = 1$ for a mutually exclusive set of events. As the sum of the bets is
+Our initial judgement regarding the bet probabilities is erroneous as it does not conform to Kolmogorov’s probability axiom for disjoint events, where $P(A\cap, ...,\cap A) = 1$. Due to the total probability of the bets summing to,
 ```{r, echo = TRUE}
 sum(pi1 + pi2 + pi3)
 ```
-it clearly implies that $\pi_{\theta_{1}}+\pi_{\theta_{2}}+\pi_{\theta_{3}}\neq0$. Consequently, the matrix $R$ is invertible. Technically speaking, and using a more commonly adopted notation, there is a scalar $x$ that gives the desired output $b = Ax$. As a corollary, this also means that the determinant of the matrix $R$ is $|{R}| \neq 0$, as evidence by
+it clearly implies that $\pi_{\theta_{1}}+\pi_{\theta_{2}}+\pi_{\theta_{3}}\neq0$. Consequently, the matrix $R$ is invertible. Technically speaking, and using a more commonly adopted notation, there is a scalar $x$ that gives the desired output $b = Ax$. As a corollary, this likewise means that the determinant of the matrix $R$ is $|{R}| \neq 0$, as evidence by
 ```{r, echo = TRUE}
 det(R)
 ```
-Thus, we are obliged to prove whether our matrix $R$ does conform to this condition, if $I = R^{-1}R$. Nevertheless, we must first digress by explaining the properties of an identity matrix $I$, for those who are unfamiliar. 
+Thus, we are blatantly obliged to prove whether our matrix $R$ does conform to this condition, if $I = R^{-1}R$. Nevertheless, we must first digress by explaining the important properties of an identity matrix $I$, for those who are unfamiliar. 
 
 An identity matrix $I$ is where all the diagonals of a matrix are $1$'s, with the rest of the elements only containing $0$'s. It is, broadly speaking, a convenient tool used for matrix manipulation. Below is an example of an $n\times n$ identity matrix $I$:
 ```{r, echo = FALSE}
@@ -77,12 +69,12 @@ If $R$ is indeed an invertible matrix, we will be able to recreate the same iden
 round(inv(R)%*%R, digits = 5)
 ```
 
-The result of applying $R^{-1}R$ clearly mirrors the identity matrix example given prior. As already alluded to, proving $I = R^{-1}R$ can be thought as a soft proof for whether any combination of linear equations is solvable if, for example, we wanted to bring $R$ to the other side of the equation and solve for $s$. Consequently, if it is proven, this makes it possible to solve for the vector of stakes $s$, by assuming them to be an unknown, and, in turn, by assigning a vector of desired gains to $g_{\theta}$. For instance, if we assign the vector $g_{\theta}$ the following positive, desired gains,
+The result of applying $R^{-1}R$ clearly mirrors the identity matrix example given prior. As already alluded to, proving $I = R^{-1}R$ can be thought as a soft proof for whether any combination of linear equations is solvable. Consequently, because it is proven, this makes it possible to solve for the vector of stakes $s$, first by assuming them to be an unknown, and, in turn, by assigning a vector of desired gains to $g_{\theta}$. For instance, if we assign the vector $g_{\theta}$ the following random, hypothetical desired gains,
 ```{r, echo = TRUE}
-g_theta <- c(400, 400, 400)
+g_theta <- sample(1:500, 3, replace = TRUE)
 g_theta
 ```
-it is then possible to solve for the linear transformation of $s$, such that we are guaranteed the desired outcomes initially assigned to $g_\theta$ above. First, multiply each side of the equation by $R^{-1}$, so that $R^{-1}Rs=R^{-1}g$, thus $I\times s = s =R^{-1}g$, and, ultimately $s = R^{-1}g$. Accordingly, we can solve for a vector of stakes $s$ that guarantees a net positive gain for each event,
+it is subsequently possible to solve for the linear transformation of $s$, such that we are guaranteed the desired outcomes initially assigned to $g_\theta$ above. First, multiply each side of the equation by $R^{-1}$, so that $R^{-1}Rs=R^{-1}g$, where $I\times s = s =R^{-1}g$, and, thus ultimately, $s = R^{-1}g$. Accordingly, we can solve for a vector of stakes $s$ to guarantee a net positive gain for each event,
 ```{r, echo = TRUE}
 s_solved <- inv(R)%*%g_theta
 s_solved
@@ -91,6 +83,6 @@ and, in reverse, as is obvious from the above,
 ```{r, echo = TRUE}
 R%*%s_solved
 ```
-we get our desired gains $g_\theta$. 
+we get our desired gains $g_\theta$ with certainty. 
 
-To conclude, it is clear that, if the probability matrix $R$ meets the invertible condition as has been described here, such that $I = R^{-1}R$, we can solve for an unknown vector of stakes $s$ by equating it with the product of a linear combination of desired gains $g_{\theta}$ and an associated probability matrix $R$. In technical language, this means that when $R$ is an invertible matrix, the solution to $Rs=g_{\theta}$ is simply $s=R^{-1}g$.
+To conclude, it is clear that, if the probability matrix $R$ is indeed invertible, such that $I = R^{-1}R$, we can solve for an unknown vector of stakes $s$ by equating it with the product of a vector of desired gains $g_{\theta}$ and an associated probability matrix $R$. In concise technical language, this means that when $R$ is an invertible matrix, the solution to $Rs=g_{\theta}$ is simply $s=R^{-1}g$. Lastly, it is also interesting to note that individuals are often on the receiving end of such a betting structure, whereby bookies commonly adjust the odds to be 'in their favour', thus guaranteeing a net positive gain.

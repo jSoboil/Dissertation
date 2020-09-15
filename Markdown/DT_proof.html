@@ -394,44 +394,38 @@ summary {
 <div id="an-incoherent-dutch-book-series-of-bets" class="section level2">
 <h2>An incoherent (Dutch Book) series of bets:</h2>
 <p>Consider a hypothetical event <span class="math inline">\(\theta\)</span> and its set of binary outcomes, where <span class="math inline">\(\theta = 1\)</span> indicates the event occurred and <span class="math inline">\(\theta = 0\)</span> indicates it did not. We can subsequently define a bet to be worth an associated stake <span class="math inline">\(S\)</span> if <span class="math inline">\(\theta\)</span> does occur, and nothing if <span class="math inline">\(\theta\)</span> does not occur, i.e. we can either win our bet with a total payout <span class="math inline">\(S\)</span> or lose.</p>
-<p>Further consider a scenario where we are offered a bet a bookie, who is typically known to sell a bet at a price <span class="math inline">\(\pi_{\theta}S\)</span>. Likewise, the ratio <span class="math inline">\(\pi:(1-\pi)\)</span> is the betting odds in favour of the event <span class="math inline">\(\theta\)</span>. We can also denote the action of placing a bet on <span class="math inline">\(\theta\)</span> as <span class="math inline">\(a_{S,\theta}\)</span>. This enables us to associate consequences with an action. For instance, if <span class="math inline">\(\theta=1\)</span>, the purchaser of the bet will have a net gain of <span class="math inline">\((1-\pi)S\)</span>, which is simply the stake <span class="math inline">\(S\)</span> minus the initial buy-in price <span class="math inline">\(\pi S\)</span>; similarly, if <span class="math inline">\(\theta = 0\)</span>, a net gain of <span class="math inline">\(-\pi S\)</span>. The rules for these gains can notationally represented by the function, <span class="math display">\[
+<p>If we decide to buy-in on a bet, bookies are typically known to sell a bet at a price <span class="math inline">\(\pi_{\theta}S\)</span>. Likewise, the ratio <span class="math inline">\(\pi:(1-\pi)\)</span> is a common way to denote the betting odds in favour of an event <span class="math inline">\(\theta\)</span>. We can also denote the action of placing a bet on <span class="math inline">\(\theta\)</span> as <span class="math inline">\(a_{S,\theta}\)</span>. This enables us to associate each action with a set of consequences, which will be referred to as a set of gains <span class="math inline">\(g_\theta\)</span>. For instance, if the outcome is <span class="math inline">\(\theta = 1\)</span>, the purchaser of the bet will have a net gain of <span class="math inline">\((1-\pi)S\)</span>, which is simply the stake <span class="math inline">\(S\)</span> less the initial buy-in price of <span class="math inline">\(\pi S\)</span>; similarly, if <span class="math inline">\(\theta = 0\)</span>, the net gain will be the loss of the initial buy-in price <span class="math inline">\(-\pi S\)</span>. The rules for these gains can thus be represented in notational form with the following function, <span class="math display">\[
 g_{\theta} = \left\{
     \begin{array}{ll}
         (1-\pi_{i})S &amp;\mbox{if } \theta=1\\
         -\pi_{i}S &amp;\mbox{if } \theta=0
     \end{array}
 \right.
-\]</span> Nevertheless, this is from the perspective of a gambler and not the bookie. In order to fully comprehend this scenario, we are obliged to invert this function. The reason for this is that, in reality, we are the bookie and, much like the bookie, we provide our own probability judgements of an event’s outcomes <span class="math inline">\(\pi\)</span> - which is referred to as the ‘price’ above. This, consequently, is sometimes referred as being a bookie with ‘nature’. Regardless, below we find the same gain function <span class="math inline">\(g_\theta\)</span> inverted. <span class="math display">\[
-g_{\theta} = \left\{
-    \begin{array}{ll}
-        -(1-\pi_{i})S &amp;\mbox{if } \theta=1\\
-          \pi_{i}S &amp;\mbox{if } \theta=0
-    \end{array}
-\right.
-\]</span> Now that we have inverted our perspective, we can consider a more complex scenario but with less fuddled language.</p>
-<p>We decide to place a series of separate bets on <span class="math inline">\(3\)</span>, disjoint, binary events -denoted <span class="math inline">\(\theta_{1}\)</span>, <span class="math inline">\(\theta_{2}\)</span>, and <span class="math inline">\(\theta_3\)</span> - and a corresponding stake <span class="math inline">\(S_\theta\)</span> for each event, forming a vector <span class="math inline">\(s=(S_{\theta_{1}}, S_{\theta_{2}}, S_{\theta_{3}})\)</span>. We can likewise consider the probability of each event <span class="math inline">\(\pi_{\theta_{i}}\)</span>, and assign the following probabilities <span class="math inline">\(\pi_{\theta_{1}}\)</span>, <span class="math inline">\(\pi_{\theta_{2}}\)</span>, and <span class="math inline">\(\pi_{\theta_{3}}\)</span>:</p>
-<pre class="r"><code>pi1 &lt;- .2
+\]</span> Accordingly, the above notation also allows us to systematically assign our own probability judgements <span class="math inline">\(\pi_{\theta_{i}}\)</span> to an event’s <span class="math inline">\(\theta\)</span> possible outcomes, <span class="math inline">\(\theta=1\)</span> or <span class="math inline">\(\theta=0\)</span> for instance. Earlier, this was simply referred to as the ‘price’. However, consider a scenario where there is no bookie and only an individual who is subjectively evaluating their own possible investment options. Such scenarios are often described as making bets with nature, where ‘nature’ simply acts as the bookmaker.</p>
+<p>Regardless of what we may call it, now that we have some familiarity with notation that allows for more precise language, we can place a series of more complex bets on <span class="math inline">\(3\)</span>, disjoint events denoted <span class="math inline">\(\theta_{1}\)</span>, <span class="math inline">\(\theta_{2}\)</span>, and <span class="math inline">\(\theta_3\)</span>. Like earlier, each bet has a corresponding stake <span class="math inline">\(S_\theta\)</span>, thus forming a vector <span class="math inline">\(s=(S_{\theta_{1}}, S_{\theta_{2}}, S_{\theta_{3}})\)</span>. Let us consider the probability of each event <span class="math inline">\(\pi_{\theta_{i}}\)</span>, and assign the following probabilities <span class="math inline">\(\pi_{\theta_{1}}\)</span>, <span class="math inline">\(\pi_{\theta_{2}}\)</span>, and <span class="math inline">\(\pi_{\theta_{3}}\)</span>, to each as</p>
+<pre class="r"><code>pi1 &lt;- .1
 pi2 &lt;- .8
-pi3 &lt;- .1</code></pre>
-<p>Because the events are mutually exclusive events, we can conveniently construct our probabilities in an <span class="math inline">\(n\times n\)</span> square matrix <span class="math inline">\(R\)</span> to track all possible events and the outcomes therein. Intuitively, this theoretically means that each row, column outcome should meet the condition <span class="math inline">\(\pi_{\theta_{ij}}=\pi_{\theta_{ij}}+\pi_{\theta_{ij}}\)</span>.</p>
+pi3 &lt;- .2</code></pre>
+<p>Because the events are mutually exclusive, we can also conveniently construct our probabilities in an <span class="math inline">\(n\times n\)</span> square matrix <span class="math inline">\(R\)</span> to track all possible outcomes, of each event, therein. Intuitively, this theoretically means that each set of column outcomes should meet the condition <span class="math inline">\(\pi_{\theta_{ij}}=\pi_{\theta_{ij}}+\pi_{\theta_{ij}}\)</span>.</p>
 <pre class="r"><code>R &lt;- matrix(
- c(1 - pi1,   - pi2,   - pi3,
-     - pi1, 1 - pi2,   - pi3,
-     - pi1,   - pi2, 1 - pi3),
-            nrow = 3)
+ c(1 -  pi1,    - pi2,    - pi3,
+      - pi1,  1 - pi2,    - pi3,
+      - pi1,    - pi2,  1 - pi3
+   ),
+            ncol = 3, nrow = 3)
 R</code></pre>
 <pre><code>##      [,1] [,2] [,3]
-## [1,]  0.8 -0.2 -0.2
+## [1,]  0.9 -0.1 -0.1
 ## [2,] -0.8  0.2 -0.8
-## [3,] -0.1 -0.1  0.9</code></pre>
-<p>Accordingly, we can then use the vectors of stakes <span class="math inline">\(s\)</span> multiplied with our <span class="math inline">\(n\times n\)</span> matrix <span class="math inline">\(R\)</span> to solve for the vector of gains <span class="math inline">\(g_{\theta}\)</span>, such that <span class="math inline">\(g_{\theta}=Rs\)</span>.</p>
-<p>However, it is now critical to bring to light the following for the reader who has not yet noticed: our set of bets do not conform to Kolmogorov’s probability axiom <span class="math inline">\(P(A\cap, ...,\cap A) = 1\)</span> for a mutually exclusive set of events. As the sum of the bets is</p>
+## [3,] -0.2 -0.2  0.8</code></pre>
+<p>Thereafter, we can then place a stake on each outcome, such that a vector of stakes <span class="math inline">\(s\)</span> multiplied with our <span class="math inline">\(n\times n\)</span> matrix <span class="math inline">\(R\)</span> can solve for a vector of gains <span class="math inline">\(g_{\theta}\)</span>, where <span class="math inline">\(g_{\theta}=Rs\)</span>. However, it is important to state that we are obliged to assume that the bettor can both buy and sell bets within this scenario, i.e. you can place both positive and negative stakes. The implications of this is minimal, as it is a common betting strategy adopted by bookies to ‘lay off’ the risk of their large bets. However, it is nevertheless critical to bring to light the one fundamental flaw in our propositions, especially for the reader who has not yet noticed.</p>
+<p>Our initial judgement regarding the bet probabilities is erroneous as it does not conform to Kolmogorov’s probability axiom for disjoint events, where <span class="math inline">\(P(A\cap, ...,\cap A) = 1\)</span>. Due to the total probability of the bets summing to,</p>
 <pre class="r"><code>sum(pi1 + pi2 + pi3)</code></pre>
 <pre><code>## [1] 1.1</code></pre>
-<p>it clearly implies that <span class="math inline">\(\pi_{\theta_{1}}+\pi_{\theta_{2}}+\pi_{\theta_{3}}\neq0\)</span>. Consequently, the matrix <span class="math inline">\(R\)</span> is invertible. Technically speaking, and using a more commonly adopted notation, there is a scalar <span class="math inline">\(x\)</span> that gives the desired output <span class="math inline">\(b = Ax\)</span>. As a corollary, this also means that the determinant of the matrix <span class="math inline">\(R\)</span> is <span class="math inline">\(|{R}| \neq 0\)</span>, as evidence by</p>
+<p>it clearly implies that <span class="math inline">\(\pi_{\theta_{1}}+\pi_{\theta_{2}}+\pi_{\theta_{3}}\neq0\)</span>. Consequently, the matrix <span class="math inline">\(R\)</span> is invertible. Technically speaking, and using a more commonly adopted notation, there is a scalar <span class="math inline">\(x\)</span> that gives the desired output <span class="math inline">\(b = Ax\)</span>. As a corollary, this likewise means that the determinant of the matrix <span class="math inline">\(R\)</span> is <span class="math inline">\(|{R}| \neq 0\)</span>, as evidence by</p>
 <pre class="r"><code>det(R)</code></pre>
 <pre><code>## [1] -0.1</code></pre>
-<p>Thus, we are obliged to prove whether our matrix <span class="math inline">\(R\)</span> does conform to this condition, if <span class="math inline">\(I = R^{-1}R\)</span>. Nevertheless, we must first digress by explaining the properties of an identity matrix <span class="math inline">\(I\)</span>, for those who are unfamiliar.</p>
+<p>Thus, we are blatantly obliged to prove whether our matrix <span class="math inline">\(R\)</span> does conform to this condition, if <span class="math inline">\(I = R^{-1}R\)</span>. Nevertheless, we must first digress by explaining the important properties of an identity matrix <span class="math inline">\(I\)</span>, for those who are unfamiliar.</p>
 <p>An identity matrix <span class="math inline">\(I\)</span> is where all the diagonals of a matrix are <span class="math inline">\(1\)</span>’s, with the rest of the elements only containing <span class="math inline">\(0\)</span>’s. It is, broadly speaking, a convenient tool used for matrix manipulation. Below is an example of an <span class="math inline">\(n\times n\)</span> identity matrix <span class="math inline">\(I\)</span>:</p>
 <pre><code>##      [,1] [,2] [,3]
 ## [1,]    1    0    0
@@ -451,25 +445,25 @@ I%*%b</code></pre>
 ## [1,]    1    0    0
 ## [2,]    0    1    0
 ## [3,]    0    0    1</code></pre>
-<p>The result of applying <span class="math inline">\(R^{-1}R\)</span> clearly mirrors the identity matrix example given prior. As already alluded to, proving <span class="math inline">\(I = R^{-1}R\)</span> can be thought as a soft proof for whether any combination of linear equations is solvable if, for example, we wanted to bring <span class="math inline">\(R\)</span> to the other side of the equation and solve for <span class="math inline">\(s\)</span>. Consequently, if it is proven, this makes it possible to solve for the vector of stakes <span class="math inline">\(s\)</span>, by assuming them to be an unknown, and, in turn, by assigning a vector of desired gains to <span class="math inline">\(g_{\theta}\)</span>. For instance, if we assign the vector <span class="math inline">\(g_{\theta}\)</span> the following positive, desired gains,</p>
-<pre class="r"><code>g_theta &lt;- c(400, 400, 400)
+<p>The result of applying <span class="math inline">\(R^{-1}R\)</span> clearly mirrors the identity matrix example given prior. As already alluded to, proving <span class="math inline">\(I = R^{-1}R\)</span> can be thought as a soft proof for whether any combination of linear equations is solvable. Consequently, because it is proven, this makes it possible to solve for the vector of stakes <span class="math inline">\(s\)</span>, first by assuming them to be an unknown, and, in turn, by assigning a vector of desired gains to <span class="math inline">\(g_{\theta}\)</span>. For instance, if we assign the vector <span class="math inline">\(g_{\theta}\)</span> the following random, hypothetical desired gains,</p>
+<pre class="r"><code>g_theta &lt;- sample(1:500, 3, replace = TRUE)
 g_theta</code></pre>
-<pre><code>## [1] 400 400 400</code></pre>
-<p>it is then possible to solve for the linear transformation of <span class="math inline">\(s\)</span>, such that we are guaranteed the desired outcomes initially assigned to <span class="math inline">\(g_\theta\)</span> above. First, multiply each side of the equation by <span class="math inline">\(R^{-1}\)</span>, so that <span class="math inline">\(R^{-1}Rs=R^{-1}g\)</span>, thus <span class="math inline">\(I\times s = s =R^{-1}g\)</span>, and, ultimately <span class="math inline">\(s = R^{-1}g\)</span>. Accordingly, we can solve for a vector of stakes <span class="math inline">\(s\)</span> that guarantees a net positive gain for each event,</p>
+<pre><code>## [1] 411 430 478</code></pre>
+<p>it is subsequently possible to solve for the linear transformation of <span class="math inline">\(s\)</span>, such that we are guaranteed the desired outcomes initially assigned to <span class="math inline">\(g_\theta\)</span> above. First, multiply each side of the equation by <span class="math inline">\(R^{-1}\)</span>, so that <span class="math inline">\(R^{-1}Rs=R^{-1}g\)</span>, where <span class="math inline">\(I\times s = s =R^{-1}g\)</span>, and, thus ultimately, <span class="math inline">\(s = R^{-1}g\)</span>. Accordingly, we can solve for a vector of stakes <span class="math inline">\(s\)</span> to guarantee a net positive gain for each event,</p>
 <pre class="r"><code>s_solved &lt;- inv(R)%*%g_theta
 s_solved</code></pre>
-<pre><code>##       [,1]
-## [1,] -2000
-## [2,] -9200
-## [3,]  -800</code></pre>
+<pre><code>##        [,1]
+## [1,]   -908
+## [2,] -10122
+## [3,]  -2160</code></pre>
 <p>and, in reverse, as is obvious from the above,</p>
 <pre class="r"><code>R%*%s_solved</code></pre>
 <pre><code>##      [,1]
-## [1,]  400
-## [2,]  400
-## [3,]  400</code></pre>
-<p>we get our desired gains <span class="math inline">\(g_\theta\)</span>.</p>
-<p>To conclude, it is clear that, if the probability matrix <span class="math inline">\(R\)</span> meets the invertible condition as has been described here, such that <span class="math inline">\(I = R^{-1}R\)</span>, we can solve for an unknown vector of stakes <span class="math inline">\(s\)</span> by equating it with the product of a linear combination of desired gains <span class="math inline">\(g_{\theta}\)</span> and an associated probability matrix <span class="math inline">\(R\)</span>. In technical language, this means that when <span class="math inline">\(R\)</span> is an invertible matrix, the solution to <span class="math inline">\(Rs=g_{\theta}\)</span> is simply <span class="math inline">\(s=R^{-1}g\)</span>.</p>
+## [1,]  411
+## [2,]  430
+## [3,]  478</code></pre>
+<p>we get our desired gains <span class="math inline">\(g_\theta\)</span> with certainty.</p>
+<p>To conclude, it is clear that, if the probability matrix <span class="math inline">\(R\)</span> is indeed invertible, such that <span class="math inline">\(I = R^{-1}R\)</span>, we can solve for an unknown vector of stakes <span class="math inline">\(s\)</span> by equating it with the product of a vector of desired gains <span class="math inline">\(g_{\theta}\)</span> and an associated probability matrix <span class="math inline">\(R\)</span>. In concise technical language, this means that when <span class="math inline">\(R\)</span> is an invertible matrix, the solution to <span class="math inline">\(Rs=g_{\theta}\)</span> is simply <span class="math inline">\(s=R^{-1}g\)</span>. Lastly, it is also interesting to note that individuals are often on the receiving end of such a betting structure, whereby bookies commonly adjust the odds to be ‘in their favour’, thus guaranteeing a net positive gain.</p>
 </div>
 
 
