@@ -418,7 +418,7 @@ R</code></pre>
 ## [1,]  0.9 -0.1 -0.1
 ## [2,] -0.8  0.2 -0.8
 ## [3,] -0.2 -0.2  0.8</code></pre>
-<p>Thereafter, we can then place a stake on each outcome, such that a vector of stakes <span class="math inline">\(s\)</span> multiplied with our <span class="math inline">\(n\times n\)</span> matrix <span class="math inline">\(R\)</span> can solve for a vector of gains <span class="math inline">\(g_{\theta}\)</span>, where <span class="math inline">\(g_{\theta}=Rs\)</span>. However, it is important to state that we are obliged to assume that the bettor can both buy and sell bets within this scenario, i.e. you can place both positive and negative stakes. The implications of this is minimal, as it is a common betting strategy adopted by bookies to ‘lay off’ the risk of their large bets. However, it is nevertheless critical to bring to light the one fundamental flaw in our propositions, especially for the reader who has not yet noticed.</p>
+<p>Thereafter, we can then place a stake on each outcome, such that a vector of stakes <span class="math inline">\(s\)</span> multiplied with our <span class="math inline">\(n\times n\)</span> matrix <span class="math inline">\(R\)</span> can solve for a vector of gains <span class="math inline">\(g_{\theta}\)</span>, where <span class="math inline">\(g_{\theta}=Rs\)</span>. However, it is important to state that we are obliged to assume that the bettor can both buy and sell bets within this scenario, i.e. you can place both positive and negative stakes. The implications of this is minimal, as it is a common betting strategy adopted by bookies to ‘lay off’ the risk of their large bets. In line with above notation, this means that there are two possible actions per event, denoted <span class="math inline">\(a_{S\theta}\)</span> and <span class="math inline">\(a_{-S\theta}\)</span>, for either a positive and negative stake respectively. However, it is nevertheless critical to bring to light the one fundamental flaw in our propositions that is unrelated to the latter point - especially for the reader who has not yet noticed.</p>
 <p>Our initial judgement regarding the bet probabilities is erroneous as it does not conform to Kolmogorov’s probability axiom for disjoint events, where <span class="math inline">\(P(A\cap, ...,\cap A) = 1\)</span>. Due to the total probability of the bets summing to,</p>
 <pre class="r"><code>sum(pi1 + pi2 + pi3)</code></pre>
 <pre><code>## [1] 1.1</code></pre>
@@ -448,20 +448,20 @@ I%*%b</code></pre>
 <p>The result of applying <span class="math inline">\(R^{-1}R\)</span> clearly mirrors the identity matrix example given prior. As already alluded to, proving <span class="math inline">\(I = R^{-1}R\)</span> can be thought as a soft proof for whether any combination of linear equations is solvable. Consequently, because it is proven, this makes it possible to solve for the vector of stakes <span class="math inline">\(s\)</span>, first by assuming them to be an unknown, and, in turn, by assigning a vector of desired gains to <span class="math inline">\(g_{\theta}\)</span>. For instance, if we assign the vector <span class="math inline">\(g_{\theta}\)</span> the following random, hypothetical desired gains,</p>
 <pre class="r"><code>g_theta &lt;- sample(1:500, 3, replace = TRUE)
 g_theta</code></pre>
-<pre><code>## [1] 411 430 478</code></pre>
+<pre><code>## [1] 394  82 209</code></pre>
 <p>it is subsequently possible to solve for the linear transformation of <span class="math inline">\(s\)</span>, such that we are guaranteed the desired outcomes initially assigned to <span class="math inline">\(g_\theta\)</span> above. First, multiply each side of the equation by <span class="math inline">\(R^{-1}\)</span>, so that <span class="math inline">\(R^{-1}Rs=R^{-1}g\)</span>, where <span class="math inline">\(I\times s = s =R^{-1}g\)</span>, and, thus ultimately, <span class="math inline">\(s = R^{-1}g\)</span>. Accordingly, we can solve for a vector of stakes <span class="math inline">\(s\)</span> to guarantee a net positive gain for each event,</p>
 <pre class="r"><code>s_solved &lt;- inv(R)%*%g_theta
 s_solved</code></pre>
-<pre><code>##        [,1]
-## [1,]   -908
-## [2,] -10122
-## [3,]  -2160</code></pre>
+<pre><code>##       [,1]
+## [1,]  -291
+## [2,] -5398
+## [3,] -1161</code></pre>
 <p>and, in reverse, as is obvious from the above,</p>
 <pre class="r"><code>R%*%s_solved</code></pre>
 <pre><code>##      [,1]
-## [1,]  411
-## [2,]  430
-## [3,]  478</code></pre>
+## [1,]  394
+## [2,]   82
+## [3,]  209</code></pre>
 <p>we get our desired gains <span class="math inline">\(g_\theta\)</span> with certainty.</p>
 <p>To conclude, it is clear that, if the probability matrix <span class="math inline">\(R\)</span> is indeed invertible, such that <span class="math inline">\(I = R^{-1}R\)</span>, we can solve for an unknown vector of stakes <span class="math inline">\(s\)</span> by equating it with the product of a vector of desired gains <span class="math inline">\(g_{\theta}\)</span> and an associated probability matrix <span class="math inline">\(R\)</span>. In concise technical language, this means that when <span class="math inline">\(R\)</span> is an invertible matrix, the solution to <span class="math inline">\(Rs=g_{\theta}\)</span> is simply <span class="math inline">\(s=R^{-1}g\)</span>. Lastly, it is also interesting to note that individuals are often on the receiving end of such a betting structure, whereby bookies commonly adjust the odds to be ‘in their favour’, thus guaranteeing a net positive gain.</p>
 </div>
