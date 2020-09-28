@@ -1,15 +1,13 @@
 model {
 # SUB-MODEL 1: AGE-SPECIFIC PREVALENCE,
-  # model parameters abbreviated by omega.age[i]
+  # model parameters abbreviated by .age
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior.
   for (i in 1:10) {
-    omega.age[i] ~ dlnorm(mu.a.log[i], sigma.a.log[i])
-    sigma.a.log[i] ~ dgamma(0.5, .5)
+    omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
+
   }
-  
-  
-  
+
 # SUB-MODEL 2: VACCINE-EFFICACY,
   # model parameters abbreviated by .vac
   for (i in 1:Nstud.vac) {
@@ -21,15 +19,15 @@ model {
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
     # Average effect:
-    mu.vac[i] ~ dnorm(0, 1e-06)
+    mu.vac[i] ~ dnorm(0, 1e-4)
     # Random population effect:
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
   }
   
   # Priors for sub-model 2:
-  psi.vac ~ dnorm(0, 1.0e-6)
-  tau.vac ~ dunif(0, 100)
+  psi.vac ~ dnorm(0, 1.0e-4)
   prec.vac <- 1 / pow(tau.vac, 2)
+  tau.vac ~ dt(0, (1 / 10000 ^ 2), 1)T(0, )
   # Convert LOR to OR:
   OR.vac <- exp(psi.vac)
   # Coverting OR to probability

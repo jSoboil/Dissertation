@@ -26,16 +26,16 @@ Accordingly, the above notation also allows us to systematically assign our own 
 
 Regardless of what we may call it, now that we have some familiarity with notation that allows for more precise language, we can place a series of more complex bets on $3$, disjoint events denoted $\theta_{1}$, $\theta_{2}$, and $\theta_3$. Like earlier, each bet has a corresponding stake $S_\theta$, thus forming a vector $s=(S_{\theta_{1}}, S_{\theta_{2}}, S_{\theta_{3}})$. Let us consider the probability of each event $\pi_{\theta_{i}}$, and assign the following probabilities $\pi_{\theta_{1}}$, $\pi_{\theta_{2}}$, and $\pi_{\theta_{3}}$, to each as
 ```{r, echo = TRUE}
-pi1 <- .1
+pi1 <- .2
 pi2 <- .8
-pi3 <- .2
+pi3 <- (pi1 + pi2)
 ```
 Because the events are mutually exclusive, we can also conveniently construct our probabilities in an $n\times n$ square matrix $R$ to track all possible outcomes, of each event, therein. Intuitively, this theoretically means that each set of column outcomes should meet the condition $\pi_{\theta_{ij}}=\pi_{\theta_{ij}}+\pi_{\theta_{ij}}$. 
 ```{r, echo = TRUE}
 R <- matrix(
- c(1 -  pi1,    - pi2,    - pi3,
-      - pi1,  1 - pi2,    - pi3,
-      - pi1,    - pi2,  1 - pi3
+ c(1 -  pi1,   - pi2,  1 - pi3,
+      - pi1, 1 - pi2,  1 - pi3,
+      - pi1,   - pi2,  - pi3
    ),
             ncol = 3, nrow = 3)
 R
@@ -44,7 +44,7 @@ Thereafter, we can then place a stake on each outcome, such that a vector of sta
 
 Our initial judgement regarding the bet probabilities is erroneous as it does not conform to Kolmogorov’s probability axiom for disjoint events, where $P(A\cap, ...,\cap A) = 1$. Due to the total probability of the bets summing to,
 ```{r, echo = TRUE}
-sum(pi1 + pi2 + pi3)
+(pi1 + pi2) - pi3
 ```
 it clearly implies that $\pi_{\theta_{1}}+\pi_{\theta_{2}}+\pi_{\theta_{3}}\neq0$. Consequently, the matrix $R$ is invertible. Technically speaking, and using a more commonly adopted notation, there is a scalar $x$ that gives the desired output $b = Ax$. As a corollary, this likewise means that the determinant of the matrix $R$ is $|{R}| \neq 0$, as evidence by
 ```{r, echo = TRUE}

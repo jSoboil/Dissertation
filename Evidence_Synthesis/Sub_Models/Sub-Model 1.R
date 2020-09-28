@@ -203,8 +203,8 @@ age_group <- c("15-16", "17", "18", "19", "20", "≤21", "22-23",
 Prevalence <- c(.09516258, .1130796, .139292, .1563352, .139292, 
                 .1130796, .09516258, .04877058, .009950166, .004987521)
 
-mu.a.log <- lnorm_params(m = Prevalence, v = .05^2)$mu
-sigma.a.log <- lnorm_params(m = Prevalence, v = .05^2)$sigma
+mu.a.log <- lnorm_params(m = Prevalence, v = 0.05)$mu
+sigma.a.log <- lnorm_params(m = Prevalence, v = 0.05)$sigma
 prec.age <- 1 / (sigma.a.log * sigma.a.log)
 mu.a.log
 prec.age
@@ -272,8 +272,8 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 12000
-n.burnin <- 4000
+n.iter <- 20000
+n.burnin <- 5000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 

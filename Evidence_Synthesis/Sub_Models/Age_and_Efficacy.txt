@@ -1,6 +1,6 @@
 model {
 # SUB-MODEL 1: AGE-SPECIFIC PREVALENCE,
-  # model parameters abbreviated by omega.age[i]
+  # model parameters abbreviated by .age
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior.
   for (i in 1:10) {
