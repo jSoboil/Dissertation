@@ -321,7 +321,7 @@ mcmc_acf(posterior, pars = c("pEfficacy.vac", "OR.vac",
 plot(apply(omega.age, 2, mean), type = "b", ylab = "Prevalence", xlab = "By Age",
      col = "grey", lwd = 3)
 
-# Example: say 21% of some age pop. group at has HPV:
+# Example: say 21% of some age pop. group at has HPV, P(No HPV | Vaccination):
 .21 * apply(pEfficacy.vac, 2, mean)
 # ≈ 19.5% protected by vaccine.
 
