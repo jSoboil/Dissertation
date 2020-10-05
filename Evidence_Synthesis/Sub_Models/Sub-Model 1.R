@@ -213,14 +213,15 @@ cbind(age_group, Prevalence)
 # ==========================================================================================
 # Sub-model 1 ------------------------------------------------------
 # ==========================================================================================
-model_String <- "model {
+model_String <- "
+model {
+
 # SUB-MODEL 1: AGE-SPECIFIC PREVALENCE,
   # model parameters abbreviated by .age
     # Note: equivalent to standard PSA, as it is 
     # sampling direclty from the prior.
   for (i in 1:10) {
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
-
   }
 
 # SUB-MODEL 2: VACCINE-EFFICACY,
