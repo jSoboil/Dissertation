@@ -184,8 +184,6 @@ length(rB.vac) == length(nB.vac)
 # ==========================================================================================
 # Age-specific infection ----------------------------------------------------
 # ==========================================================================================
-# Note: will use a relative risk parameter for proportion of HIV+ population who have 
-# increased risk of being reinfected rather than clearing HPV. See Italian study.
 
 # Informative prior -------------------------------------
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
