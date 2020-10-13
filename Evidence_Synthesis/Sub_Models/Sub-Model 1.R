@@ -181,10 +181,11 @@ nB.vac <- c(5406, 366, 310, 2190, 2910, 387, 193, 7788, 7344, 401, 2497)
 length(rA.vac) == length(nA.vac)
 length(rB.vac) == length(nB.vac)
 
+
+
 # ==========================================================================================
 # Age-specific infection ----------------------------------------------------
 # ==========================================================================================
-
 # Informative prior -------------------------------------
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
@@ -201,8 +202,8 @@ age_group <- c("15-16", "17", "18", "19", "20", "≤21", "22-23",
 Prevalence <- c(.09516258, .1130796, .139292, .1563352, .139292, 
                 .1130796, .09516258, .04877058, .009950166, .004987521)
 
-mu.a.log <- lnorm_params(m = Prevalence, v = 0.05)$mu
-sigma.a.log <- lnorm_params(m = Prevalence, v = 0.05)$sigma
+mu.a.log <- lnorm_params(m = Prevalence, v = sd(Prevalence)^2)$mu
+sigma.a.log <- lnorm_params(m = Prevalence, v = sd(Prevalence)^2)$sigma
 prec.age <- 1 / (sigma.a.log * sigma.a.log)
 mu.a.log
 prec.age
@@ -216,8 +217,8 @@ model {
 
 # SUB-MODEL 1: AGE-SPECIFIC PREVALENCE,
   # model parameters abbreviated by .age
-    # Note: equivalent to standard PSA, as it is 
-    # sampling direclty from the prior.
+    # Note: equivalent to Monte Carlo PSA, as it 
+    # is technically sampling directly from a prior.
   for (i in 1:10) {
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
   }
@@ -271,17 +272,21 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 20000
-n.burnin <- 5000
+n.iter <- 30000
+n.burnin <- 2000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
+# Run MCMC model:
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
                  model.file = "Age_and_Efficacy.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 mod_JAGS
+
 # Attach JAGS model to global envir:
 attach.jags(mod_JAGS)
 
+
+# Visual Inspection of Posterior ------------------------------------------
 # Create array of posterior samples:
 posterior <- as.array(mod_JAGS$BUGSoutput$sims.array)
 dimnames(posterior)

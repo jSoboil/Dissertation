@@ -1,11 +1,12 @@
+
 model {
+
 # SUB-MODEL 1: AGE-SPECIFIC PREVALENCE,
   # model parameters abbreviated by .age
-    # Note: equivalent to standard PSA, as it is 
-    # sampling direclty from the prior.
+    # Note: equivalent to Monte Carlo PSA, as it 
+    # is technically sampling directly from a prior.
   for (i in 1:10) {
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
-
   }
 
 # SUB-MODEL 2: VACCINE-EFFICACY,
