@@ -201,17 +201,10 @@ age_group <- c("15-16", "17", "18", "19", "20", "≤21", "22-23",
 # Estimated Prevalence:
 Prevalence <- c(.09516258, .1130796, .139292, .1563352, .139292, 
                 .1130796, .09516258, .04877058, .009950166, .004987521)
-<<<<<<< HEAD
+
 mu.a.log <-log(Prevalence)
+
 # mu.a.log <- lnorm_params(m = Prevalence, v = sd(Prevalence)^2)$mu
-=======
-
-mu.a.log <- lnorm_params(m = Prevalence, v = sd(Prevalence)^2)$mu
-sigma.a.log <- lnorm_params(m = Prevalence, v = sd(Prevalence)^2)$sigma
-prec.age <- 1 / (sigma.a.log * sigma.a.log)
->>>>>>> 4fc56243688bf3ceb4533b5a9013bae82d469467
-mu.a.log
-
 # Optional non-hierarchical model on variance:
 # sigma.a.log <- lnorm_params(m = Prevalence, v = sd(Prevalence)^2)$sigma
 # prec.age <- 1 / (sigma.a.log * sigma.a.log)
@@ -247,20 +240,22 @@ model {
     logit(pA.vac[i]) <- mu.vac[i]
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
-    # Average effect:
+    # Average effect prior for sub-model 2:
     mu.vac[i] ~ dnorm(0, 1e-4)
-    # Random population effect:
+    # Prior for sub-model 2 (Random. pop. effect):
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
   }
   
-  # Priors for sub-model 2:
+  # Hyperpriors for sub-model 2:
   psi.vac ~ dnorm(0, 1.0e-4)
   prec.vac <- 1 / pow(tau.vac, 2)
   tau.vac ~ dt(0, (1 / 10000 ^ 2), 1)T(0, )
-  # Convert LOR to OR:
+  
+ # Transformations for Sub-model 2:
+  # Convert LOR to OR
   OR.vac <- exp(psi.vac)
-  # Coverting OR to probability
-  # for vaccine efficacy:
+  # Convert OR to probability
+  # for vaccine efficacy
   pEfficacy.vac <- 1 / (1 + OR.vac)
 
 }
@@ -322,10 +317,23 @@ mcmc_dens_overlay(posterior, pars = c("pEfficacy.vac", "OR.vac",
                                       "omega.age[1]", "omega.age[2]", "omega.age[6]")
                   )
 
+color_scheme_set("mix-teal-pink")
+mcmc_dens(posterior, pars = c("pEfficacy.vac", "OR.vac", 
+                              "omega.age[1]", "omega.age[2]", "omega.age[6]")
+                  )
+
 color_scheme_set("mix-blue-brightblue")
 mcmc_acf(posterior, pars = c("pEfficacy.vac", "OR.vac", 
                              "omega.age[1]", "omega.age[2]"),
          lags = 50)
+mcmc_acf_bar(posterior, pars = c("pEfficacy.vac", "OR.vac", 
+                             "omega.age[1]", "omega.age[2]"),
+         lags = 25)
+
+mcmc_areas(posterior, pars = c("pEfficacy.vac","omega.age[2]"))
+
+mcmc_combo(posterior, pars = c("pEfficacy.vac", "OR.vac", 
+                             "omega.age[1]", "omega.age[2]"))
 
 # Add plot for meta analysis results: found in BCEA pg 52:
 # ggplot(tr.eff) + 

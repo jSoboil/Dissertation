@@ -7,15 +7,12 @@ model {
     # is technically sampling directly from a prior.
   for (i in 1:10) {
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
-<<<<<<< HEAD
     
     # Hyper-prior precision:
     log(prec.age[i]) <- 1 / (sigma.age[i] ^ 2)
     # Hyper-pior:
     sigma.age[i] ~ dt(0, .1, 1)T(0, )
     
-=======
->>>>>>> 4fc56243688bf3ceb4533b5a9013bae82d469467
   }
 
 # SUB-MODEL 2: VACCINE-EFFICACY,
@@ -28,20 +25,22 @@ model {
     logit(pA.vac[i]) <- mu.vac[i]
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
-    # Average effect:
+    # Average effect prior for sub-model 2:
     mu.vac[i] ~ dnorm(0, 1e-4)
-    # Random population effect:
+    # Prior for sub-model 2 (Random. pop. effect):
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
   }
   
-  # Priors for sub-model 2:
+  # Hyperpriors for sub-model 2:
   psi.vac ~ dnorm(0, 1.0e-4)
   prec.vac <- 1 / pow(tau.vac, 2)
   tau.vac ~ dt(0, (1 / 10000 ^ 2), 1)T(0, )
-  # Convert LOR to OR:
+  
+ # Transformations for Sub-model 2:
+  # Convert LOR to OR
   OR.vac <- exp(psi.vac)
-  # Coverting OR to probability
-  # for vaccine efficacy:
+  # Convert OR to probability
+  # for vaccine efficacy
   pEfficacy.vac <- 1 / (1 + OR.vac)
 
 }
