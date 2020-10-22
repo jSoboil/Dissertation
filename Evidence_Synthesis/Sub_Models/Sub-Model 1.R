@@ -201,8 +201,15 @@ age_group <- c("15-16", "17", "18", "19", "20", "≤21", "22-23",
 # Estimated Prevalence:
 Prevalence <- c(.09516258, .1130796, .139292, .1563352, .139292, 
                 .1130796, .09516258, .04877058, .009950166, .004987521)
+<<<<<<< HEAD
 mu.a.log <-log(Prevalence)
 # mu.a.log <- lnorm_params(m = Prevalence, v = sd(Prevalence)^2)$mu
+=======
+
+mu.a.log <- lnorm_params(m = Prevalence, v = sd(Prevalence)^2)$mu
+sigma.a.log <- lnorm_params(m = Prevalence, v = sd(Prevalence)^2)$sigma
+prec.age <- 1 / (sigma.a.log * sigma.a.log)
+>>>>>>> 4fc56243688bf3ceb4533b5a9013bae82d469467
 mu.a.log
 
 # Optional non-hierarchical model on variance:

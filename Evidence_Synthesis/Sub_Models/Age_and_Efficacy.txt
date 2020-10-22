@@ -7,12 +7,15 @@ model {
     # is technically sampling directly from a prior.
   for (i in 1:10) {
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
+<<<<<<< HEAD
     
     # Hyper-prior precision:
     log(prec.age[i]) <- 1 / (sigma.age[i] ^ 2)
     # Hyper-pior:
     sigma.age[i] ~ dt(0, .1, 1)T(0, )
     
+=======
+>>>>>>> 4fc56243688bf3ceb4533b5a9013bae82d469467
   }
 
 # SUB-MODEL 2: VACCINE-EFFICACY,
