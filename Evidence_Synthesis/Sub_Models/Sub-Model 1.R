@@ -219,14 +219,15 @@ model {
 # SUB-MODEL 1: AGE-SPECIFIC PREVALENCE,
   # model parameters abbreviated by .age
     # Note: equivalent to Monte Carlo PSA, as it 
-    # is technically sampling directly from a prior.
+    # is technically sampling directly from a prior
+    # without any likelihood model.
   for (i in 1:10) {
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
     
     # Hyper-prior precision:
     log(prec.age[i]) <- 1 / (sigma.age[i] ^ 2)
     # Hyper-pior:
-    sigma.age[i] ~ dt(0, .1, 1)T(0, )
+    sigma.age[i] ~ dt(0, 5, 1)T(0, )
     
   }
 
@@ -249,7 +250,7 @@ model {
   # Hyperpriors for sub-model 2:
   psi.vac ~ dnorm(0, 1.0e-4)
   prec.vac <- 1 / pow(tau.vac, 2)
-  tau.vac ~ dt(0, (1 / 10000 ^ 2), 1)T(0, )
+  tau.vac ~ dt(0, (1 / 100 ^ 2), 1)T(0, )
   
  # Transformations for Sub-model 2:
   # Convert LOR to OR
@@ -281,8 +282,8 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 30000
-n.burnin <- 2000
+n.iter <- 55000
+n.burnin <- 10000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
 # Run MCMC model:
