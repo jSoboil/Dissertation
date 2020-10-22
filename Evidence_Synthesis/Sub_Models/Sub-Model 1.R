@@ -224,12 +224,16 @@ model {
   for (i in 1:10) {
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
     
-    # Hyper-prior precision:
+    # Sigma precision:
     log(prec.age[i]) <- 1 / (sigma.age[i] ^ 2)
-    # Hyper-pior:
-    sigma.age[i] ~ dt(0, 5, 1)T(0, )
+    # Sigma Pior:
+    sigma.age[i] ~ dt(0, sigma.hyperprior, 1)T(0, )
     
   }
+    # Hyper-prior for sigma prior:
+    sigma.hyperprior ~ dunif(0, 100)
+
+# End of SUB-MODEL 1.
 
 # SUB-MODEL 2: VACCINE-EFFICACY,
   # model parameters abbreviated by .vac
@@ -247,17 +251,19 @@ model {
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
   }
   
-  # Hyperpriors for sub-model 2:
-  psi.vac ~ dnorm(0, 1.0e-4)
-  prec.vac <- 1 / pow(tau.vac, 2)
-  tau.vac ~ dt(0, (1 / 100 ^ 2), 1)T(0, )
+   # Hyperpriors for sub-model 2:
+   psi.vac ~ dnorm(0, 1.0e-4)
+   prec.vac <- 1 / pow(tau.vac, 2)
+   tau.vac ~ dunif(0, 100)
   
- # Transformations for Sub-model 2:
-  # Convert LOR to OR
-  OR.vac <- exp(psi.vac)
-  # Convert OR to probability
-  # for vaccine efficacy
-  pEfficacy.vac <- 1 / (1 + OR.vac)
+  # Transformations for Sub-model 2:
+   # Convert LOR to OR
+   OR.vac <- exp(psi.vac)
+   # Convert OR to probability
+   # for vaccine efficacy
+   pEfficacy.vac <- 1 / (1 + OR.vac)
+
+# End of SUB-MODEL 2.
 
 }
 "
@@ -282,7 +288,7 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 55000
+n.iter <- 35000
 n.burnin <- 10000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
@@ -294,7 +300,6 @@ mod_JAGS
 
 # Attach JAGS model to global envir:
 attach.jags(mod_JAGS)
-
 
 # Visual Inspection of Posterior ------------------------------------------
 # Create array of posterior samples:
