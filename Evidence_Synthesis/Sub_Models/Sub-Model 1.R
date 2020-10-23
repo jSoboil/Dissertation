@@ -230,10 +230,10 @@ model {
     sigma.age[i] ~ dt(0, sigma.hyperprior, 1)T(0, )
     
   }
-    # Hyper-prior for sigma prior:
+    # Hyper-prior for sigma.age prior:
     sigma.hyperprior ~ dunif(0, 100)
 
-# End of SUB-MODEL 1.
+# END OF SUB-MODEL 1.
 
 # SUB-MODEL 2: VACCINE-EFFICACY,
   # model parameters abbreviated by .vac
@@ -263,7 +263,7 @@ model {
    # for vaccine efficacy
    pEfficacy.vac <- 1 / (1 + OR.vac)
 
-# End of SUB-MODEL 2.
+# END OF SUB-MODEL 2.
 
 }
 "
@@ -288,8 +288,8 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 35000
-n.burnin <- 10000
+n.iter <- 40000
+n.burnin <- 15000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
 # Run MCMC model:
