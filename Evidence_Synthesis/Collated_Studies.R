@@ -42,24 +42,22 @@ mort_data <- read_excel("mortality tables.xls",
 # Total Pop. divided by total deaths:
 v_r_mort_by_age <- mort_data[, 2] / mort_data[, 1]
 v_r_mort_by_age[1:90, ]
+plot(unlist(v_r_mort_by_age), type = "l")
+
 # Therefore, all-less HPV mortality calculated as All-cause mortality - HPV mortality, i.e.
 # the number of people who die due to cervical cancer.
 
 # Vector of probabilities directly computed with model.
 
 # ===========================================================================================
-# Vaccine efficacy --------------------------------------------------------
+# Collated studies on vaccine efficacy -------------------------------------------------
 # ===========================================================================================
-# Vaccine efficacy is expressed as the reduction in the occurrence of HPV due to vaccination.
-# Individuals who are vaccinated fully experience a rate of occurrence of HPV that is 
-# (1 – alpha) times that of those who are not vaccinated (Favato G., et al. 2012).
-
-# COMPARISON GROUPS: PLACEBO (A) AND VACCINE(B)
-
 # Study 1: Apter et al. (2015)   ------------------------------------------
 # Efficacy of Human Papillomavirus 16 and 18 (HPV-16/18) AS04- Adjuvanted Vaccine against 
-# Cervical Infection and Precancer in Young Women: Final Event-Driven Analysis of the 
+# Cervical Infection and Pre-cancer in Young Women: Final Event-Driven Analysis of the 
 # Randomized, Double- Blind PATRICIA Trial.
+
+# Continent: 
 
 # Data collected from 6-month HPV 16/18 ATP cohort.
 
@@ -112,7 +110,6 @@ v_r_mort_by_age[1:90, ]
 # Vaccine (B):
 # n = 2190
 # cases = 3
-
 
 # Study 5: Herrero et al. (2013) ------------------------------------------
 # Reduced Prevalence of Oral Human Papillomavirus (HPV) 4 Years after Bivalent HPV Vaccination
@@ -215,7 +212,6 @@ v_r_mort_by_age[1:90, ]
 # Vaccine (B):
 # n = 2497
 # cases = 1
-
 # ===========================================================================================
 # Vaccine coverage --------------------------------------------------------
 # ===========================================================================================

@@ -16,6 +16,8 @@ library(dampack)
 # Cervical Infection and Pre-cancer in Young Women: Final Event-Driven Analysis of the 
 # Randomized, Double- Blind PATRICIA Trial.
 
+# Continent: 
+
 # Data collected from 6-month HPV 16/18 ATP cohort.
 
 # Control (A):
@@ -181,8 +183,6 @@ nB.vac <- c(5406, 366, 310, 2190, 2910, 387, 193, 7788, 7344, 401, 2497)
 length(rA.vac) == length(nA.vac)
 length(rB.vac) == length(nB.vac)
 
-
-
 # ==========================================================================================
 # Age-specific infection ----------------------------------------------------
 # ==========================================================================================
@@ -216,45 +216,42 @@ mu.a.log <-log(Prevalence)
 model_String <- "
 model {
 
-# SUB-MODEL 1: AGE-SPECIFIC PREVALENCE,
-  # model parameters abbreviated by .age
-    # Note: equivalent to Monte Carlo PSA, as it 
-    # is technically sampling directly from a prior
-    # without any likelihood model.
+# SUB-MODEL 1: AGE-SPECIFIC PREVALENCE - model parameters abbreviated by .age. Note: 
+# this is equivalent to Monte Carlo PSA, as it is technically sampling directly from 
+# a prior and is not propogated into a posterior using a likelihood model.
   for (i in 1:10) {
+  # MC sampling model:
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
     
-    # Sigma precision:
-    log(prec.age[i]) <- 1 / (sigma.age[i] ^ 2)
-    # Sigma Pior:
-    sigma.age[i] ~ dt(0, sigma.hyperprior, 1)T(0, )
-    
-  }
-    # Hyper-prior for sigma.age prior:
-    sigma.hyperprior ~ dunif(0, 100)
+  # Sigma precision:
+  log(prec.age[i]) <- pow(sigma.age[i], -2)
+  # Sigma prior:
+  sigma.age[i] ~ dunif(0, 5)
+  
+ }
+  
+ # END OF SUB-MODEL 1.
 
-# END OF SUB-MODEL 1.
-
-# SUB-MODEL 2: VACCINE-EFFICACY,
-  # model parameters abbreviated by .vac
+# SUB-MODEL 2: VACCINE-EFFICACY - model parameters abbreviated by .vac.
   for (i in 1:Nstud.vac) {
     # Likelihood:
     rA.vac[i] ~ dbin(pA.vac[i], nA.vac[i])
     rB.vac[i] ~ dbin(pB.vac[i], nB.vac[i])
-    # Logistic function:
+    
+    # Random Effect Logistic model:
     logit(pA.vac[i]) <- mu.vac[i]
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
     # Average effect prior for sub-model 2:
-    mu.vac[i] ~ dnorm(0, 1e-4)
+    mu.vac[i] ~ dnorm(0, 1e-6)
     # Prior for sub-model 2 (Random. pop. effect):
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
   }
   
    # Hyperpriors for sub-model 2:
-   psi.vac ~ dnorm(0, 1.0e-4)
-   prec.vac <- 1 / pow(tau.vac, 2)
-   tau.vac ~ dunif(0, 100)
+   psi.vac ~ dnorm(0, 1.0e-6)
+   prec.vac <- pow(tau.vac, -2)
+   tau.vac ~  dunif(0, 10)
   
   # Transformations for Sub-model 2:
    # Convert LOR to OR
@@ -288,7 +285,7 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 40000
+n.iter <- 45000
 n.burnin <- 15000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
@@ -297,6 +294,10 @@ mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params,
                  model.file = "Age_and_Efficacy.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 mod_JAGS
+
+# autoJAGS_Update <- autojags(mod_JAGS, Rhat = 1.001, parallel = TRUE, n.cores = 4,
+#                             jags.seed = 22)
+# autoJAGS_Update
 
 # Attach JAGS model to global envir:
 attach.jags(mod_JAGS)
