@@ -216,12 +216,12 @@ mu.a.log <-log(Prevalence)
 model_String <- "
 model {
 
-# SUB-MODEL 1: AGE-SPECIFIC PREVALENCE,
-  # model parameters abbreviated by .age
-    # Note: equivalent to Monte Carlo PSA, as it 
-    # is technically sampling directly from a prior
-    # without any likelihood model.
+# SUB-MODEL 1: AGE-SPECIFIC PREVALENCE - model parameters abbreviated by .age. Note: 
+# equivalent to Monte Carlo PSA, as it is technically sampling directly from a prior and 
+# is not propogated using a likelihood model.
+
   for (i in 1:10) {
+  # MC sampling model:
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
     
     # Sigma precision:
@@ -231,12 +231,12 @@ model {
     
   }
     # Hyper-prior for sigma.age prior:
-    sigma.hyperprior ~ dunif(0, 100)
+    sigma.hyperprior ~ dunif(0, 1000)
 
 # END OF SUB-MODEL 1.
 
-# SUB-MODEL 2: VACCINE-EFFICACY,
-  # model parameters abbreviated by .vac
+# SUB-MODEL 2: VACCINE-EFFICACY - model parameters abbreviated by .vac.
+
   for (i in 1:Nstud.vac) {
     # Likelihood:
     rA.vac[i] ~ dbin(pA.vac[i], nA.vac[i])
@@ -246,15 +246,15 @@ model {
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
     # Average effect prior for sub-model 2:
-    mu.vac[i] ~ dnorm(0, 1e-4)
+    mu.vac[i] ~ dnorm(0, 1e-6)
     # Prior for sub-model 2 (Random. pop. effect):
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
   }
   
    # Hyperpriors for sub-model 2:
-   psi.vac ~ dnorm(0, 1.0e-4)
+   psi.vac ~ dnorm(0, 1.0e-6)
    prec.vac <- 1 / pow(tau.vac, 2)
-   tau.vac ~ dunif(0, 100)
+   tau.vac ~ dunif(0, 1000)
   
   # Transformations for Sub-model 2:
    # Convert LOR to OR
@@ -288,7 +288,7 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 40000
+n.iter <- 45000
 n.burnin <- 15000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
