@@ -226,7 +226,7 @@ model {
   # Sigma precision:
   log(prec.age[i]) <- pow(sigma.age[i], -2)
   # Sigma prior:
-  sigma.age[i] ~ dunif(0, 5)
+  sigma.age[i] ~ dt(0, 1, 1)T(0, )
   
  }
 
@@ -286,8 +286,8 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 45000
-n.burnin <- 15000
+n.iter <- 25000
+n.burnin <- 5000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
 # Run MCMC model:

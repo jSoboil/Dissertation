@@ -11,7 +11,7 @@ model {
   # Sigma precision:
   log(prec.age[i]) <- pow(sigma.age[i], -2)
   # Sigma prior:
-  sigma.age[i] ~ dunif(0, 5)
+  sigma.age[i] ~ dt(0, 1, 1)T(0, )
   
  }
 
