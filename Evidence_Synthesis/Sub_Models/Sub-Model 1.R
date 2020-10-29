@@ -229,8 +229,8 @@ model {
   sigma.age[i] ~ dunif(0, 5)
   
  }
-  
- # END OF SUB-MODEL 1.
+
+# END OF SUB-MODEL 1.
 
 # SUB-MODEL 2: VACCINE-EFFICACY - model parameters abbreviated by .vac.
   for (i in 1:Nstud.vac) {
@@ -248,12 +248,13 @@ model {
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
   }
   
-   # Hyperpriors for sub-model 2:
+   # Hyperpriors for Sub-model 2:
    psi.vac ~ dnorm(0, 1.0e-6)
    prec.vac <- pow(tau.vac, -2)
    tau.vac ~  dunif(0, 10)
   
-  # Transformations for Sub-model 2:
+  # Transformations for Sub-model 2
+  
    # Convert LOR to OR
    OR.vac <- exp(psi.vac)
    # Convert OR to probability
@@ -262,7 +263,7 @@ model {
 
 # END OF SUB-MODEL 2.
 
-}
+ }
 "
 writeLines(text = model_String, con = "Age_and_Efficacy.txt")
 
