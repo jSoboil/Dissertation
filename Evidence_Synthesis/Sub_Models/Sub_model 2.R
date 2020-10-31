@@ -131,7 +131,7 @@ Prevalence <- c(.09516258, .1130796, .139292, .1563352, .139292,
 
 mu.a.log <- log(Prevalence)
 
-# 'Emprical bayes' method:
+# Optional 'emprical bayes' method:
 # mu.a.log <- lnorm_params(m = Prevalence, v = .01)$mu
 # sigma.a.log <- lnorm_params(m = Prevalence, v = .01)$sigma
 # prec.age <- 1 / (sigma.a.log * sigma.a.log)
@@ -155,7 +155,8 @@ model {
     # Note in use of pow() function, -2 is a shorthand inverse
     # method, i.e. equivalent to 1 / x^2.
     log(prec.age[i]) <- pow(sigma.age[i], -2)
-    # Prior on variance for each age group:
+    # Prior on variance for each age group. Note use of half Student-t to draw
+    # variance away from 0. See Gelman (2006):
     sigma.age[i] ~ dt(0, eta.age, 1)T(0, )
   }
   
@@ -306,9 +307,9 @@ diri.contour(a = alpha.Stage_II, x = Stage.II.canc)
 diri.contour(a = alpha.Stage_III, x = Stage.III.canc)
 plot(density(Stage.IV.canc), lty = 4, lwd = 2, col = "navyblue", xlim = c(.66, 1))
 
-
 # Example: say 21% of some age pop. group at has HPV, P(No HPV | Vaccination), assuming
 # 50% of pop is covered:
 (.5 *.21) * apply(pEfficacy.vac, 2, mean)
 # ≈ 19.5% protected by vaccine.
 
+# End file ----------------------------------------------------------------
