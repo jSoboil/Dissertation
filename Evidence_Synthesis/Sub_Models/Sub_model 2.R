@@ -5,6 +5,7 @@ library(tidyverse)
 library(dampack)
 library(MCMCpack)
 library(Compositional)
+library(matplotlib)
 
 # ==========================================================================================
 # Cancer State Progression ------------------------------------------------
@@ -96,7 +97,6 @@ alpha.Stage_III <- c(0.6837724, 0.1897366, 0.126491)
 # Stage_IV ~ ddirch(alpha)
 alpha.Stage_IV <- beta_params(mean = .9, sigma = .05)$alpha
 beta.Stage_IV <- beta_params(mean = .9, sigma = .05)$beta
-plot(density(rbeta(n = 1000, shape1 = alpha.Stage_IV, shape2 = beta.Stage_IV)))
 
 # ==========================================================================================
 # Vaccine efficacy data ----------------------------------------------------
@@ -196,8 +196,7 @@ model {
 
 # SUB-MODEL 3: CANCER PROGRESSION model parameters abbreviated by .canc. Note: 
 # this is equivalent to Monte Carlo PSA, as it is technically sampling directly from 
-# a prior and is not propogated into a posterior using a likelihood model. However,
-# a hyperprior is used for the population variance to account for a greater uncertainty.
+# a prior and is *not* propogated into a posterior using a likelihood model. 
 
 Stage.I.canc ~ ddirch(alpha.Stage_I)
 Stage.II.canc ~ ddirch(alpha.Stage_II)
@@ -222,6 +221,9 @@ data_JAGS <- list(
   alpha.Stage_III = alpha.Stage_III, 
   alpha.Stage_IV = alpha.Stage_IV, beta.Stage_IV = beta.Stage_IV
 )
+
+mean(Stage.I.canc[, 3])
+mean(Stage.II.canc[, 1])
 
 
 # Parameters to monitor:
@@ -259,7 +261,7 @@ theme_set(theme_minimal())
 mcmc_trace(posterior, pars = c("pEfficacy.vac", "Stage.I.canc[1]", "Stage.I.canc[2]", 
                                "Stage.I.canc[3]", "Stage.II.canc[1]", "Stage.II.canc[2]", 
                                "Stage.II.canc[3]", "Stage.III.canc[1]", "Stage.III.canc[2]",
-                               "Stage.III.canc[3]", "Stage.IV.canc[1]", "Stage.IV.canc[2]"),
+                               "Stage.III.canc[3]", "Stage.IV.canc"),
            facet_args = list(ncol = 1, strip.position = "left"))
 
 color_scheme_set("mix-teal-pink")
@@ -293,15 +295,15 @@ mcmc_combo(posterior, pars = c("pEfficacy.vac", "Stage.III.canc[1]", "Stage.III.
 #  coord_flip() + theme_bw() + 
 #  labs(x="",y="Probability of smoking cessation",title="Meta-analysis results")
 
-# Calibration: ------------------------------------------------------------
-# Age-specific HPV prevalence:
-bivt.contour(Stage.I.canc)
-bivt.contour(Stage.II.canc)
-bivt.contour(Stage.III.canc)
-plot(density(Stage.IV.canc))
+# Cancer State distribution visualisation ------------------------------
+diri.contour(a = alpha.Stage_I, x = Stage.I.canc)
+diri.contour(a = alpha.Stage_II, x = Stage.II.canc)
+diri.contour(a = alpha.Stage_III, x = Stage.III.canc)
+plot(density(Stage.IV.canc), lty = 4, lwd = 2, col = "navyblue", xlim = c(.66, 1))
 
 
-
-# Example: say 21% of some age pop. group at has HPV, P(No HPV | Vaccination):
-.21 * apply(pEfficacy.vac, 2, mean)
+# Example: say 21% of some age pop. group at has HPV, P(No HPV | Vaccination), assuming
+# 50% of pop is covered:
+(.5 *.21) * apply(pEfficacy.vac, 2, mean)
 # ≈ 19.5% protected by vaccine.
+
