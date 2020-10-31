@@ -51,5 +51,15 @@ model {
 
 # END OF SUB-MODEL 2.
 
+# SUB-MODEL 3: CANCER PROGRESSION model parameters abbreviated by .canc. Note: 
+# this is equivalent to Monte Carlo PSA, as it is technically sampling directly from 
+# a prior and is not propogated into a posterior using a likelihood model. However,
+# a hyperprior is used for the population variance to account for a greater uncertainty.
+
+Stage.I.canc ~ ddirch(alpha.Stage_I)
+Stage.II.canc ~ ddirch(alpha.Stage_II)
+Stage.III.canc ~ ddirch(alpha.Stage_III)
+Stage.IV.canc ~ dbeta(alpha.Stage_IV, beta.Stage_IV)
+
  }
 

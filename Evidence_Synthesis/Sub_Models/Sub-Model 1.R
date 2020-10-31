@@ -202,11 +202,11 @@ age_group <- c("15-16", "17", "18", "19", "20", "≤21", "22-23",
 Prevalence <- c(.09516258, .1130796, .139292, .1563352, .139292, 
                 .1130796, .09516258, .04877058, .009950166, .004987521)
 
-mu.a.log <-log(Prevalence)
+mu.a.log <- log(Prevalence)
 
-# mu.a.log <- lnorm_params(m = Prevalence, v = sd(Prevalence)^2)$mu
-# Optional non-hierarchical model on variance:
-# sigma.a.log <- lnorm_params(m = Prevalence, v = sd(Prevalence)^2)$sigma
+# 'Emprical bayes' method:
+# mu.a.log <- lnorm_params(m = Prevalence, v = .01)$mu
+# sigma.a.log <- lnorm_params(m = Prevalence, v = .01)$sigma
 # prec.age <- 1 / (sigma.a.log * sigma.a.log)
 # prec.age
 
@@ -218,18 +218,21 @@ model {
 
 # SUB-MODEL 1: AGE-SPECIFIC PREVALENCE - model parameters abbreviated by .age. Note: 
 # this is equivalent to Monte Carlo PSA, as it is technically sampling directly from 
-# a prior and is not propogated into a posterior using a likelihood model.
+# a prior and is not propogated into a posterior using a likelihood model. However,
+# a hyperprior is used for the population variance to account for a greater uncertainty.
   for (i in 1:10) {
-  # MC sampling model:
+  # Monte Carlo model:
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
     
-  # Sigma precision:
-  log(prec.age[i]) <- pow(sigma.age[i], -2)
-  # Sigma prior:
-  sigma.age[i] ~ dt(0, 1, 1)T(0, )
+    # Note use of pow() function, -2 is inverse method,
+    # i.e. 1 / x^2
+    log(prec.age[i]) <- pow(sigma.age[i], -2)
+    sigma.age[i] ~ dt(0, eta.age, 1)T(0, )
+  }
   
- }
-
+  # Hyper-priors on pop. variance:
+  eta.age ~ dunif(0, 100)
+ 
 # END OF SUB-MODEL 1.
 
 # SUB-MODEL 2: VACCINE-EFFICACY - model parameters abbreviated by .vac.

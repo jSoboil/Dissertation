@@ -347,7 +347,12 @@ beta_params(mean = 0.8775436, sigma = .05)
 # Informative prior -------------------------------------------------------
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
-1 - exp(-.4 * 10)
+
+# Probability of progression every 10 years = .4
+# Convert to yearly rate
+- (1 / 10) * log(1 - .4)
+# Convert to annual progression probability to Stage I Cancer:
+1 - exp(-0.05108256 * 1)
 
 # ==========================================================================================
 # From Stage I Cancer to Treatment or Stage II Cancer ---------------------
@@ -356,14 +361,20 @@ beta_params(mean = 0.8775436, sigma = .05)
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
-# Probability of symptoms every 4 years = .9
+# Probability of progression every 4 years = .9
 # Convert to yearly rate
 - (1 / 4) * log(1 - .9)
-# Convert to yearly transition probability to treatment
-1 - exp(-.5756463 * 1)
+# Yearly probability from Stage I to Stage II:
+1 - exp(-0.5756463 * 1)
 
-# Yearly probability of progression to Stage II Cancer:
-1 - exp(-.15 * 1)
+# Annual probability of symptoms from Stage I to Treatment:
+.15
+
+# Yearly probability from Stage I to Stage I:
+1 - (1 - exp(-.15 * 1) + .15)
+
+# To check probability laws, uncomment the line below:
+# 0.710708 + (1 - exp(-.15 * 1) + .15)
 
 # ==========================================================================================
 # From Stage II Cancer to Treatment or Stage III Cancer -------------------
@@ -372,14 +383,20 @@ beta_params(mean = 0.8775436, sigma = .05)
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
-# Probability of symptoms and therefore treatment every 4 years = .9
+# Probability of progression every 3 years = .9
 # Convert to yearly rate
 - (1 / 3) * log(1 - .9)
-# Convert to yearly transition probability to treatment
-1 - exp(-.7675284 * 1)
+# Yearly probability from Stage I to Stage II:
+1 - exp(-0.7675284 * 1)
 
-# Yearly probability of progression to Stage III Cancer:
-1 - exp(-.225 * 1)
+# Annual probability of symptoms from Stage II to Treatment:
+0.225
+
+# Yearly probability from Stage II to Stage II:
+1 - ((1 - exp(-0.7675284 * 1)) + 0.225)
+
+# To check probability laws, uncomment the line below:
+# 0.2391589 + ((1 - exp(-0.7675284 * 1)) + 0.225)
 
 # ==========================================================================================
 # From Stage III Cancer to Treatment or Stage IV Cancer -------------------
@@ -388,14 +405,22 @@ beta_params(mean = 0.8775436, sigma = .05)
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
-# Probability of symptoms and therefore treatment every 4 years = .9
+# Probability of progression every 2 years = .9
 # Convert to yearly rate
 - (1 / 2) * log(1 - .9)
-# Convert to yearly transition probability to treatment
+# Yearly probability from Stage III to Stage IV:
 1 - exp(-1.151293 * 1)
 
-# Yearly probability of progression to Stage IV Cancer:
-1 - exp(-.6 * 1)
+# Yearly probability of symptoms from Stage II to Treatment:
+# This doesn't make sense unless it is a proportion of the leftover cohort less those who
+# progress to Stage IV...
+((1 - (1 - exp(-1.151293 * 1))) * .6)
+
+# Yearly probability from Stage III to Stage III:
+1 - ((1 - exp(-1.151293 * 1)) + ((1 - (1 - exp(-1.151293 * 1))) * .6))
+
+# To check probability laws, uncomment the line below:
+# 0.126491 + ((1 - exp(-1.151293 * 1)) + ((1 - (1 - exp(-1.151293 * 1))) * .6))
 
 # ==========================================================================================
 # From Stage IV Cancer to Treatment -------------------
@@ -404,136 +429,112 @@ beta_params(mean = 0.8775436, sigma = .05)
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
-# Probability of symptoms and therefore treatment every 4 years = .9
-# Convert to yearly rate
-- (1 / 2) * log(1 - .9)
-# Convert to yearly transition probability to treatment
-1 - exp(-1.151293 * 1)
-
-# ==========================================================================================
-# From Stage I to Survival for Years 1-5 -----------------------------------
-# ==========================================================================================
-# Informative prior -------------------------------------------------------
-# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
-# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
-
-# Year 1
-.9688
-beta_params(mean = .9688, sigma = .05)
-# Year 2
-.9525
-beta_params(mean = .9525, sigma = .05)
-# Year 3
-.9544
-beta_params(mean = .9544, sigma = .05)
-# Year 4
-.9760
-beta_params(mean = .9760, sigma = .05)
-# Year 5
-.9761
-beta_params(mean = .9761, sigma = .05)
-
-# ==========================================================================================
-# From Stage II to Survival for Years 1-5 -----------------------------------
-# ==========================================================================================
-# Informative prior -------------------------------------------------------
-# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
-# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
-
-# Year 1
-.9066
-beta_params(mean = .9066, sigma = .05)
-# Year 2
-.8760
-beta_params(mean = .8760, sigma = .05)
-# Year 3
-.9225
-beta_params(mean = .9225, sigma = .05)
-# Year 4
-.9332
-beta_params(mean = .9332, sigma = .05)
-# Year 5
-.9604
-beta_params(mean = .9604, sigma = .05)
-
-# ==========================================================================================
-# From Stage III to Survival for Years 1-5 -----------------------------------
-# ==========================================================================================
-# Informative prior -------------------------------------------------------
-# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
-# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
-
-# Year 1
-.7064
-beta_params(mean = .7064, sigma = .05)
-# Year 2
-.7378
-beta_params(mean = .7378, sigma = .05)
-# Year 3
-.8610
-beta_params(mean = .8610, sigma = .05)
-# Year 4
-.9231
-beta_params(mean = .9231, sigma = .05)
-# Year 5
-.9142
-beta_params(mean = .9142, sigma = .05)
-
-# ==========================================================================================
-# From Stage IV to Survival for Years 1-5 -----------------------------------
-# ==========================================================================================
-# Informative prior -------------------------------------------------------
-# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
-# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
-
-# Year 1
-.3986
-beta_params(mean = .3986, sigma = .05)
-# Year 2
-.4982
-beta_params(mean = .4982, sigma = .05)
-# Year 3
-.7638
-beta_params(mean = .7638, sigma = .05)
-# Year 4
-.8652
-beta_params(mean = .8652, sigma = .05)
-# Year 5
-.8592
-beta_params(mean = .8592, sigma = .05)
+# Yearly probability of symptoms from Stage IV to Treatment:
+.9
 
 # ===========================================================================================
-# Annual Cancer Screening Coverage  --------------------------------------------------------
+# Stage I 5-year Survival -------------------------------------------------
 # ===========================================================================================
-# Informative prior -------------------------------------------------------
-# 1. HPV and Related Diseases Report
-# Proportion of pop. screening coverage every three years according to age group, converted 
-# to an annual rate, and then annual probability:
+# Year 1:
+# Survive = 0.9688
+# Die = 1 - 0.9688
 
-# 18-29 years = 12.9%
-- (1 / 3) * log(1 - .129) # 3-year Probability converted to 1-year Rate.
-1 - exp(-.04603777 * 1) # 1-year Probability
-beta_params(mean = .04499411, sigma = .05)
+# Year 2
+# Survive = 0.9525
+# Die = 1 - 0.9525
 
-# 30-39 years = 21.4%
-- (1 / 3) * log(1 - .214) # 3-year Probability converted to 1-year Rate.
-1 - exp(-.08026616 * 1) # 1-year Probability
-beta_params(mean = .07712932, sigma = .05)
+# Year 3
+# Survive = 0.9544
+# Die = 1 - 0.9544
 
-# 40-49 years = 11.5%
-- (1 / 3) * log(1 - .115) # 3-year Probability converted to 1-year Rate.
-1 - exp(-.04072254 * 1) # 1-year Probability
-beta_params(mean = .03990452, sigma = .05)
+# Year 4
+# Survive = 0.9760
+# Die = 1 - 0.9760
 
-# 50-59 years = 7.7%
-- (1 / 3) * log(1 - .077) # 3-year Probability converted to 1-year Rate.
-1 - exp(-.02670868 * 1) # 1-year Probability
-beta_params(mean = .02635516,sigma = .05)
+# Year 5
+# Survive = 0.9761
+# Die = 1 - 0.9761
 
-# 60-69 years = 5.8%
-- (1 / 3) * log(1 - .058) # 3-year Probability converted to 1-year Rate.
-1 - exp(-.01991667 * 1) # 1-year Probability
-beta_params(mean = .01971964, sigma = .05)
+# 5 year survival:
+((0.9688) * (0.9525) * (0.9544) * (0.9760) * (0.9761))
+
+# ===========================================================================================
+# Stage II 5-year Survival -------------------------------------------------
+# ===========================================================================================
+# Year 1:
+# Survive = 0.9066
+# Die = 1 - 0.9066
+
+# Year 2
+# Survive = 0.8760
+# Die = 1 - 0.8760
+
+# Year 3
+# Survive = 0.9225
+# Die = 1 - 0.9225
+
+# Year 4
+# Survive = 0.9332
+# Die = 1 - 0.9332
+
+# Year 5
+# Survive = 0.9604
+# Die = 1 - 0.9604
+
+# 5 year survival:
+((0.9066) * (0.8760) * (0.9225) * (0.9332) * (0.9604))
+
+# ===========================================================================================
+# Stage III 5-year Survival -------------------------------------------------
+# ===========================================================================================
+# Year 1:
+# Survive = 0.7064
+# Die = 1 - 0.7064
+
+# Year 2
+# Survive = 0.7378
+# Die = 1 - 0.7378
+
+# Year 3
+# Survive = 0.8610
+# Die = 1 - 0.8610
+
+# Year 4
+# Survive = 0.9231
+# Die = 1 - 0.9231
+
+# Year 5
+# Survive = 0.9142
+# Die = 1 - 0.9142
+
+# 5 year survival:
+((0.7064) * (0.7378) * (0.8610) * (0.9231) * (0.9142))
+
+# ===========================================================================================
+# Stage IV 5-year Survival -------------------------------------------------
+# ===========================================================================================
+# Year 1:
+# Survive = 0.3986
+# Die = 1 - 0.3986
+
+# Year 2
+# Survive = 0.4982
+# Die = 1 - 0.4982
+
+# Year 3
+# Survive = 0.7638
+# Die = 1 - 0.7638
+
+# Year 4
+# Survive = 0.8652
+# Die = 1 - 0.8652
+
+# Year 5
+# Survive = 0.8592
+# Die = 1 - 0.8592
+
+# 5 year survival:
+((0.3986) * (0.4982) * (0.7638) * (0.8652) * (0.8592))
 
 # ===========================================================================================
 # Loss to Follow-Up -------------------------------------------------------
@@ -541,7 +542,9 @@ beta_params(mean = .01971964, sigma = .05)
 # Informative prior -------------------------------------------------------
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
-beta_params(mean = .15, sigma = .05)
+
+# Probability:
+0.15
 
 # ==========================================================================================
 # Risk Increase (HIV+) ------------------------------------------------------
