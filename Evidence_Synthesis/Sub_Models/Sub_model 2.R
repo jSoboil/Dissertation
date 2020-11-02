@@ -152,8 +152,8 @@ model {
     # Monte Carlo:
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
     
-    # Note in use of pow() function, -2 is a shorthand inverse
-    # method, i.e. equivalent to 1 / x^2.
+    # Note in use of pow() function, using -2 is a shorthand inverse
+    # method equivalent to 1 / x^2.
     log(prec.age[i]) <- pow(sigma.age[i], -2)
     # Prior on variance for each age group. Note use of half Student-t to draw
     # variance away from 0. See Gelman (2006):
@@ -161,7 +161,7 @@ model {
   }
   
    # Wide hyper-prior on prior variance parameter for SUB-MODEL 1:
-   eta.age ~ dunif(0, 100)
+   eta.age ~ dunif(0, 1000)
  
 # END OF SUB-MODEL 1.
 
@@ -227,10 +227,6 @@ data_JAGS <- list(
   alpha.Stage_III = alpha.Stage_III, 
   alpha.Stage_IV = alpha.Stage_IV, beta.Stage_IV = beta.Stage_IV
 )
-
-mean(Stage.I.canc[, 3])
-mean(Stage.II.canc[, 1])
-
 
 # Parameters to monitor:
 params <- c(
