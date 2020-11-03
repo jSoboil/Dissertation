@@ -46,13 +46,23 @@ mu.a.log <- log(Prevalence)
 
 # Normal to Death ---------------------------------------------------------
 # Import ASSA mortality table:
-mort_data <- read_excel("/Users/joshuamusson/Desktop/Analytics/R/Dissertation/Evidence_Synthesis/mortality tables.xls", 
+mort_data <- read_excel(
+"/Users/joshuamusson/Desktop/Analytics/R/Dissertation/Evidence_Synthesis/mortality tables.xls", 
                         sheet = "ASSA data", range = "B3:C94")
 
 # Total Pop. divided by total deaths:
 v_r_mort_by_age <- mort_data[, 2] / mort_data[, 1]
 v_r_mort_by_age[1:90, ]
-plot(unlist(v_r_mort_by_age), type = "l")
+plot(unlist(v_r_mort_by_age), type = "l", lwd = 4)
+
+# Ages 1:14
+annual.mortality_1to14 <- v_r_mort_by_age[1:14, ]
+# Ages 15:24
+annual.mortality_15to24 <- v_r_mort_by_age[15:24, ]
+# Ages 25:29
+annual.mortality_25to29 <- v_r_mort_by_age[25:29, ]
+# Ages ≥30:
+annual.mortality_30plus <- v_r_mort_by_age[25:29, ]
 
 # Normal to Normal --------------------------------------------------------
 # 1 - (Age mortality[, i] + omega.age[, i])
@@ -79,20 +89,32 @@ HPV_Normal_25 <- (1 - exp(-.5 * 1.5))
 
 # Ages ≥30:
 HPV_Normal_30plus <- (1 - exp(-.15 * 1.5))
-1 - HPV_Normal_30plus
+1 - HPV_Normal_30up
+
+# Parameters for this regression:
+alpha.HPVtoNormal_15to24 <- beta_params(mean = HPV_Normal_15, sigma = 0.1)$alpha
+beta.HPVtoNormal_15to24 <- beta_params(mean = HPV_Normal_15, sigma = 0.1)$beta
+
+alpha.HPVtoNormal_25to29 <- beta_params(mean = HPV_Normal_25, sigma = 0.1)$alpha
+beta.HPVtoNormal_25to29 <- beta_params(mean = HPV_Normal_25, sigma = 0.1)$beta
+
+alpha.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.1)$alpha
+beta.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.1)$beta
 
 # HPV to LSIL -------------------------------------------------------------
 # Ages 15-24:
-HPV_LSIL_15 <- ((1 - HPV_Normal_15) * ((1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1)))
+HPV_LSIL_15 <- (1 - HPV_Normal_15) * ((1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1))
 HPV_LSIL_15
 
 # Ages 25-29:
-HPV_LSIL_25 <- ((1 - HPV_Normal_25) * ((1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1)))
+HPV_LSIL_25 <- (1 - HPV_Normal_25) * ((1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1))
 HPV_LSIL_25
 
 # Ages ≥30:
-HPV_LSIL_30plus <- ((1 - HPV_Normal_30plus) * ((1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1)))
+HPV_LSIL_30plus <- (1 - HPV_Normal_30plus) * ((1 - exp(-.2 * 3)) - 
+                                               ((1 - exp(-.2 * 3)) * .1))
 HPV_LSIL_30plus
+
 
 # HPV to HSIL -------------------------------------------------------------
 # Ages 15-24:
@@ -127,22 +149,25 @@ HPV_Death_30plus
 # Ages 15-24:
 HPV_HPV_15 <- (1 - HPV_Normal_15) - (HPV_Death_15 + HPV_LSIL_15 + 
                                 HPV_HSIL_15)
-# Calibration - Ages 15-34. Must equal 1 across all ages:
-(HPV_HPV_15 + HPV_HSIL_15 + HPV_LSIL_15 + HPV_Death_15) + HPV_Normal_15
 
 # Ages 25-29:
 HPV_HPV_25 <- (1 - HPV_Normal_25) - (HPV_Death_25 + HPV_LSIL_25 + 
                                 HPV_HSIL_25)
-# Calibration - Ages 25-29. Must equal 1 across all ages:
-(HPV_HPV_25 + HPV_HSIL_25 + HPV_LSIL_25 + HPV_Death_25) + HPV_Normal_25
 
 # Ages ≥30:
-HPV_HPV_30plus <- (1 - HPV_Normal_30plus) - (HPV_Death_30plus + HPV_LSIL_30plus + 
+HPV_HPV_30up <- (1 - HPV_Normal_30plus) - (HPV_Death_30plus + HPV_LSIL_30plus + 
                                 HPV_HSIL_30plus)
-# Calibration - Ages ≥30. Must equal 1 across all ages:
-(HPV_HPV_30plus + HPV_HSIL_30plus + HPV_LSIL_30plus + HPV_Death_30plus) + 
- HPV_Normal_30plus
 
+# State Calibration -------------------------------------------------------------
+
+# Calibration - Ages 15-34. Must equal 1 across all ages:
+(HPV_HPV_15 + HPV_HSIL_15 + HPV_LSIL_15 + HPV_Death_15) + HPV_Normal_15
+
+# Calibration - Ages 25-29. Must equal 1 across all ages:
+HPV_HPV_25 + HPV_HSIL_25 + HPV_LSIL_25 + HPV_Death_25 + HPV_Normal_25
+
+# Calibration - Ages ≥30. Must equal 1 across all ages:
+HPV_HPV_30plus + HPV_HSIL_30plus + HPV_LSIL_30plus + HPV_Death_30plus + HPV_Normal_30plus
 
 # ==========================================================================================
 # Cancer State Progression ------------------------------------------------
@@ -206,7 +231,8 @@ model {
     # method equivalent to 1 / x^2.
     log(prec.age[i]) <- pow(sigma.age[i], -2)
     # Prior on variance for each age group. Note use of half Student-t to draw
-    # variance away from 0. See Gelman (2006):
+    # variance away from 0. See Prior distribution for variance parameters in 
+    # hierarchical models (Gelman, 2006):
     sigma.age[i] ~ dt(0, eta.age, 1)T(0, )
   }
   
@@ -251,21 +277,31 @@ model {
 # Monte Carlo PSA, as it is technically sampling directly from a prior and it is
 # *not* propogated into a posterior using a likelihood model. 
 
-  # Monte Carlo:
-   Stage.I.canc ~ ddirch(alpha.Stage_I)
-   Stage.II.canc ~ ddirch(alpha.Stage_II)
-   Stage.III.canc ~ ddirch(alpha.Stage_III)
-   Stage.IV.canc ~ dbeta(alpha.Stage_IV, beta.Stage_IV)
+   # Monte Carlo:
+    Stage.I.canc ~ ddirch(alpha.Stage_I)
+    Stage.II.canc ~ ddirch(alpha.Stage_II)
+    Stage.III.canc ~ ddirch(alpha.Stage_III)
+    Stage.IV.canc ~ dbeta(alpha.Stage_IV, beta.Stage_IV)
 
 # END OF SUB-MODEL 3.
 
-# SUB-MODEL 4: LSIL AND HSIL STATES
-
-
-
+# SUB-MODEL 4: INFECTION PROGRESSION:
+# Model parameters abbreviated by .canc. Note: this is equivalent to a standard 
+# Monte Carlo PSA, as it is technically sampling directly from a prior and it is
+# *not* propogated into a posterior using a likelihood model. 
+   
+   # Monte Carlo:
+   # From HPV to Normal across age groups:
+   # Note: because all other states except Death are assumed to be dependent and disjoint for
+   # regression to normal from state of HPV/Infection, one can calculate all other relevant 
+   # states from the complement of the transitions that are obtained from the model below:
+    HPV_Well_15to24 ~ dbeta(alpha.HPVtoNormal_15to24, beta.HPVtoNormal_15to24)
+    HPV_Well_25to29 ~ dbeta(alpha.HPVtoNormal_25to29, beta.HPVtoNormal_25to29)
+    HPV_Well_30toEnd ~ dbeta(alpha.HPVtoNormal_30toPlus, beta.HPVtoNormal_30toPlus)
+   
  }
 "
-writeLines(text = model_String, con = "CancerStages.txt")
+writeLines(text = model_String, con = "SUBMOD4.txt")
 
 # Transform data into list format so that can be read by JAGS:
 data_JAGS <- list(
@@ -279,7 +315,16 @@ data_JAGS <- list(
   # Cancer Stage alpha's:
   alpha.Stage_I = alpha.Stage_I, alpha.Stage_II = alpha.Stage_II,
   alpha.Stage_III = alpha.Stage_III, 
-  alpha.Stage_IV = alpha.Stage_IV, beta.Stage_IV = beta.Stage_IV
+  alpha.Stage_IV = alpha.Stage_IV, beta.Stage_IV = beta.Stage_IV,
+  
+  # HPV to Normal data:
+  alpha.HPVtoNormal_15to24 = alpha.HPVtoNormal_15to24, 
+  beta.HPVtoNormal_15to24 = beta.HPVtoNormal_15to24,
+  alpha.HPVtoNormal_25to29 = alpha.HPVtoNormal_25to29, 
+  beta.HPVtoNormal_25to29 = beta.HPVtoNormal_25to29,
+  alpha.HPVtoNormal_30toPlus = alpha.HPVtoNormal_30toPlus,
+  beta.HPVtoNormal_30toPlus = beta.HPVtoNormal_30toPlus
+
 )
 
 # Parameters to monitor:
@@ -290,7 +335,11 @@ params <- c(
   "omega.age",
   # Cancer Stage Progression:
   "Stage.I.canc", "Stage.II.canc",
-  "Stage.III.canc", "Stage.IV.canc"
+  "Stage.III.canc", "Stage.IV.canc",
+  # HPV to Normal Progression:
+  "HPV_Well_15to24", "HPV_Well_25to29",
+  "HPV_Well_30toEnd"
+  
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
@@ -300,6 +349,26 @@ n.thin <- floor((n.iter - n.burnin) / 250)
 
 # Run MCMC model:
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
-                 model.file = "CancerStages.txt", n.chains = 4, 
+                 model.file = "SUBMOD4.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 mod_JAGS
+
+# Attach JAGS model to global envir:
+attach.jags(mod_JAGS)
+
+# Visual Inspection of Posterior ------------------------------------------
+# Create array of posterior samples:
+posterior <- as.array(mod_JAGS$BUGSoutput$sims.array)
+dimnames(posterior)
+
+# CHECKING IF IM ON RIGHT PATH...
+HPVLSIL <- (1 - mean(HPV_Normal_15to24)) *  ((1 - exp(-.2 * 3)) - 
+                                              ((1 - exp(-.2 * 3)) * .1))
+HPVHSIL <- (1 - mean(HPV_Normal_15to24)) * ((1 - exp(-.2 * 3)) * .1)
+
+annual.mortality_15to24
+
+HPVHPV <- (1 - mean(HPV_Normal_15to24)) - (HPVLSIL + HPVHSIL + annual.mortality_15to24)
+
+mean(HPV_Normal_15to24) + (HPVLSIL + HPVHSIL + annual.mortality_15to24 + HPVHPV)
+# YES!

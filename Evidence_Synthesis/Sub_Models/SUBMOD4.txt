@@ -77,7 +77,7 @@ model {
    # From HPV to Normal across age groups:
     HPV_Normal_15to24 ~ dbeta(alpha.HPVtoNormal_15to24, beta.HPVtoNormal_15to24)
     HPV_Normal_25to29 ~ dbeta(alpha.HPVtoNormal_25to29, beta.HPVtoNormal_25to29)
-    HPV_Normal_30plus ~ dbeta(alpha.HPVtoNormal_30toPlus, beta.HPVtoNormal_30toPlus)
+    HPV_Normal_30to91 ~ dbeta(alpha.HPVtoNormal_30toPlus, beta.HPVtoNormal_30toPlus)
    
  }
 

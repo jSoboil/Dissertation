@@ -156,7 +156,8 @@ model {
     # method equivalent to 1 / x^2.
     log(prec.age[i]) <- pow(sigma.age[i], -2)
     # Prior on variance for each age group. Note use of half Student-t to draw
-    # variance away from 0. See Gelman (2006):
+    # variance away from 0. See Prior distribution for variance parameters in 
+    # hierarchical models (Gelman, 2006):
     sigma.age[i] ~ dt(0, eta.age, 1)T(0, )
   }
   
