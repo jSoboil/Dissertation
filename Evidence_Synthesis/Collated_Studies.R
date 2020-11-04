@@ -275,7 +275,7 @@ beta_params(mean = .65, sigma = .05)
 beta_params(mean = 0.9994, sigma = .05)
 # Ages ≥30 years:
 1 - exp(-.15 * 1.5)
-beta_params(mean = 0.2014838, sigma = .05)
+
 
 # ==========================================================================================
 # From Infection to LSIL -----------------------------------------------------
@@ -285,7 +285,6 @@ beta_params(mean = 0.2014838, sigma = .05)
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
 1 - exp(-.2 * 3)
-beta_params(mean = 0.4511884, sigma = .05)
 
 # ==========================================================================================
 # From Infection to HSIL -----------------------------------------------------
@@ -294,7 +293,6 @@ beta_params(mean = 0.4511884, sigma = .05)
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
-beta_params(mean = .1, sigma = .05)
 
 # ==========================================================================================
 # From LSIL to Infection or Normal ----------------------------------------
@@ -305,13 +303,11 @@ beta_params(mean = .1, sigma = .05)
 
 # Ages 15-34:
 1 - exp(-.65 * 6)
-beta_params(mean = 0.9797581, sigma = .05)
 # Proportion reverting to Normal is .9:
 1 - ((0.9797581 - 0.9797581 * .9) + 0.9797581 * .9)
 
 # Ages ≥ 35:
 1 - exp(-.4 * 6)
-beta_params(mean = 0.909282, sigma = .05)
 # Proportion reverting to Normal is .9:
 1 - ((0.909282 - 0.909282 * .9) + 0.909282 * .9)
 

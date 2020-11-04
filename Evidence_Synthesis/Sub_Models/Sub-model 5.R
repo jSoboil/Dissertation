@@ -9,9 +9,84 @@ library(dampack)
 library(MCMCpack)
 library(Compositional)
 
+# This script adds sub-model 5 to the overall model. Specifically, states LSIL to HPV,
+# LSIL to HSIL, LSIL to LSIL, HSIL to LSIL, HSIL to Normal/Well, HSIL to Stage-I Cancer, 
+# and HSIL to HSIL. Like the states from Infection, this can be modelled from a single
+# distribution as the rest of the probabilities are conditional on moving out the state.
+
+# Informative prior -------------------------------------------------------
+# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+
+# ====================================================================================
+# Sub-Model for progressions from LSIL --------------------
+# ====================================================================================
+# To Infection or Normal ----------------------------------------
+# Ages 15-34:
+LSIL_15to34 <- 1 - exp(-.65 * 6)
+alpha.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.05)$alpha
+beta.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.05)$beta
+
+# Proportion reverting to Normal is .9:
+LSILtoNormal_15to34 <- ((1 - exp(-.65 * 6)) * .9)
+# Proportion reverting to HPV/Infection
+LSILtoHPV_15to34 <- (1 - exp(-.65 * 6)) - ((1 - exp(-.65 * 6)) * .9)
+
+# Ages ≥ 35:
+LSIL_35up <- 1 - exp(-.4 * 6)
+alpha.LSIL_35up <- beta_params(mean = LSIL_35up, sigma = 0.05)$alpha
+beta.LSIL_35up <- beta_params(mean = LSIL_35up, sigma = 0.05)$beta
+# Proportion reverting to Normal is .9:
+LSILtoNormal_35up <- ((1 - exp(-.4 * 6)) * .9)
+# Proportion reverting to HPV/Infection
+LSILtoHPV_35up <- (1 - exp(-.4 * 6)) - ((1 - exp(-.4 * 6)) * .9)
+
+# To HSIL -------------------------------------------------------
+# Conditional on not regressing to Normal or Infection...
+# Ages 15-34:
+LSILtoHSIL_15to34 <- (1 - (1 - exp(-.65 * 6))) * (1 - exp(-.1 * 6))
+
+# Ages ≥ 35:
+LSILtoHSIL_35up <- (1 - (1 - exp(-.4 * 6))) * (1 - exp(-.35 * 6))
+
+# To LSIL -----------------------------------------------------------------
+# Setting 1 - \sum{p_i}
+LSILtoLSIL_15to34 <- 1 - (LSILtoHPV_15to34 + LSILtoHSIL_15to34 + LSILtoNormal_15to34)
+
+# Calibration for LSIL State ----------------------------------------------
+LSILtoLSIL_15to34 + LSILtoHPV_15to34 + LSILtoHSIL_15to34 + LSILtoNormal_15to34
+
+# ====================================================================================
+# Sub-Model for progressions from HSIL --------------------
+# ====================================================================================
+HSIL <- (1 - exp(-.35 * 6))
+alpha.HSIL <- beta_params(mean = HSIL, sigma = 0.05)$alpha
+beta.HSIL <- beta_params(mean = HSIL, sigma = 0.05)$beta
+
+# To Normal ----------------------------------------
+HSILtoNormal <- ((1 - exp(-.35 * 6)) * .5)
+
+# To LSIL ----------------------------------------
+HSILtoLSIL <- (1 - exp(-.35 * 6)) - ((1 - exp(-.35 * 6)) * .5)
+
+# To Stage-I Cancer -------------------------------------------------------
+# Probability of progression every 10 years = .4
+# Convert to yearly rate
+- (1 / 10) * log(1 - .4)
+# Convert to annual progression probability to Stage I Cancer:
+HSILtoStageI <- 1 - exp(-0.05108256 * 1)
+
+# To HSIL -----------------------------------------------------------------
+HSILtoHSIL <- 1 - (HSILtoNormal + HSILtoLSIL + HSILtoStageI)
+HSILtoHSIL
+
+# Calibration for HSIL State ----------------------------------------------
+HSILtoHSIL + HSILtoLSIL + HSILtoNormal + HSILtoStageI
+
+
 # This script adds sub-model 4 to the overall model. Specifically, states Normal/Well to HPV,
 # HPV to LSIL, HPV to HSIL.
-source
+
 # ==========================================================================================
 # Normal/Well State Progression -------------------------------------------
 # ==========================================================================================
@@ -284,9 +359,9 @@ model {
 # END OF SUB-MODEL 3.
 
 # SUB-MODEL 4: INFECTION PROGRESSION:
-# Model parameters abbreviated by .canc. Note: this is equivalent to a standard 
-# Monte Carlo PSA, as it is technically sampling directly from a prior and it is
-# *not* propogated into a posterior using a likelihood model. 
+# Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
+# directly from a prior and it is *not* propogated into a posterior using a likelihood 
+# model. 
    
    # Monte Carlo:
    # From HPV to Normal across age groups:
@@ -296,10 +371,21 @@ model {
     HPV_Well_15to24 ~ dbeta(alpha.HPVtoNormal_15to24, beta.HPVtoNormal_15to24)
     HPV_Well_25to29 ~ dbeta(alpha.HPVtoNormal_25to29, beta.HPVtoNormal_25to29)
     HPV_Well_30toEnd ~ dbeta(alpha.HPVtoNormal_30toPlus, beta.HPVtoNormal_30toPlus)
-   
+
+# END OF SUB-MODEL 4.
+
+# SUB-MODEL 5: LSIL & HSIL PROGRESSION:
+# Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
+# directly from a prior and it is *not* propogated into a posterior using a likelihood 
+# model. 
+   LSIL_15 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)
+   LSIL_35 ~ dbeta(alpha.LSIL_35up, beta.LSIL_35up)
+   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)
+
+
  }
 "
-writeLines(text = model_String, con = "SUBMOD4.txt")
+writeLines(text = model_String, con = "SUBMOD5.txt")
 
 # Transform data into list format so that can be read by JAGS:
 data_JAGS <- list(
@@ -321,8 +407,13 @@ data_JAGS <- list(
   alpha.HPVtoNormal_25to29 = alpha.HPVtoNormal_25to29, 
   beta.HPVtoNormal_25to29 = beta.HPVtoNormal_25to29,
   alpha.HPVtoNormal_30toPlus = alpha.HPVtoNormal_30toPlus,
-  beta.HPVtoNormal_30toPlus = beta.HPVtoNormal_30toPlus
-
+  beta.HPVtoNormal_30toPlus = beta.HPVtoNormal_30toPlus,
+  
+  # LSIL and HSIL transition data:
+  alpha.LSIL_15to34 = alpha.LSIL_15to34, beta.LSIL_15to34 = beta.LSIL_15to34,
+  alpha.LSIL_35up = alpha.LSIL_35up, beta.LSIL_35up = beta.LSIL_35up,
+  alpha.HSIL = alpha.HSIL, beta.HSIL = beta.HSIL
+  
 )
 
 # Parameters to monitor:
@@ -336,7 +427,10 @@ params <- c(
   "Stage.III.canc", "Stage.IV.canc",
   # HPV to Normal Progression:
   "HPV_Well_15to24", "HPV_Well_25to29",
-  "HPV_Well_30toEnd"
+  "HPV_Well_30toEnd",
+  # LSIL and HSIL Progression:
+  "LSIL_15", "LSIL_35",
+  "HSIL_n"
   
   )
 
@@ -347,25 +441,25 @@ n.thin <- floor((n.iter - n.burnin) / 250)
 
 # Run MCMC model:
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
-                 model.file = "SUBMOD4.txt", n.chains = 4, 
+                 model.file = "SUBMOD5.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 mod_JAGS
 
-# Attach JAGS model to global envir:
 attach.jags(mod_JAGS)
 
-# Create array of posterior samples:
-posterior <- as.array(mod_JAGS$BUGSoutput$sims.array)
-dimnames(posterior)
+# Equations for state transitions:
+# Proportion reverting to Normal is .9:
+LSILtoNormal_15 <- LSIL_15 * .9
+LSILtoNormal_15
+# Proportion reverting to HPV/Infection
+LSILtoHPV_15 <- LSIL_15 - LSILtoNormal_15
+LSILtoHPV_15
+# To HSIL:
+LSILtoHSIL_15 <- (1 - LSIL_15) * (1 - exp(-.1 * 6))
+LSILtoHSIL_15
+# To LSIL:
+LSILtoLSIL_15 <- 1 - (LSILtoHPV_15 + LSILtoHSIL_15 + LSILtoNormal_15)
 
-# CHECKING IF IM ON RIGHT PATH...
-HPVLSIL <- (1 - mean(HPV_Well_15to24)) *  ((1 - exp(-.2 * 3)) - 
-                                              ((1 - exp(-.2 * 3)) * .1))
-HPVHSIL <- (1 - mean(HPV_Well_15to24)) * ((1 - exp(-.2 * 3)) * .1)
-
-annual.mortality_15to24
-
-HPVHPV <- (1 - mean(HPV_Well_15to24)) - (HPVLSIL + HPVHSIL + annual.mortality_15to24)
-
-mean(HPV_Well_15to24) + (HPVLSIL + HPVHSIL + annual.mortality_15to24 + HPVHPV)
-# YES!
+# Calibration for SUB-MODEL 5 ----------------------------------------------
+LSILtoLSIL_15 + LSILtoHPV_15 + LSILtoHSIL_15 + LSILtoNormal_15
+# Yay!

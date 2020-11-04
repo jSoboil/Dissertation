@@ -15,7 +15,7 @@ nodes <- data.frame(id = 1:12, label = c("Healthy", "Exposure", "Infection",
                     shadow = FALSE,  font.color = "black", font.size = 30, 
                     font.bold = TRUE) 
 
-edges <- data.frame(from = c(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 5, 6, 7, 8, 9, 4, 
+edges <- data.frame(from = c(1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5, 5, 6, 7, 8, 9, 4, 
                              5, 10, 11, 11, 11, 12),
                     to = c(1, 2, 2, 3, 4, 5, 4, 5, 4, 5, 6, 7, 8, 9, 10, 10, 
                            10, 11, 10, 4, 5, 12), 

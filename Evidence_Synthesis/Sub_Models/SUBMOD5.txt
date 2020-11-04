@@ -69,9 +69,9 @@ model {
 # END OF SUB-MODEL 3.
 
 # SUB-MODEL 4: INFECTION PROGRESSION:
-# Model parameters abbreviated by .canc. Note: this is equivalent to a standard 
-# Monte Carlo PSA, as it is technically sampling directly from a prior and it is
-# *not* propogated into a posterior using a likelihood model. 
+# Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
+# directly from a prior and it is *not* propogated into a posterior using a likelihood 
+# model. 
    
    # Monte Carlo:
    # From HPV to Normal across age groups:
@@ -81,6 +81,17 @@ model {
     HPV_Well_15to24 ~ dbeta(alpha.HPVtoNormal_15to24, beta.HPVtoNormal_15to24)
     HPV_Well_25to29 ~ dbeta(alpha.HPVtoNormal_25to29, beta.HPVtoNormal_25to29)
     HPV_Well_30toEnd ~ dbeta(alpha.HPVtoNormal_30toPlus, beta.HPVtoNormal_30toPlus)
-   
+
+# END OF SUB-MODEL 4.
+
+# SUB-MODEL 5: LSIL & HSIL PROGRESSION:
+# Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
+# directly from a prior and it is *not* propogated into a posterior using a likelihood 
+# model. 
+   LSIL_15 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)
+   LSIL_35 ~ dbeta(alpha.LSIL_35up, beta.LSIL_35up)
+   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)
+
+
  }
 

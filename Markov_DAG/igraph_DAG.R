@@ -14,10 +14,10 @@ net <- graph_from_data_frame(d = links, directed = TRUE)
 
 set.seed(1)
 plot(net, layout = layout_as_tree, edge.arrow.size=.08, edge.arrow.width = 0.75,
-     vertex.color = alpha("lightgrey", .25), vertex.label.color = "black", 
-     vertex.frame.color = alpha("darkgrey", .35), vertex.label.font = 4, vertex.size = 12.5, 
-     vertex.label.cex = 0.35, edge.curved = .075, edge.color = alpha("black", .75), 
+     vertex.color = alpha("lightgrey", .95), vertex.label.color = "black", 
+     vertex.frame.color = alpha("darkgrey", .35), vertex.label.font = 4, vertex.size = 13, 
+     vertex.label.cex = 0.4, edge.curved = 0, edge.color = alpha("black", .75), 
      mark.groups = 1, mark.col = alpha("lightgreen", .025))
-title(cex.main = .75, main = "Human Papillomavirus: a Markov Model of its natural history")
+# title(main = "Human Papillomavirus: a Markov Model of its natural history")
 
 # End file ----------------------------------------------------------------
