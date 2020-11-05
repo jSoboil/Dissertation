@@ -37,17 +37,22 @@ rateConv.consR <- function(r, t) {
 # ==========================================================================================
 # Import ASSA mortality table:
 mort_data <- read_excel("mortality tables.xls", 
-                        sheet = "ASSA data", range = "B3:C94")
-
+                        sheet = "ASSA data", range = "A3:H94")
+mort_data
 # Total Pop. divided by total deaths:
-v_r_mort_by_age <- mort_data[, 2] / mort_data[, 1]
-v_r_mort_by_age[1:90, ]
-plot(unlist(v_r_mort_by_age), type = "l")
+v_p_mort_All <- mort_data[1:86, 3] / mort_data[1:86, 2]
+v_p_mort_All
 
-# Therefore, all-less HPV mortality calculated as All-cause mortality - HPV mortality, i.e.
-# the number of people who die due to cervical cancer.
+# Probability of mortality Cervical Cancer from HPV:
+v_p_mort_HPV <- mort_data[1:86, 8]
+colnames(v_p_mort_HPV) <- "Death_HPV"
+v_p_mort_HPV
 
-# Vector of probabilities directly computed with model.
+# Probability of mortality less HPV:
+v_p_mort_lessHPV <- v_p_mort_All - v_p_mort_HPV
+v_p_mort_lessHPV <- cbind(mort_data$Age[1:86], v_p_mort_lessHPV)
+colnames(v_p_mort_lessHPV) <- c("Age", "Death_less.HPV")
+v_p_mort_lessHPV
 
 # ===========================================================================================
 # Collated studies on vaccine efficacy -------------------------------------------------
@@ -357,17 +362,14 @@ beta_params(mean = 0.8775436, sigma = .05)
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
-# Probability of progression every 4 years = .9
-# Convert to yearly rate
-- (1 / 4) * log(1 - .9)
-# Yearly probability from Stage I to Stage II:
-1 - exp(-0.5756463 * 1)
+# Annual probability from Stage I to Stage II:
+(1 - exp(-0.9 * 4))
 
-# Annual probability of symptoms from Stage I to Treatment:
+# Annual probability of symptoms from Stage I to Stage I Treatment:
 .15
 
 # Yearly probability from Stage I to Stage I:
-1 - (1 - exp(-.15 * 1) + .15)
+# 1 - (StageI_to_StageII + StageI_to_Death + StageI_to_Treatment)
 
 # To check probability laws, uncomment the line below:
 # 0.710708 + (1 - exp(-.15 * 1) + .15)
@@ -381,18 +383,15 @@ beta_params(mean = 0.8775436, sigma = .05)
 
 # Probability of progression every 3 years = .9
 # Convert to yearly rate
-- (1 / 3) * log(1 - .9)
+
 # Yearly probability from Stage I to Stage II:
-1 - exp(-0.7675284 * 1)
+1 - exp(-0.9 * 3)
 
 # Annual probability of symptoms from Stage II to Treatment:
 0.225
 
 # Yearly probability from Stage II to Stage II:
-1 - ((1 - exp(-0.7675284 * 1)) + 0.225)
-
-# To check probability laws, uncomment the line below:
-# 0.2391589 + ((1 - exp(-0.7675284 * 1)) + 0.225)
+# 1 - (StageII_to_StageIII + StageII_to_Death + StageII_to_Treatment)
 
 # ==========================================================================================
 # From Stage III Cancer to Treatment or Stage IV Cancer -------------------
@@ -413,10 +412,7 @@ beta_params(mean = 0.8775436, sigma = .05)
 ((1 - (1 - exp(-1.151293 * 1))) * .6)
 
 # Yearly probability from Stage III to Stage III:
-1 - ((1 - exp(-1.151293 * 1)) + ((1 - (1 - exp(-1.151293 * 1))) * .6))
-
-# To check probability laws, uncomment the line below:
-# 0.126491 + ((1 - exp(-1.151293 * 1)) + ((1 - (1 - exp(-1.151293 * 1))) * .6))
+# 1 - (StageIII_to_StageIV + StageIII_to_Death + StageIII_to_Treatment)
 
 # ==========================================================================================
 # From Stage IV Cancer to Treatment -------------------
@@ -427,6 +423,11 @@ beta_params(mean = 0.8775436, sigma = .05)
 
 # Yearly probability of symptoms from Stage IV to Treatment:
 .9
+
+# Yearly probability from Stage IV to Stage IV:
+# 1 - (StageIV_to_Death + StageIV_to_Treatment)
+
+# ==========================================================================
 
 # ===========================================================================================
 # Stage I 5-year Survival -------------------------------------------------
@@ -531,16 +532,6 @@ beta_params(mean = 0.8775436, sigma = .05)
 
 # 5 year survival:
 ((0.3986) * (0.4982) * (0.7638) * (0.8652) * (0.8592))
-
-# ===========================================================================================
-# Loss to Follow-Up -------------------------------------------------------
-# ===========================================================================================
-# Informative prior -------------------------------------------------------
-# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
-# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
-
-# Probability:
-0.15
 
 # ==========================================================================================
 # Risk Increase (HIV+) ------------------------------------------------------

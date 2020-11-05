@@ -10,7 +10,7 @@ library(MCMCpack)
 library(Compositional)
 
 # This script adds sub-model 4 to the overall model. Specifically, states Normal/Well to HPV,
-# HPV to LSIL, HPV to HSIL.
+# HPV to LSIL, HPV to HSIL, and HPV to Death.
 source
 # ==========================================================================================
 # Normal/Well State Progression -------------------------------------------
@@ -47,21 +47,32 @@ mu.a.log <- log(Prevalence)
 # Import ASSA mortality table:
 mort_data <- read_excel(
 "/Users/joshuamusson/Desktop/Analytics/R/Dissertation/Evidence_Synthesis/mortality tables.xls", 
-                        sheet = "ASSA data", range = "B3:C94")
+                        sheet = "ASSA data", range = "A3:H94")
+mort_data
 
 # Total Pop. divided by total deaths:
-v_r_mort_by_age <- mort_data[, 2] / mort_data[, 1]
-v_r_mort_by_age[1:90, ]
-plot(unlist(v_r_mort_by_age), type = "l", lwd = 4)
+v_p_mort_All <- mort_data[1:86, 3] / mort_data[1:86, 2]
+v_p_mort_All
+
+# Probability of mortality Cervical Cancer from HPV:
+v_p_mort_HPV <- mort_data[1:86, 8]
+colnames(v_p_mort_HPV) <- "Death_HPV"
+v_p_mort_HPV
+
+# Probability of mortality less HPV:
+v_p_mort_lessHPV <- v_p_mort_All - v_p_mort_HPV
+v_p_mort_lessHPV <- cbind(mort_data$Age[1:86], v_p_mort_lessHPV)
+colnames(v_p_mort_lessHPV) <- c("Age", "Death_less.HPV")
+v_p_mort_lessHPV
 
 # Ages 1:14
-annual.mortality_1to14 <- v_r_mort_by_age[1:14, ]
+annual.mortality_1to14 <- v_p_mort_lessHPV[1:14, ]
 # Ages 15:24
-annual.mortality_15to24 <- v_r_mort_by_age[15:24, ]
+annual.mortality_15to24 <- v_p_mort_lessHPV[15:24, ]
 # Ages 25:29
-annual.mortality_25to29 <- v_r_mort_by_age[25:29, ]
+annual.mortality_25to29 <- v_p_mort_lessHPV[25:29, ]
 # Ages ≥30:
-annual.mortality_30plus <- v_r_mort_by_age[30:91, ]
+annual.mortality_30plus <- v_p_mort_lessHPV[30:91, ]
 
 # Normal to Normal --------------------------------------------------------
 # 1 - (Age mortality[, i] + omega.age[, i])
@@ -88,7 +99,7 @@ HPV_Normal_25 <- (1 - exp(-.5 * 1.5))
 
 # Ages ≥30:
 HPV_Normal_30plus <- (1 - exp(-.15 * 1.5))
-1 - HPV_Normal_30up
+1 - HPV_Normal_30plus
 
 # Parameters for this regression:
 alpha.HPVtoNormal_15to24 <- beta_params(mean = HPV_Normal_15, sigma = 0.1)$alpha
@@ -132,15 +143,15 @@ HPV_HSIL_30plus
 # Death not dependent on regression to normal...
 
 # Ages 15-24:
-HPV_Death_15 <- v_r_mort_by_age[15:24, ]
+HPV_Death_15 <- v_p_mort_lessHPV[16:25, ]
 HPV_Death_15
 
 # Ages 25-29:
-HPV_Death_25 <- v_r_mort_by_age[25:29, ]
+HPV_Death_25 <- v_p_mort_lessHPV[26:30, ]
 HPV_Death_25
 
 # Ages ≥30:
-HPV_Death_30plus <- v_r_mort_by_age[30:91, ]
+HPV_Death_30plus <- v_p_mort_lessHPV[31:86, ]
 HPV_Death_30plus
 
 # HPV to HPV --------------------------------------------------------------

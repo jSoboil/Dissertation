@@ -18,75 +18,6 @@ library(Compositional)
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
-# ====================================================================================
-# Sub-Model for progressions from LSIL --------------------
-# ====================================================================================
-# To Infection or Normal ----------------------------------------
-# Ages 15-34:
-LSIL_15to34 <- 1 - exp(-.65 * 6)
-alpha.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.05)$alpha
-beta.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.05)$beta
-
-# Proportion reverting to Normal is .9:
-LSILtoNormal_15to34 <- ((1 - exp(-.65 * 6)) * .9)
-# Proportion reverting to HPV/Infection
-LSILtoHPV_15to34 <- (1 - exp(-.65 * 6)) - ((1 - exp(-.65 * 6)) * .9)
-
-# Ages ≥ 35:
-LSIL_35up <- 1 - exp(-.4 * 6)
-alpha.LSIL_35up <- beta_params(mean = LSIL_35up, sigma = 0.05)$alpha
-beta.LSIL_35up <- beta_params(mean = LSIL_35up, sigma = 0.05)$beta
-# Proportion reverting to Normal is .9:
-LSILtoNormal_35up <- ((1 - exp(-.4 * 6)) * .9)
-# Proportion reverting to HPV/Infection
-LSILtoHPV_35up <- (1 - exp(-.4 * 6)) - ((1 - exp(-.4 * 6)) * .9)
-
-# To HSIL -------------------------------------------------------
-# Conditional on not regressing to Normal or Infection...
-# Ages 15-34:
-LSILtoHSIL_15to34 <- (1 - (1 - exp(-.65 * 6))) * (1 - exp(-.1 * 6))
-
-# Ages ≥ 35:
-LSILtoHSIL_35up <- (1 - (1 - exp(-.4 * 6))) * (1 - exp(-.35 * 6))
-
-# To LSIL -----------------------------------------------------------------
-# Setting 1 - \sum{p_i}
-LSILtoLSIL_15to34 <- 1 - (LSILtoHPV_15to34 + LSILtoHSIL_15to34 + LSILtoNormal_15to34)
-
-# Calibration for LSIL State ----------------------------------------------
-LSILtoLSIL_15to34 + LSILtoHPV_15to34 + LSILtoHSIL_15to34 + LSILtoNormal_15to34
-
-# ====================================================================================
-# Sub-Model for progressions from HSIL --------------------
-# ====================================================================================
-HSIL <- (1 - exp(-.35 * 6))
-alpha.HSIL <- beta_params(mean = HSIL, sigma = 0.05)$alpha
-beta.HSIL <- beta_params(mean = HSIL, sigma = 0.05)$beta
-
-# To Normal ----------------------------------------
-HSILtoNormal <- ((1 - exp(-.35 * 6)) * .5)
-
-# To LSIL ----------------------------------------
-HSILtoLSIL <- (1 - exp(-.35 * 6)) - ((1 - exp(-.35 * 6)) * .5)
-
-# To Stage-I Cancer -------------------------------------------------------
-# Probability of progression every 10 years = .4
-# Convert to yearly rate
-- (1 / 10) * log(1 - .4)
-# Convert to annual progression probability to Stage I Cancer:
-HSILtoStageI <- 1 - exp(-0.05108256 * 1)
-
-# To HSIL -----------------------------------------------------------------
-HSILtoHSIL <- 1 - (HSILtoNormal + HSILtoLSIL + HSILtoStageI)
-HSILtoHSIL
-
-# Calibration for HSIL State ----------------------------------------------
-HSILtoHSIL + HSILtoLSIL + HSILtoNormal + HSILtoStageI
-
-
-# This script adds sub-model 4 to the overall model. Specifically, states Normal/Well to HPV,
-# HPV to LSIL, HPV to HSIL.
-
 # ==========================================================================================
 # Normal/Well State Progression -------------------------------------------
 # ==========================================================================================
@@ -122,24 +53,89 @@ mu.a.log <- log(Prevalence)
 # Import ASSA mortality table:
 mort_data <- read_excel(
 "/Users/joshuamusson/Desktop/Analytics/R/Dissertation/Evidence_Synthesis/mortality tables.xls", 
-                        sheet = "ASSA data", range = "B3:C94")
+                        sheet = "ASSA data", range = "A3:H94")
+mort_data
 
 # Total Pop. divided by total deaths:
-v_r_mort_by_age <- mort_data[, 2] / mort_data[, 1]
-v_r_mort_by_age[1:90, ]
-plot(unlist(v_r_mort_by_age), type = "l", lwd = 4)
+v_p_mort_All <- mort_data[1:86, 3] / mort_data[1:86, 2]
+v_p_mort_All
 
-# Ages 1:14
-annual.mortality_1to14 <- v_r_mort_by_age[1:14, ]
+# Probability of mortality Cervical Cancer from HPV:
+v_p_mort_HPV <- mort_data[1:86, 8]
+colnames(v_p_mort_HPV) <- "Death_HPV"
+v_p_mort_HPV
+
+# Probability of mortality less HPV:
+v_p_mort_lessHPV <- v_p_mort_All[1:86, ] - v_p_mort_HPV[1:86, ]
+v_p_mort_lessHPV <- cbind(mort_data$Age[1:86], v_p_mort_lessHPV)
+colnames(v_p_mort_lessHPV) <- c("Age", "Death_less.HPV")
+v_p_mort_lessHPV
+
+annual.mortality_1to14 <- v_p_mort_lessHPV[1:15, 2]
 # Ages 15:24
-annual.mortality_15to24 <- v_r_mort_by_age[15:24, ]
+annual.mortality_15to24 <- v_p_mort_lessHPV[16:25, 2]
 # Ages 25:29
-annual.mortality_25to29 <- v_r_mort_by_age[25:29, ]
+annual.mortality_25to29 <- v_p_mort_lessHPV[26:30, 2]
 # Ages ≥30:
-annual.mortality_30plus <- v_r_mort_by_age[30:91, ]
+annual.mortality_30plus <- v_p_mort_lessHPV[31:86, 2]
 
 # Normal to Normal --------------------------------------------------------
 # 1 - (Age mortality[, i] + omega.age[, i])
+
+# ====================================================================================
+# Sub-Model for progressions from LSIL --------------------
+# ====================================================================================
+# To Infection or Normal ----------------------------------------
+# Simulation distribution parameter values # Ages 15-34:
+LSIL_15to34 <- (1 - exp(-.65 * 6))
+
+alpha.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.025)$alpha
+beta.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.025)$beta
+
+# Simulation distribution parameter values # Ages ≥ 35:
+LSIL_35up <- 1 - exp(-.4 * 6)
+
+alpha.LSIL_35up <- beta_params(mean = LSIL_35up, sigma = 0.025)$alpha
+beta.LSIL_35up <- beta_params(mean = LSIL_35up, sigma = 0.025)$beta
+
+
+# State Equations ---------------------------------------------------------
+LSILtoHSIL <- (1 - (1 - exp(-.65 * 6))) * (1 - exp(-.1 * 6))
+LSILtoDeath <- v_p_mort_lessHPV[16:25, 2]
+
+LSILtoLSIL <- (1 - LSIL_15to34) - (LSILtoHSIL + LSILtoDeath)
+
+LSILtoLSIL + LSILtoDeath + LSIL_15to34 + LSILtoHSIL
+
+
+# ====================================================================================
+# Sub-Model for progressions from HSIL --------------------
+# ====================================================================================
+HSIL <- (1 - exp(-.35 * 6))
+alpha.HSIL <- beta_params(mean = HSIL, sigma = 0.1)$alpha
+beta.HSIL <- beta_params(mean = HSIL, sigma = 0.1)$beta
+
+
+# State Equations ---------------------------------------------------------
+# To Normal ----------------------------------------
+HSILtoNormal <- ((1 - exp(-.35 * 6)) * .5)
+
+# To LSIL ----------------------------------------
+HSILtoLSIL <- (1 - exp(-.35 * 6)) - ((1 - exp(-.35 * 6)) * .5)
+
+# To Stage-I Cancer -------------------------------------------------------
+# Probability of progression every 10 years = .4
+# Convert to yearly rate
+- (1 / 10) * log(1 - .4)
+# Convert to annual progression probability to Stage I Cancer:
+HSILtoStageI <- 1 - exp(-0.05108256 * 1)
+
+# To HSIL -----------------------------------------------------------------
+HSILtoHSIL <- 1 - (HSILtoNormal + HSILtoLSIL + HSILtoStageI)
+HSILtoHSIL
+
+# Calibration for HSIL State ----------------------------------------------
+HSILtoHSIL + HSILtoLSIL + HSILtoNormal + HSILtoStageI
 
 # ==========================================================================================
 # HPV/Infection State Progression -----------------------------------------
@@ -175,6 +171,8 @@ beta.HPVtoNormal_25to29 <- beta_params(mean = HPV_Normal_25, sigma = 0.1)$beta
 alpha.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.1)$alpha
 beta.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.1)$beta
 
+
+# State Equations ---------------------------------------------------------
 # HPV to LSIL -------------------------------------------------------------
 # Ages 15-24:
 HPV_LSIL_15 <- (1 - HPV_Normal_15) * ((1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1))
@@ -188,7 +186,6 @@ HPV_LSIL_25
 HPV_LSIL_30plus <- (1 - HPV_Normal_30plus) * ((1 - exp(-.2 * 3)) - 
                                                ((1 - exp(-.2 * 3)) * .1))
 HPV_LSIL_30plus
-
 
 # HPV to HSIL -------------------------------------------------------------
 # Ages 15-24:
@@ -215,7 +212,7 @@ HPV_Death_25 <- v_r_mort_by_age[25:29, ]
 HPV_Death_25
 
 # Ages ≥30:
-HPV_Death_30plus <- v_r_mort_by_age[30:91, ]
+HPV_Death_30plus <- v_r_mort_by_age[30:86, ]
 HPV_Death_30plus
 
 # HPV to HPV --------------------------------------------------------------
@@ -233,7 +230,6 @@ HPV_HPV_30up <- (1 - HPV_Normal_30plus) - (HPV_Death_30plus + HPV_LSIL_30plus +
                                 HPV_HSIL_30plus)
 
 # State Calibration -------------------------------------------------------------
-
 # Calibration - Ages 15-34. Must equal 1 across all ages:
 (HPV_HPV_15 + HPV_HSIL_15 + HPV_LSIL_15 + HPV_Death_15) + HPV_Normal_15
 
@@ -444,22 +440,3 @@ mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params,
                  model.file = "SUBMOD5.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 mod_JAGS
-
-attach.jags(mod_JAGS)
-
-# Equations for state transitions:
-# Proportion reverting to Normal is .9:
-LSILtoNormal_15 <- LSIL_15 * .9
-LSILtoNormal_15
-# Proportion reverting to HPV/Infection
-LSILtoHPV_15 <- LSIL_15 - LSILtoNormal_15
-LSILtoHPV_15
-# To HSIL:
-LSILtoHSIL_15 <- (1 - LSIL_15) * (1 - exp(-.1 * 6))
-LSILtoHSIL_15
-# To LSIL:
-LSILtoLSIL_15 <- 1 - (LSILtoHPV_15 + LSILtoHSIL_15 + LSILtoNormal_15)
-
-# Calibration for SUB-MODEL 5 ----------------------------------------------
-LSILtoLSIL_15 + LSILtoHPV_15 + LSILtoHSIL_15 + LSILtoNormal_15
-# Yay!
