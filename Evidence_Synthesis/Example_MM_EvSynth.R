@@ -212,6 +212,7 @@ mcmc_acf(posterior, pars = c("pi_res[1]", "pi_res[2]",
 # Misc: define treatments ---------------------------------------------
 colnames(pi_res) <- c("Status Quo", "New Treatment")
 colnames(pi_res)
+pi_res
 colnames(pi_tox) <- c("Status Quo", "New Treatment")
 colnames(pi_tox)
 colnames(beta_tr) <- c("Status Quo", "New Treatment")

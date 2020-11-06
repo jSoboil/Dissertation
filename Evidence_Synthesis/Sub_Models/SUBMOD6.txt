@@ -6,9 +6,12 @@ model {
 # as it is technically sampling directly from a prior and is not propogated into a 
 # posterior using a likelihood model. However, a hyperprior is used for the population 
 # variance to account for a greater uncertainty in each age-population.
-  for (i in 1:10) {
+  for (i in 1:85) {
     # Monte Carlo:
+    # No vaccine:
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
+    # With vaccine:
+    omega.age.vac[i] <- omega.age[i] * pEfficacy.vac
     
     # Note in use of pow() function, using -2 is a shorthand inverse
     # method equivalent to 1 / x^2.
@@ -20,9 +23,9 @@ model {
   }
   
    # Wide hyper-prior on prior variance parameter for SUB-MODEL 1:
-   eta.age ~ dunif(0, 1000)
+   eta.age ~ dunif(0, 100)
  
-# END OF SUB-MODEL 2.
+# END OF SUB-MODEL 1.
 
 # SUB-MODEL 2: VACCINE-EFFICACY.
 # Model parameters abbreviated by .vac.
@@ -53,18 +56,22 @@ model {
    # for vaccine efficacy
    pEfficacy.vac <- 1 / (1 + OR.vac)
 
-# END OF SUB-MODEL 3.
+# END OF SUB-MODEL 2.
 
-# SUB-MODEL 3: CANCER PROGRESSION STAGES I-IV.
+# SUB-MODEL 3: CANCER PROGRESSION AND 5-YEAR SURVIVAL STAGES I-IV.
 # Model parameters abbreviated by .canc. Note: this is equivalent to a standard 
 # Monte Carlo PSA, as it is technically sampling directly from a prior and it is
 # *not* propogated into a posterior using a likelihood model. 
 
-   # Monte Carlo:
+   # Distribution according to Stage:
     Stage.I.canc ~ dbeta(alpha.StageI, beta.StageI)
     Stage.II.canc ~ dbeta(alpha.StageII, beta.StageII)
     Stage.III.canc ~ dbeta(alpha.StageIII, beta.StageIII)
-    Stage.IV.canc ~ dbeta(alpha.StageIV, beta.StageIV)
+    StageIV.Detected ~ dbeta(alpha.StageIV, beta.StageIV)
+    
+    # Functional parameters for Cancer stages:
+    StageI.Detected <- Stage.I.canc * 0.15
+    StageII.Detected <- Stage.II.canc * 0.225
     
    # Stage I Cervical Cancer detected 5-year Survival:
    surv.StageI_year1 ~ dbeta(alpha.StageI_YearI, beta.StageI_YearI)
@@ -91,8 +98,7 @@ model {
    surv.StageIV_year4 ~ dbeta(alpha.StageIV_YearIV, beta.StageIV_YearIV)
    surv.StageIV_year5 ~ dbeta(alpha.StageIV_YearV, beta.StageIV_YearV)
    
-
-# END OF SUB-MODEL 4.
+# END OF SUB-MODEL 3.
 
 # SUB-MODEL 4: INFECTION PROGRESSION:
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
@@ -108,7 +114,7 @@ model {
     HPV_Well_25to29 ~ dbeta(alpha.HPVtoNormal_25to29, beta.HPVtoNormal_25to29)
     HPV_Well_30toEnd ~ dbeta(alpha.HPVtoNormal_30toPlus, beta.HPVtoNormal_30toPlus)
 
-# END OF SUB-MODEL 5.
+# END OF SUB-MODEL 4.
 
 # SUB-MODEL 5: LSIL & HSIL PROGRESSION:
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
@@ -118,6 +124,7 @@ model {
    LSIL_35 ~ dbeta(alpha.LSIL_35up, beta.LSIL_35up)
    HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)
 
+# END OF SUB-MODEL 5.
 
  }
 

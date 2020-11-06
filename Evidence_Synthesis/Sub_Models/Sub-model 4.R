@@ -1,4 +1,4 @@
-library(tidyverse)
+wlibrary(tidyverse)
 library(dampack)
 library(readxl)
 library(rjags)

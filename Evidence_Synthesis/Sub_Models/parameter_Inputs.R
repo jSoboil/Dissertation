@@ -17,9 +17,14 @@ age_group <- c("15-16", "17", "18", "19", "20", "≤21", "22-23",
                "24-29", "30-49", "≥55")
 
 # Estimated Prevalence:
-Prevalence <- c(.09516258, .1130796, .139292, .1563352, .139292, 
-                .1130796, .09516258, .04877058, .009950166, .004987521)
-
+Prevalence <- c(rep(0, length(1:14)), rep(0.09516258, length(15:16)), 
+                rep(0.1130796, length(17:17)), 
+                rep(0.139292, length(18:18)), rep(0.1563352, length(19:19)), 
+                rep(0.13929220, length(20:20)), 
+                rep(0.1130796, length(21:21)), rep(0.09516258, length(22:23)), 
+                rep(0.04877058, length(24:29)), 
+                rep(0.009950166, length(30:49)), rep(0.004987521, length(50:85)))
+length(Prevalence)
 mu.a.log <- log(Prevalence)
 
 # Optional 'emprical bayes' method:

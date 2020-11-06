@@ -12,7 +12,7 @@ library(Compositional)
 # This script adds sub-model 6 to the overall model. Specifically, all progression from Cancer
 # states to cancer survivor states.
 
-source("Evidence_Synthesis/Sub_Models/parameter_Inputs.R")
+source("parameter_Inputs.R")
 
 # ==========================================================================================
 # Sub-model 3 ------------------------------------------------------
@@ -25,9 +25,12 @@ model {
 # as it is technically sampling directly from a prior and is not propogated into a 
 # posterior using a likelihood model. However, a hyperprior is used for the population 
 # variance to account for a greater uncertainty in each age-population.
-  for (i in 1:10) {
+  for (i in 1:85) {
     # Monte Carlo:
+    # No vaccine:
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
+    # With vaccine:
+    omega.age.vac[i] <- omega.age[i] * pEfficacy.vac
     
     # Note in use of pow() function, using -2 is a shorthand inverse
     # method equivalent to 1 / x^2.
@@ -39,9 +42,9 @@ model {
   }
   
    # Wide hyper-prior on prior variance parameter for SUB-MODEL 1:
-   eta.age ~ dunif(0, 1000)
+   eta.age ~ dunif(0, 100)
  
-# END OF SUB-MODEL 2.
+# END OF SUB-MODEL 1.
 
 # SUB-MODEL 2: VACCINE-EFFICACY.
 # Model parameters abbreviated by .vac.
@@ -72,18 +75,22 @@ model {
    # for vaccine efficacy
    pEfficacy.vac <- 1 / (1 + OR.vac)
 
-# END OF SUB-MODEL 3.
+# END OF SUB-MODEL 2.
 
-# SUB-MODEL 3: CANCER PROGRESSION STAGES I-IV.
+# SUB-MODEL 3: CANCER PROGRESSION AND 5-YEAR SURVIVAL STAGES I-IV.
 # Model parameters abbreviated by .canc. Note: this is equivalent to a standard 
 # Monte Carlo PSA, as it is technically sampling directly from a prior and it is
 # *not* propogated into a posterior using a likelihood model. 
 
-   # Monte Carlo:
+   # Distribution according to Stage:
     Stage.I.canc ~ dbeta(alpha.StageI, beta.StageI)
     Stage.II.canc ~ dbeta(alpha.StageII, beta.StageII)
     Stage.III.canc ~ dbeta(alpha.StageIII, beta.StageIII)
-    Stage.IV.canc ~ dbeta(alpha.StageIV, beta.StageIV)
+    StageIV.Detected ~ dbeta(alpha.StageIV, beta.StageIV)
+    
+    # Functional parameters for Cancer stages:
+    StageI.Detected <- Stage.I.canc * 0.15
+    StageII.Detected <- Stage.II.canc * 0.225
     
    # Stage I Cervical Cancer detected 5-year Survival:
    surv.StageI_year1 ~ dbeta(alpha.StageI_YearI, beta.StageI_YearI)
@@ -110,8 +117,7 @@ model {
    surv.StageIV_year4 ~ dbeta(alpha.StageIV_YearIV, beta.StageIV_YearIV)
    surv.StageIV_year5 ~ dbeta(alpha.StageIV_YearV, beta.StageIV_YearV)
    
-
-# END OF SUB-MODEL 4.
+# END OF SUB-MODEL 3.
 
 # SUB-MODEL 4: INFECTION PROGRESSION:
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
@@ -127,7 +133,7 @@ model {
     HPV_Well_25to29 ~ dbeta(alpha.HPVtoNormal_25to29, beta.HPVtoNormal_25to29)
     HPV_Well_30toEnd ~ dbeta(alpha.HPVtoNormal_30toPlus, beta.HPVtoNormal_30toPlus)
 
-# END OF SUB-MODEL 5.
+# END OF SUB-MODEL 4.
 
 # SUB-MODEL 5: LSIL & HSIL PROGRESSION:
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
@@ -137,6 +143,7 @@ model {
    LSIL_35 ~ dbeta(alpha.LSIL_35up, beta.LSIL_35up)
    HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)
 
+# END OF SUB-MODEL 5.
 
  }
 "
@@ -202,9 +209,9 @@ data_JAGS <- list(
 # Parameters to monitor:
 params <- c(
   # Vaccine efficacy parameters:
-  "OR.vac", "pEfficacy.vac", 
+  "OR.vac", "pEfficacy.vac",
   # Well to infection prevalence:
-  "omega.age",
+  "omega.age", "omega.age.vac",
   # HPV Progression:
   "HPV_Well_15to24", "HPV_Well_25to29",
   "HPV_Well_30toEnd",
@@ -213,7 +220,8 @@ params <- c(
   "HSIL_n",
    # Cancer Stage Progression:
   "Stage.I.canc", "Stage.II.canc",
-  "Stage.III.canc", "Stage.IV.canc",
+  "Stage.III.canc", "StageIV.Detected",
+  "StageI.Detected", "StageII.Detected",
   # Cancer survival progression:
   "surv.StageI_year1", "surv.StageI_year2", "surv.StageI_year3", 
   "surv.StageI_year4", "surv.StageI_year5",
@@ -227,7 +235,7 @@ params <- c(
 
 # Set no. of iterations, burn-in period and thinned samples:
 n.iter <- 30000
-n.burnin <- 5000
+n.burnin <- 10000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
 # Run MCMC model:
@@ -252,6 +260,78 @@ StageItoDeath <- v_p_mort_lessHPV[22, 2]
 
 StageItoStageI <- 1 - (StageItoDeath + StageItoTreat + StageItoStageII)
 
-# LOTP CheckL
+# LOTP Check:
 (StageItoDeath + StageItoTreat + StageItoStageII + StageItoStageI)
+
+# ==========================================================================================
+# Markov Model setup: -----------------------------------------------------------
+# ==========================================================================================
+n_age_init <- 0 # age at baseline
+n_age_max <- 85 # maximum age of follow up
+n_t <- n_age_max - n_age_init # time horizon, number of cycles
+
+# the 30 health states of the model:
+v_n <- c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer",
+         "Stage-III Cancer", "Stage-IV Cancer", "Detected.Stage-I Year 1",
+         "Detected.Stage-I Year 2", "Detected.Stage-I Year 3", "Detected.Stage-I Year 4",
+         "Detected.Stage-I Year 5", "Detected.Stage-II Year 1", "Detected.Stage-II Year 2",
+         "Detected.Stage-II Year 3", "Detected.Stage-II Year 4", "Detected.Stage-II Year 5",
+         "Detected.Stage-III Year 1", "Detected.Stage-III Year 2", "Detected.Stage-III Year 3",
+         "Detected.Stage-III Year 4", "Detected.Stage-III Year 5", "Detected.Stage-IV Year 1",
+         "Detected.Stage-IV Year 2", "Detected.Stage-IV Year 3", "Detected.Stage-IV Year 4",
+         "Detected.Stage-IV Year 5", "Cancer Survivor", "Death")
+n_states <- length(v_n) # number of health states 
+
+d_c <- 0.03 # discount rate for costs 
+d_e <- 0.03 # discount rate for QALYs
+v_names_str <- c("Status quo", "Bivalent HPV Vaccine") # strategy names
+
+a_P <- array(0, dim = c(n_states, n_states, n_t, n.sims),
+             dimnames = list(v_n, v_n, 0:(n_t - 1), 1:n.sims))
+str(a_P)
+
+# ==========================================================================================
+# Fill Transition Array ------------------------------------------------
+# ==========================================================================================
+# Status Quo  ----------------------------------------------------------
+
+
+# New Treatment  ----------------------------------------------------------
+str(a_P)
+str(omega.age)
+for (i in 1:85) {
+ for (j in 1:n.sims) {
+  a_P["Well", "Infection", i, ] <- omega.age[j, i] * (1 - pEfficacy.vac[j, ])
+ }
+}
+a_P[, , 19, ]
+
+str(pEfficacy.vac)
+
+for (j in 1:n.sims) {
+ treatment <- omega.age[j, ] * (1- pEfficacy.vac[j, ])
+}
+treatment
+
+
+
+a_P["Stable", "Progression", , ] <- pi_tox[, 2]
+a_P["Stable", "Response", , ] <- (1 - pi_tox[, 2]) * beta_tr[, 2]
+a_P["Stable", "Death", , ] <- 1 - ((1 - pi_tox[, 2]) * (1 - beta_tr[, 2]) + pi_tox[, 2] + 
+                                    (1 - pi_tox[, 2]) * beta_tr[, 2])
+# All transitions from the state Response
+a_P["Response", "Response", , ] <- ((1 - pi_tox[, 2] ) * pi_res[, 2])
+a_P["Response", "Progression", , ] <-  (pi_tox[, 2]) + (1 - pi_tox[, 2]) * (1 - pi_res[, 2])
+
+# All transitions from the state Progression
+a_P["Progression", "Progression", , ] <- 1 - beta_dth[, 2]
+a_P["Progression", "Death", , ] <- beta_dth[, 2]
+
+# All transitions from the state Death
+a_P["Death", "Death", , ] <- 1
+a_P
+
+
+
+
 
