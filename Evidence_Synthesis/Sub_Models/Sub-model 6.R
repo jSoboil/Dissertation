@@ -286,9 +286,12 @@ d_c <- 0.03 # discount rate for costs
 d_e <- 0.03 # discount rate for QALYs
 v_names_str <- c("Status quo", "Bivalent HPV Vaccine") # strategy names
 
-a_P <- array(0, dim = c(n_states, n_states, n_t, n.sims),
+# Transition array for each alternative:
+a_P_1 <- array(0, dim = c(n_states, n_states, n_t, n.sims),
              dimnames = list(v_n, v_n, 0:(n_t - 1), 1:n.sims))
-str(a_P)
+a_P_2 <- array(0, dim = c(n_states, n_states, n_t, n.sims),
+             dimnames = list(v_n, v_n, 0:(n_t - 1), 1:n.sims))
+str(a_P_2)
 
 # ==========================================================================================
 # Fill Transition Array ------------------------------------------------
@@ -297,39 +300,24 @@ str(a_P)
 
 
 # New Treatment  ----------------------------------------------------------
-str(a_P)
+str(a_P_2)
 str(omega.age)
+str(v_p_mort_lessHPV)
+
 for (i in 1:85) {
  for (j in 1:n.sims) {
-  a_P["Well", "Infection", i, ] <- omega.age[j, i] * (1 - pEfficacy.vac[j, ])
+  a_P_2["Well", "Infection", i, ] <- omega.age[j, i] * (1 - pEfficacy.vac[j, ])
+  a_P_2["Well", "Death", i, ] <-  v_p_mort_lessHPV[i, ]
+  a_P_2["Well", "Well", i, ] <- 1 - ((omega.age[j, i] * (1 - pEfficacy.vac[j, ])) + 
+                                      v_p_mort_lessHPV[i, ])
  }
 }
-a_P[, , 19, ]
+
+a_P_2[, , , ]
 
 str(pEfficacy.vac)
+v_p_mort_lessHPV
 
-for (j in 1:n.sims) {
- treatment <- omega.age[j, ] * (1- pEfficacy.vac[j, ])
-}
-treatment
-
-
-
-a_P["Stable", "Progression", , ] <- pi_tox[, 2]
-a_P["Stable", "Response", , ] <- (1 - pi_tox[, 2]) * beta_tr[, 2]
-a_P["Stable", "Death", , ] <- 1 - ((1 - pi_tox[, 2]) * (1 - beta_tr[, 2]) + pi_tox[, 2] + 
-                                    (1 - pi_tox[, 2]) * beta_tr[, 2])
-# All transitions from the state Response
-a_P["Response", "Response", , ] <- ((1 - pi_tox[, 2] ) * pi_res[, 2])
-a_P["Response", "Progression", , ] <-  (pi_tox[, 2]) + (1 - pi_tox[, 2]) * (1 - pi_res[, 2])
-
-# All transitions from the state Progression
-a_P["Progression", "Progression", , ] <- 1 - beta_dth[, 2]
-a_P["Progression", "Death", , ] <- beta_dth[, 2]
-
-# All transitions from the state Death
-a_P["Death", "Death", , ] <- 1
-a_P
 
 
 

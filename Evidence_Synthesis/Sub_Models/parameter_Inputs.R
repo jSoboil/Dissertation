@@ -50,9 +50,8 @@ colnames(v_p_mort_HPV) <- "Death_HPV"
 v_p_mort_HPV
 
 # Probability of mortality less HPV:
-v_p_mort_lessHPV <- v_p_mort_All[1:86, ] - v_p_mort_HPV[1:86, ]
-v_p_mort_lessHPV <- cbind(mort_data$Age[1:86], v_p_mort_lessHPV)
-colnames(v_p_mort_lessHPV) <- c("Age", "Death_less.HPV")
+v_p_mort_lessHPV <- as.matrix(v_p_mort_All[1:86, ] - v_p_mort_HPV[1:86, ])
+colnames(v_p_mort_lessHPV) <- c("Death_less.HPV")
 v_p_mort_lessHPV
 
 annual.mortality_1to14 <- v_p_mort_lessHPV[1:15, 2]
