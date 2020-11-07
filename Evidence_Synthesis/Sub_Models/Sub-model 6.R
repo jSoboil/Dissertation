@@ -8,6 +8,9 @@ library(tidyverse)
 library(dampack)
 library(MCMCpack)
 library(Compositional)
+library(rbenchmark)
+
+start_time <- Sys.time()
 
 # This script adds sub-model 6 to the overall model. Specifically, all progression from Cancer
 # states to cancer survivor states.
@@ -247,7 +250,7 @@ mod_JAGS
 attach.jags(mod_JAGS)
 
 # Death from cancer, for example:
-1 - (surv.StageI_year1 - v_p_mort_lessHPV[1, 2])
+# 1 - (surv.StageI_year1 - v_p_mort_lessHPV[1, 2])
 
 # Stage I-IV equations:
 StageItoStageII <- (Stage.I.canc - (Stage.I.canc * 0.15))
@@ -256,7 +259,7 @@ StageItoStageII
 StageItoTreat <- (Stage.I.canc * 0.15)
 StageItoTreat
 
-StageItoDeath <- v_p_mort_lessHPV[22, 2]
+StageItoDeath <- v_p_mort_lessHPV[22]
 
 StageItoStageI <- 1 - (StageItoDeath + StageItoTreat + StageItoStageII)
 
@@ -306,20 +309,30 @@ str(v_p_mort_lessHPV)
 
 for (i in 1:85) {
  for (j in 1:n.sims) {
-  a_P_2["Well", "Infection", i, ] <- omega.age[j, i] * (1 - pEfficacy.vac[j, ])
-  a_P_2["Well", "Death", i, ] <-  v_p_mort_lessHPV[i, ]
-  a_P_2["Well", "Well", i, ] <- 1 - ((omega.age[j, i] * (1 - pEfficacy.vac[j, ])) + 
-                                      v_p_mort_lessHPV[i, ])
+  a_P_2["Well", "Infection", i, j] <- omega.age[j, i] * (1 - pEfficacy.vac[j, ])
+  a_P_2["Well", "Death", i, j] <-  v_p_mort_lessHPV[i]
+  a_P_2["Well", "Well", i, j] <- 1 - ((omega.age[j, i] * (1 - pEfficacy.vac[j, ])) + 
+                                      v_p_mort_lessHPV[i])
  }
 }
 
-a_P_2[, , , ]
+# Infection to Well:
+HPV_Well_15to24
+# Infection to LSIL
+one <- (1 - HPV_Well_15to24) * ((1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1))
+# Infection to HSIL
+two <- (1 - mean(HPV_Well_15to24)) * ((1 - exp(-.2 * 3)) * .1)
+# Infection to Death
+three <- v_p_mort_lessHPV[16]
+# Infection to Infection
+four <- (1 - HPV_Well_15to24) - (((1 - HPV_Well_15to24) * ((1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1))) + 
+                          ((1 - mean(HPV_Well_15to24)) * ((1 - exp(-.2 * 3)) * .1)) + v_p_mort_lessHPV[16])
 
-str(pEfficacy.vac)
-v_p_mort_lessHPV
+one + two + three + four + HPV_Well_15to24
 
+rep(0, length(HPV_Well_15to24))
 
+# Code run time:
+end_time <- Sys.time()
 
-
-
-
+end_time - start_time

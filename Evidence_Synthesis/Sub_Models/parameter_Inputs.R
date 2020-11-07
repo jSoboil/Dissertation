@@ -54,13 +54,13 @@ v_p_mort_lessHPV <- as.matrix(v_p_mort_All[1:86, ] - v_p_mort_HPV[1:86, ])
 colnames(v_p_mort_lessHPV) <- c("Death_less.HPV")
 v_p_mort_lessHPV
 
-annual.mortality_1to14 <- v_p_mort_lessHPV[1:15, 2]
+# annual.mortality_1to14 <- v_p_mort_lessHPV[1:15, 2]
 # Ages 15:24
-annual.mortality_15to24 <- v_p_mort_lessHPV[16:25, 2]
+# annual.mortality_15to24 <- v_p_mort_lessHPV[16:25, 2]
 # Ages 25:29
-annual.mortality_25to29 <- v_p_mort_lessHPV[26:30, 2]
+# annual.mortality_25to29 <- v_p_mort_lessHPV[26:30, 2]
 # Ages ≥30:
-annual.mortality_30plus <- v_p_mort_lessHPV[31:86, 2]
+# annual.mortality_30plus <- v_p_mort_lessHPV[31:86, 2]
 
 # ==========================================================================================
 # HPV/Infection State Progression -----------------------------------------
@@ -130,15 +130,15 @@ HPV_HSIL_30plus
 # HPV to Death ------------------------------------------------------------
 # Death independent on regression to normal...
 # Ages 15-24:
-HPV_Death_15 <- v_p_mort_lessHPV[15:24, 2]
+HPV_Death_15 <- v_p_mort_lessHPV[15:24]
 HPV_Death_15
 
 # Ages 25-29:
-HPV_Death_25 <- v_p_mort_lessHPV[25:29, 2]
+HPV_Death_25 <- v_p_mort_lessHPV[25:29]
 HPV_Death_25
 
 # Ages ≥30:
-HPV_Death_30plus <- v_p_mort_lessHPV[30:86, 2]
+HPV_Death_30plus <- v_p_mort_lessHPV[30:86]
 HPV_Death_30plus
 
 # HPV to HPV --------------------------------------------------------------
@@ -185,7 +185,7 @@ beta.LSIL_35up <- beta_params(mean = LSIL_35up, sigma = 0.025)$beta
 LSILtoHSIL <- (1 - (1 - exp(-.65 * 6))) * (1 - exp(-.1 * 6))
 
 # Transition to Death:
-LSILtoDeath <- v_p_mort_lessHPV[16:25, 2]
+LSILtoDeath <- v_p_mort_lessHPV[16:25]
 
 # Transition to LSIL
 LSILtoLSIL <- (1 - LSIL_15to34) - (LSILtoHSIL + LSILtoDeath)
