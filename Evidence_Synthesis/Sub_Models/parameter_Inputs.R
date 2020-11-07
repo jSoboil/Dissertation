@@ -17,7 +17,7 @@ age_group <- c("15-16", "17", "18", "19", "20", "≤21", "22-23",
                "24-29", "30-49", "≥55")
 
 # Estimated Prevalence:
-Prevalence <- c(rep(0, length(1:14)), rep(0.09516258, length(15:16)), 
+Prevalence <- c(rep(0, length(0:14)), rep(0.09516258, length(15:16)), 
                 rep(0.1130796, length(17:17)), 
                 rep(0.139292, length(18:18)), rep(0.1563352, length(19:19)), 
                 rep(0.13929220, length(20:20)), 
