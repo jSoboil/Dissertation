@@ -6,12 +6,10 @@ model {
 # as it is technically sampling directly from a prior and is not propogated into a 
 # posterior using a likelihood model. However, a hyperprior is used for the population 
 # variance to account for a greater uncertainty in each age-population.
-  for (i in 1:85) {
+  for (i in 1:86) {
     # Monte Carlo:
     # No vaccine:
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
-    # With vaccine:
-    omega.age.vac[i] <- omega.age[i] * pEfficacy.vac
     
     # Note in use of pow() function, using -2 is a shorthand inverse
     # method equivalent to 1 / x^2.
@@ -23,7 +21,7 @@ model {
   }
   
    # Wide hyper-prior on prior variance parameter for SUB-MODEL 1:
-   eta.age ~ dunif(0, 100)
+   eta.age ~ dunif(0, 10000)
  
 # END OF SUB-MODEL 1.
 
@@ -120,9 +118,9 @@ model {
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
 # directly from a prior and it is *not* propogated into a posterior using a likelihood 
 # model. 
-   LSIL_15 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)
-   LSIL_35 ~ dbeta(alpha.LSIL_35up, beta.LSIL_35up)
-   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)
+   LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, )
+   LSIL_35_End ~ dbeta(alpha.LSIL_35up, beta.LSIL_35up)T(0, )
+   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, )
 
 # END OF SUB-MODEL 5.
 

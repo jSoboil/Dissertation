@@ -17,7 +17,7 @@ model {
     # Prior on variance for each age group. Note use of half Student-t to draw
     # variance away from 0. See Prior distribution for variance parameters in 
     # hierarchical models (Gelman, 2006):
-    sigma.age[i] ~ dt(0, 1, 1)T(0, )
+    sigma.age[i] ~ dt(0, eta.age, 1)T(0, )
   }
   
    # Wide hyper-prior on prior variance parameter for SUB-MODEL 1:
