@@ -32,8 +32,6 @@ model {
     # Monte Carlo:
     # No vaccine:
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
-    # With vaccine:
-    omega.age.vac[i] <- omega.age[i] * pEfficacy.vac
     
     # Note in use of pow() function, using -2 is a shorthand inverse
     # method equivalent to 1 / x^2.
@@ -45,7 +43,7 @@ model {
   }
   
    # Wide hyper-prior on prior variance parameter for SUB-MODEL 1:
-   eta.age ~ dunif(0, 10000)
+   eta.age ~ dunif(0, 1000)
  
 # END OF SUB-MODEL 1.
 
@@ -142,9 +140,9 @@ model {
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
 # directly from a prior and it is *not* propogated into a posterior using a likelihood 
 # model. 
-   LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)
-   LSIL_35_End ~ dbeta(alpha.LSIL_35up, beta.LSIL_35up)
-   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)
+   LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, )
+   LSIL_35_End ~ dbeta(alpha.LSIL_35up, beta.LSIL_35up)T(0, )
+   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, )
 
 # END OF SUB-MODEL 5.
 
@@ -214,7 +212,7 @@ params <- c(
   # Vaccine efficacy parameters:
   "OR.vac", "pEfficacy.vac",
   # Well to infection prevalence:
-  "omega.age", "omega.age.vac",
+  "omega.age",
   # HPV Progression:
   "HPV_Well_15to24", "HPV_Well_25to29",
   "HPV_Well_30toEnd",
@@ -238,33 +236,16 @@ params <- c(
 
 # Set no. of iterations, burn-in period and thinned samples:
 n.iter <- 30000
-n.burnin <- 10000
+n.burnin <- 5000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
 # Run MCMC model:
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
-                 model.file = "SUBMOD6.txt", n.chains = 6, 
+                 model.file = "SUBMOD6.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 mod_JAGS
 
 attach.jags(mod_JAGS)
-
-# Death from cancer, for example:
-# 1 - (surv.StageI_year1 - v_p_mort_lessHPV[1, 2])
-
-# Stage I-IV equations for example DELETE WHEN FINISHED:
-StageItoStageII <- (Stage.I.canc - (Stage.I.canc * 0.15))
-StageItoStageII
-
-StageItoTreat <- (Stage.I.canc * 0.15)
-StageItoTreat
-
-StageItoDeath <- v_p_mort_lessHPV[22]
-
-StageItoStageI <- 1 - (StageItoDeath + StageItoTreat + StageItoStageII)
-
-# LOTP Check:
-(StageItoDeath + StageItoTreat + StageItoStageII + StageItoStageI)
 
 # ==========================================================================================
 # Markov Model setup: -----------------------------------------------------------
@@ -309,9 +290,11 @@ str(a_P_2)
 # ==========================================================================================
 # Status-Quo  ----------------------------------------------------------
 # ==========================================================================================
-# These are transitions without added vaccine treatment.
+# These are all the state transitions with no vaccine treatment. The following creates a
+# transition array that is then used to simulate the Markov cohort without treatment.
 
 # Transitions from Well State ---------------------------------------------
+
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state Well, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -327,22 +310,17 @@ for (i in 1:86) {
  }
 }
 
+# Note: all transition probabilities for ages 0-14 are already filled by the natural structure
+# of the transition array, i.e., all initial transitions are = 0 before being filled in by the
+# proceeding code. This is why one can omit these transitions where applicable from the for 
+# loop. Also see that this is why the mortality data for deaths from well state are the only
+# data filled in for age groups 0-14.
+
 # Transitions from Infection State ----------------------------------------
+
 # First replicate age group for patients ages 0-14:
 HPV_Well_0to14 <- matrix(rep(0, length(HPV_Well_15to24)))
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state Infection, across the appropriate time horizon i and all probabilistic 
-# simulations j.
-for (i in 1:15) {
-    for (j in 1:n.sims) {
-     a_P_1["Infection", "Well", i, j] <- HPV_Well_0to14[j]
-     a_P_1["Infection", "LSIL", i, j] <- HPV_Well_0to14[j]
-     a_P_1["Infection", "HSIL", i, j] <- HPV_Well_0to14[j]
-     a_P_1["Infection", "Death", i, j] <- HPV_Well_0to14[j]
-     a_P_1["Infection", "Infection", i, j] <- HPV_Well_0to14[j]
-    }
-}
 # The following enters all transition probabilities for ages 15-24 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -405,9 +383,11 @@ for (i in 31:86) {
 # ==========================================================================================
 # New Treatment  ----------------------------------------------------------
 # ==========================================================================================
-# These are transitions with added vaccine treatment.
+# These are all the state transitions with added vaccine treatment. The following creates a
+# transition array that is then used to simulate the Markov cohort with treatment.
 
 # Transitions from Well State ---------------------------------------------
+
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state Well, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -423,22 +403,14 @@ for (i in 1:86) {
  }
 }
 
-# Transitions from Infection State ----------------------------------------
-# First replicate age group for patients ages 0-14:
-HPV_Well_0to14 <- matrix(rep(0, length(HPV_Well_15to24)))
+# Note: all transition probabilities for ages 0-14 are already filled by the natural structure
+# of the transition array, i.e. all initial transitions are = 0 before being filled in by the
+# proceeding code. This is why you can omit these transitions where applicable from the for 
+# loop. Also note that this is why the mortality data for deaths from well state are the only
+# data filled in for age groups 0-14.
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state Infection, across the appropriate time horizon i and all probabilistic 
-# simulations j.
-for (i in 1:15) {
-    for (j in 1:n.sims) {
-     a_P_2["Infection", "Well", i, j] <- HPV_Well_0to14[j]
-     a_P_2["Infection", "LSIL", i, j] <- HPV_Well_0to14[j]
-     a_P_2["Infection", "HSIL", i, j] <- HPV_Well_0to14[j]
-     a_P_2["Infection", "Death", i, j] <- HPV_Well_0to14[j]
-     a_P_2["Infection", "Infection", i, j] <- HPV_Well_0to14[j]
-    }
-}
+# Transitions from Infection State ----------------------------------------
+
 # The following enters all transition probabilities for ages 15-24 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -498,8 +470,75 @@ for (i in 31:86) {
 }
 
 # Transitions from LSIL State ---------------------------------------------
-LSIL_Well_0to14 <- matrix(rep(0, length(HPV_Well_15to24)))
-LSIL_35_End
+
+# The following enters all transition probabilities for ages 15-34 for each transition from
+# the state LSIL, across the appropriate time horizon i and all probabilistic 
+# simulations j.
+for (i in 16:35) {
+    for (j in 1:n.sims) {
+     a_P_2["LSIL", "Well", i, j] <- (LSIL_15_34[i] * 0.9)
+     a_P_2["LSIL", "Infection", i, j] <- (LSIL_15_34[i] - (LSIL_15_34[i] * 0.9))
+     a_P_2["LSIL", "HSIL", i, j] <- (1 - LSIL_15_34[i]) * (1 - exp(-0.1 * 6))
+     a_P_2["LSIL", "Death", i, j] <- v_p_mort_lessHPV[i]
+     a_P_2["LSIL", "LSIL", i, j] <- (1 - LSIL_15_34[i]) - ((1 - LSIL_15_34[i]) * 
+                                                         (1 - exp(-0.1 * 6)) + 
+                                                         v_p_mort_lessHPV[i])
+    }
+}
+# Check:
+# a_P_2["LSIL", "LSIL", 22, ] + a_P_2["LSIL", "Death", 22, ] + a_P_2["LSIL", "HSIL", 22, ] + 
+# a_P_2["LSIL", "Infection", 22, ] + a_P_2["LSIL", "Well", 22, ]
+
+# The following enters all transition probabilities for ages ≥35 for each transition from
+# the state LSIL, across the appropriate time horizon i and all probabilistic 
+# simulations j.
+for (i in 36:86) {
+    for (j in 1:n.sims) {
+     a_P_2["LSIL", "Well", i, j] <- (LSIL_35_End[i] * 0.9)
+     a_P_2["LSIL", "Infection", i, j] <- (LSIL_35_End[i] - (LSIL_35_End[i] * 0.9))
+     a_P_2["LSIL", "HSIL", i, j] <- (1 - LSIL_35_End[i]) * (1 - exp(-0.35 * 6))
+     a_P_2["LSIL", "Death", i, j] <- v_p_mort_lessHPV[i]
+     a_P_2["LSIL", "LSIL", i, j] <- (1 - LSIL_35_End[i]) - ((1 - LSIL_35_End[i]) * 
+                                                         (1 - exp(-0.1 * 6)) + 
+                                                         v_p_mort_lessHPV[i])
+    }
+}
+
+
+# Transitions from HSIL State ---------------------------------------------
+
+# The following enters all transition probabilities for ages 15-85 for each transition from
+# the state HSIl, across the appropriate time horizon i and all probabilistic 
+# simulations j.
+
+for (i in 16:86) {
+    for (j in 1:n.sims) {
+
+    }
+}
+
+
+# HSIL to Normal:
+HSIL_n * 0.5
+# HSIL to LSIL:
+(HSIL_n - (HSIL_n * 0.5))
+# HSIL to Stage I Cancer:
+HSILCANC <- ((1 - (HSIL_n + v_p_mort_lessHPV[22])) * (1 - exp(-0.4 * 10)))
+# HSIL to Death:
+HSILDEAD <- v_p_mort_lessHPV[22]
+# HSIL to HSIL:
+1 - (HSILCANC + HSILDEAD + HSIL_n)
+
+# !!!!!!!!!!!!!!!!!!!!!############
+# ADD DEATH TO CONDITIONAL!!!!!!!!!!!!!!!!!!!!!############
+# !!!!!!!!!!!!!!!!!!!!!############
+     a_P_2["LSIL", "Well", i, j] <- (LSIL_15_34[i] * 0.9)
+     a_P_2["LSIL", "Infection", i, j] <- (LSIL_15_34[i] - (LSIL_15_34[i] * 0.9))
+     a_P_2["LSIL", "HSIL", i, j] <- (1 - LSIL_15_34[i]) * (1 - exp(-0.1 * 6))
+     a_P_2["LSIL", "Death", i, j] <- v_p_mort_lessHPV[i]
+     a_P_2["LSIL", "LSIL", i, j] <- (1 - LSIL_15_34[i]) - ((1 - LSIL_15_34[i]) * 
+                                                         (1 - exp(-0.1 * 6)) + 
+                                                         v_p_mort_lessHPV[i])
 
 
 # Code run time:

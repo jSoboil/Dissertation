@@ -63,6 +63,16 @@ v_p_mort_lessHPV
 # annual.mortality_30plus <- v_p_mort_lessHPV[31:86, 2]
 
 # ==========================================================================================
+# Vaccine efficacy data ----------------------------------------------------
+# ==========================================================================================
+# PLACEBO (A) AND VACCINE(B).
+Nstud.vac <- 11
+rA.vac <- c(435, 41, 28, 38, 219, 15, 10, 21, 56, 20, 17)
+nA.vac <- c(5375, 355, 277, 2239, 2924, 392, 175, 7838, 7312, 372, 2502)
+rB.vac <- c(32, 12, 1, 3, 61, 0, 0, 2, 4, 0, 1)
+nB.vac <- c(5406, 366, 310, 2190, 2910, 387, 193, 7788, 7344, 401, 2497)
+
+# ==========================================================================================
 # HPV/Infection State Progression -----------------------------------------
 # ==========================================================================================
 # Below are the equations for relationships between all states from HPV/infection:
@@ -79,14 +89,14 @@ HPV_Normal_30plus <- (1 - exp(-.15 * 1.5))
 # all other parameters using one input distribution.
 
 # Parameters for this regression:
-alpha.HPVtoNormal_15to24 <- beta_params(mean = HPV_Normal_15, sigma = 0.1)$alpha
-beta.HPVtoNormal_15to24 <- beta_params(mean = HPV_Normal_15, sigma = 0.1)$beta
+alpha.HPVtoNormal_15to24 <- beta_params(mean = HPV_Normal_15, sigma = 0.025)$alpha
+beta.HPVtoNormal_15to24 <- beta_params(mean = HPV_Normal_15, sigma = 0.025)$beta
 
-alpha.HPVtoNormal_25to29 <- beta_params(mean = HPV_Normal_25, sigma = 0.1)$alpha
-beta.HPVtoNormal_25to29 <- beta_params(mean = HPV_Normal_25, sigma = 0.1)$beta
+alpha.HPVtoNormal_25to29 <- beta_params(mean = HPV_Normal_25, sigma = 0.025)$alpha
+beta.HPVtoNormal_25to29 <- beta_params(mean = HPV_Normal_25, sigma = 0.025)$beta
 
-alpha.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.1)$alpha
-beta.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.1)$beta
+alpha.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.025)$alpha
+beta.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.025)$beta
 
 
 # State Equations ---------------------------------------------------------
@@ -169,13 +179,13 @@ HPV_HPV_30up + HPV_HSIL_30plus + HPV_LSIL_30plus + HPV_Death_30plus + HPV_Normal
 # ====================================================================================
 # To Infection or Normal ----------------------------------------
 # Simulation distribution parameter values Ages 15-34:
-LSIL_15to34 <- (1 - exp(-.65 * 6))
+LSIL_15to34 <- (1 - exp(-0.6 * 6))
 
 alpha.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.025)$alpha
 beta.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.025)$beta
 
 # Simulation distribution parameter values Ages ≥ 35:
-LSIL_35up <- 1 - exp(-.4 * 6)
+LSIL_35up <- (1 - exp(-0.4 * 6))
 
 alpha.LSIL_35up <- beta_params(mean = LSIL_35up, sigma = 0.025)$alpha
 beta.LSIL_35up <- beta_params(mean = LSIL_35up, sigma = 0.025)$beta
@@ -197,8 +207,9 @@ LSILtoLSIL + LSILtoDeath + LSIL_15to34 + LSILtoHSIL
 # Sub-Model for progressions from HSIL --------------------
 # ====================================================================================
 HSIL <- (1 - exp(-.35 * 6))
-alpha.HSIL <- beta_params(mean = HSIL, sigma = 0.1)$alpha
-beta.HSIL <- beta_params(mean = HSIL, sigma = 0.1)$beta
+
+alpha.HSIL <- beta_params(mean = HSIL, sigma = 0.025)$alpha
+beta.HSIL <- beta_params(mean = HSIL, sigma = 0.025)$beta
 
 
 # State Equations ---------------------------------------------------------
@@ -206,13 +217,9 @@ beta.HSIL <- beta_params(mean = HSIL, sigma = 0.1)$beta
 HSILtoNormal <- ((1 - exp(-.35 * 6)) * .5)
 # Transition to LSIL:
 HSILtoLSIL <- (1 - exp(-.35 * 6)) - ((1 - exp(-.35 * 6)) * .5)
-
 # Transition to Stage I Cancer:
-# Probability of progression every 10 years = .4
-# Convert to yearly rate
-- (1 / 10) * log(1 - .4)
-# Convert to annual progression probability to Stage I Cancer:
-HSILtoStageI <- 1 - exp(-0.05108256 * 1)
+HSILtoStageI <- ((1 - HSIL) * (1 - exp(-0.4 * 10)))
+
 
 # Transition to HSIL
 HSILtoHSIL <- 1 - (HSILtoNormal + HSILtoLSIL + HSILtoStageI)
@@ -413,14 +420,21 @@ beta.StageIV_YearV <- beta_params(mean = 0.8592, sigma = 0.025)$beta
 # Death from cancer, for example:
 # 1 - (surv.StageI_year1 - v_p_mort_lessHPV[1, 2])
 
-# ==========================================================================================
-# Vaccine efficacy data ----------------------------------------------------
-# ==========================================================================================
-# PLACEBO (A) AND VACCINE(B).
-Nstud.vac <- 11
-rA.vac <- c(435, 41, 28, 38, 219, 15, 10, 21, 56, 20, 17)
-nA.vac <- c(5375, 355, 277, 2239, 2924, 392, 175, 7838, 7312, 372, 2502)
-rB.vac <- c(32, 12, 1, 3, 61, 0, 0, 2, 4, 0, 1)
-nB.vac <- c(5406, 366, 310, 2190, 2910, 387, 193, 7788, 7344, 401, 2497)
+# Death from cancer, for example:
+# 1 - (surv.StageI_year1 - v_p_mort_lessHPV[1, 2])
+
+# Stage I-IV equations for example DELETE WHEN FINISHED:
+StageItoStageII <- (Stage.I.canc - (Stage.I.canc * 0.15))
+StageItoStageII
+
+StageItoTreat <- (Stage.I.canc * 0.15)
+StageItoTreat
+
+StageItoDeath <- v_p_mort_lessHPV[22]
+
+StageItoStageI <- 1 - (StageItoDeath + StageItoTreat + StageItoStageII)
+
+# LOTP Check:
+(StageItoDeath + StageItoTreat + StageItoStageII + StageItoStageI)
 
 # End file ----------------------------------------------------------------
