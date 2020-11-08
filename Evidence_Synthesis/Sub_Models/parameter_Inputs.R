@@ -193,45 +193,45 @@ HPV_HPV_30up + HPV_HSIL_30plus + HPV_LSIL_30plus + HPV_Death_30plus + HPV_Normal
 # ====================================================================================
 # To Infection or Normal ----------------------------------------
 # Simulation distribution parameter values Ages 15-34:
-# This is extremely odd - I have had to necessarily reduce the rate by 0.1 in order for the 
-# equations to conform. My gut feeling is this is a result of a mismatch between the death rates of 
-# original study and those used by Edina et al. 
-LSIL_15to34 <- (1 - exp(-0.5 * 6))
+
+# This has forced a truncation of the distribution between values T(0, 0.75-0.90)
+
+LSIL_15to34 <- (1 - exp(-0.65 * 6))
 
 alpha.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.025)$alpha
 beta.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.025)$beta
 
-# Simulation distribution parameter values Ages ≥ 35:
-LSIL_35up <- (1 - exp(-0.4 * 6))
+# Simulation distribution parameter values Ages 25-50:
+LSIL_35to85 <- (1 - exp(-0.4 * 6))
 
-alpha.LSIL_35up <- beta_params(mean = LSIL_35up, sigma = 0.025)$alpha
-beta.LSIL_35up <- beta_params(mean = LSIL_35up, sigma = 0.025)$beta
+alpha.LSIL_35to85 <- beta_params(mean = LSIL_35to85, sigma = 0.025)$alpha
+beta.LSIL_35to85 <- beta_params(mean = LSIL_35to85, sigma = 0.025)$beta
 
 # State Equations ---------------------------------------------------------
 # Transition to Death:
 LSILtoDeath <- (v_p_mort_lessHPV[16:35])
 # To Normal:
-LSILNORM <-  (LSIL_15to34 * 0.9)
+LSILNORM <-  (LSIL_15to24 * 0.9)
 LSILNORM
 # To Infection:
-LSILINF <- (LSIL_15to34) -  (LSIL_15to34 * 0.9)
+LSILINF <- (LSIL_15to24) -  (LSIL_15to24 * 0.9)
 LSILINF
 
 # Transition to HSIL
-LSILtoHSIL <- (1 - LSIL_15to34) * (1 - exp(-0.1 * 6))
+LSILtoHSIL <- (1 - LSIL_15to24) * (1 - exp(-0.1 * 6))
 LSILtoHSIL
 
 # Transition to LSIL
 LSILtoLSIL <- 1 - (LSILtoDeath + LSILNORM + LSILINF + LSILtoHSIL)
 LSILtoLSIL
 # LOTP check:
-
+LSILtoDeath + LSILNORM + LSILINF + LSILtoHSIL + LSILtoLSIL
 
 # ====================================================================================
 # Sub-Model for progressions from HSIL --------------------
 # ====================================================================================
 HSIL <- (1 - exp(-.35 * 6))
-
+HSIL
 alpha.HSIL <- beta_params(mean = HSIL, sigma = 0.025)$alpha
 beta.HSIL <- beta_params(mean = HSIL, sigma = 0.025)$beta
 

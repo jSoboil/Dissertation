@@ -31,7 +31,7 @@ model {
   for (i in 1:86) {
     # Monte Carlo:
     # No vaccine:
-    omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
+    omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])T(0, )
     
     # Note in use of pow() function, using -2 is a shorthand inverse
     # method equivalent to 1 / x^2.
@@ -43,11 +43,12 @@ model {
   }
   
    # Wide hyper-prior on prior variance parameter for SUB-MODEL 1:
-   eta.age ~ dunif(0, 10000)
+   eta.age ~ dunif(0, 1000)
  
 # END OF SUB-MODEL 1.
 
-# SUB-MODEL 2: VACCINE-EFFICACY.
+# SUB-MODEL 2: VACCINE-EFFICACY. Note: this is a fully integrated Bayesian model, as it combines
+# evidence directly via the likelihood and combines it with a prior. 
 # Model parameters abbreviated by .vac.
   for (i in 1:Nstud.vac) {
     # Likelihood:
@@ -140,9 +141,9 @@ model {
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
 # directly from a prior and it is *not* propogated into a posterior using a likelihood 
 # model. 
-   LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, )
-   LSIL_35_End ~ dbeta(alpha.LSIL_35up, beta.LSIL_35up)T(0, )
-   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, )
+   LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, 0.90)
+   LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.75)
+   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.90)
 
 # END OF SUB-MODEL 5.
 
@@ -170,7 +171,7 @@ data_JAGS <- list(
   
   # LSIL and HSIL transition data:
   alpha.LSIL_15to34 = alpha.LSIL_15to34, beta.LSIL_15to34 = beta.LSIL_15to34,
-  alpha.LSIL_35up = alpha.LSIL_35up, beta.LSIL_35up = beta.LSIL_35up,
+  alpha.LSIL_35to85 = alpha.LSIL_35to85, beta.LSIL_35to85 = beta.LSIL_35to85,
   alpha.HSIL = alpha.HSIL, beta.HSIL = beta.HSIL,
   
   # Cancer Stage alpha's:
@@ -217,7 +218,7 @@ params <- c(
   "HPV_Well_15to24", "HPV_Well_25to29",
   "HPV_Well_30toEnd",
   # LSIL and HSIL Progression:
-  "LSIL_15_34", "LSIL_35_End",
+  "LSIL_15_34", "LSIL_35_85",
   "HSIL_n",
    # Cancer Stage Progression:
   "Stage.I.canc", "Stage.II.canc",
@@ -276,7 +277,6 @@ a_P_1 <- array(0, dim = c(n_states, n_states, n_t, n.sims),
              dimnames = list(v_n, v_n, 0:(n_t - 1), 1:n.sims))
 a_P_2 <- array(0, dim = c(n_states, n_states, n_t, n.sims),
              dimnames = list(v_n, v_n, 0:(n_t - 1), 1:n.sims))
-str(a_P_2)
 
 # ==========================================================================================
 # Transition Array ------------------------------------------------
@@ -297,8 +297,7 @@ str(a_P_2)
 
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state Well, across the appropriate time horizon i and all probabilistic 
-# simulations j. Note: all state transitions are dependent on any regression or death-less-HPV
-# within each individual health state.
+# simulations j.
 for (i in 1:86) {
  for (j in 1:n.sims) {
   a_P_1["Well", "Death", i, j] <-  v_p_mort_lessHPV[i]
@@ -320,8 +319,7 @@ for (i in 1:86) {
 
 # The following enters all transition probabilities for ages 15-24 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
-# simulations j. Note: all state transitions are dependent on any regression or death less HPV
-# from that occurs within the state.
+# simulations j.
  for (i in 16:25) {
      for (j in 1:n.sims) {
       a_P_1["Infection", "Well", i, j] <- HPV_Well_15to24[j]
@@ -343,8 +341,7 @@ for (i in 1:86) {
 
 # The following enters all transition probabilities for ages 25-29 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
-# simulations j. Note: all state transitions are dependent on any regression or death less HPV
-# from that occurs within the state.
+# simulations j.
  for (i in 26:30) {
      for (j in 1:n.sims) {
       a_P_1["Infection", "Well", i, j] <- HPV_Well_25to29[j]
@@ -366,8 +363,7 @@ for (i in 1:86) {
 
 # The following enters all transition probabilities for ages 30-85 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
-# simulations j. Note: all state transitions are dependent on any regression or death less HPV
-# from that occurs within the state.
+# simulations j.
  for (i in 31:86) {
      for (j in 1:n.sims) {
       a_P_1["Infection", "Well", i, j] <- HPV_Well_30toEnd[j]
@@ -387,6 +383,67 @@ for (i in 1:86) {
      }
  }
 
+# Transitions from LSIL State ---------------------------------------------
+
+# The following enters all transition probabilities for ages 15-34 for each transition from
+# the state LSIL, across the appropriate time horizon i and all probabilistic 
+# simulations j.
+for (i in 16:35) {
+    for (j in 1:n.sims) {
+     a_P_1["LSIL", "Well", i, j] <- (LSIL_15_34[j] * 0.9)
+     
+     a_P_1["LSIL", "Death", i, j] <- v_p_mort_lessHPV[i]
+     
+     a_P_1["LSIL", "Infection", i, j] <- (LSIL_15_34[j] - (LSIL_15_34[j] * 0.9))
+     
+     a_P_1["LSIL", "HSIL", i, j] <- (1 - LSIL_15_34[j]) * (1 - exp(-0.1 * 6))
+     
+     a_P_1["LSIL", "LSIL", i, j] <- 1 - (v_p_mort_lessHPV[i] + (LSIL_15_34[j] * 0.9) + 
+                                          (LSIL_15_34[j] - (LSIL_15_34[j] * 0.9)) + 
+                                          (1 - LSIL_15_34[j]) * (1 - exp(-0.1 * 6)))
+    }
+}
+
+# The following enters all transition probabilities for ages ≥25 for each transition from
+# the state LSIL, across the appropriate time horizon i and all probabilistic 
+# simulations j.
+for (i in 36:86) {
+    for (j in 1:n.sims) {
+     a_P_1["LSIL", "Well", i, j] <- (LSIL_35_85[j] * 0.9)
+     
+     a_P_1["LSIL", "Death", i, j] <- v_p_mort_lessHPV[i]
+     
+     a_P_1["LSIL", "Infection", i, j] <- (LSIL_35_85[j] - (LSIL_35_85[j] * 0.9))
+     
+     a_P_1["LSIL", "HSIL", i, j] <- (1 - LSIL_35_85[j]) * (1 - exp(-0.1 * 6))
+     
+     a_P_1["LSIL", "LSIL", i, j] <- 1 - (v_p_mort_lessHPV[i] + (LSIL_35_85[j] * 0.9) + 
+                                          (LSIL_35_85[j] - (LSIL_35_85[j] * 0.9)) + 
+                                          (1 - LSIL_35_85[j]) * (1 - exp(-0.1 * 6)))
+    }
+}
+
+# Transitions from HSIL State ---------------------------------------------
+
+# The following enters all transition probabilities for ages 15-85 for each transition from
+# the state HSIl, across the appropriate time horizon i and all probabilistic 
+# simulations j.
+
+for (i in 16:86) {
+    for (j in 1:n.sims) {
+     a_P_1["HSIL", "Well", i, j] <- (HSIL_n[j] * 0.5)
+     
+     a_P_1["HSIL", "Death", i, j] <- v_p_mort_lessHPV[i]
+     
+     a_P_1["HSIL", "LSIL", i, j] <- (HSIL_n[j] - (HSIL_n[j] * 0.5))
+     
+     a_P_1["HSIL", "Stage-I Cancer", i, j] <- (1 - HSIL_n[j]) * (1 - exp(-0.4 * 10))
+     
+     a_P_1["HSIL", "HSIL", i, j] <- 1 - ((HSIL_n[j] * 0.5) + (HSIL_n[j] - (HSIL_n[j] * 0.5)) + 
+                                          ((1 - HSIL_n[j]) * (1 - exp(-0.4 * 10))))
+    }
+}
+
 # ==========================================================================================
 # New Treatment  ----------------------------------------------------------
 # ==========================================================================================
@@ -397,8 +454,7 @@ for (i in 1:86) {
 
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state Well, across the appropriate time horizon i and all probabilistic 
-# simulations j. Note: all state transitions are dependent on any regression or death-less-HPV
-# within each individual health state.
+# simulations j
 for (i in 1:86) {
  for (j in 1:n.sims) {
   a_P_2["Well", "Death", i, j] <-  v_p_mort_lessHPV[i]
@@ -421,8 +477,7 @@ for (i in 1:86) {
 
 # The following enters all transition probabilities for ages 15-24 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
-# simulations j. Note: all state transitions are dependent on any regression or death less HPV
-# from that occurs within the state.
+# simulations j.
  for (i in 16:25) {
      for (j in 1:n.sims) {
       a_P_2["Infection", "Well", i, j] <- HPV_Well_15to24[j]
@@ -444,8 +499,7 @@ for (i in 1:86) {
 
 # The following enters all transition probabilities for ages 25-29 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
-# simulations j. Note: all state transitions are dependent on any regression or death less HPV
-# from that occurs within the state.
+# simulations j.
  for (i in 26:30) {
      for (j in 1:n.sims) {
       a_P_2["Infection", "Well", i, j] <- HPV_Well_25to29[j]
@@ -467,8 +521,7 @@ for (i in 1:86) {
 
 # The following enters all transition probabilities for ages 30-85 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
-# simulations j. Note: all state transitions are dependent on any regression or death less HPV
-# from that occurs within the state.
+# simulations j.
  for (i in 31:86) {
      for (j in 1:n.sims) {
       a_P_2["Infection", "Well", i, j] <- HPV_Well_30toEnd[j]
@@ -487,73 +540,67 @@ for (i in 1:86) {
 
      }
  }
-a_P_2[, , 22, ]
+
 # Transitions from LSIL State ---------------------------------------------
 
 # The following enters all transition probabilities for ages 15-34 for each transition from
 # the state LSIL, across the appropriate time horizon i and all probabilistic 
-# simulations j. Note: all state transitions are dependent on any regression or death less HPV
-# from that occurs within the state.
+# simulations j.
 for (i in 16:35) {
     for (j in 1:n.sims) {
-     a_P_2["LSIL", "Well", i, j] <- (LSIL_15_34[i] * 0.9)
-     a_P_2["LSIL", "Infection", i, j] <- (LSIL_15_34[i] - (LSIL_15_34[i] * 0.9))
-     a_P_2["LSIL", "HSIL", i, j] <- (1 - LSIL_15_34[i]) * (1 - exp(-0.1 * 6))
+     a_P_2["LSIL", "Well", i, j] <- (LSIL_15_34[j] * 0.9)
+     
      a_P_2["LSIL", "Death", i, j] <- v_p_mort_lessHPV[i]
-     a_P_2["LSIL", "LSIL", i, j] <- (1 - LSIL_15_34[i]) - ((1 - LSIL_15_34[i]) * 
-                                                         (1 - exp(-0.1 * 6)) + 
-                                                         v_p_mort_lessHPV[i])
+     
+     a_P_2["LSIL", "Infection", i, j] <- (LSIL_15_34[j] - (LSIL_15_34[j] * 0.9))
+     
+     a_P_2["LSIL", "HSIL", i, j] <- (1 - LSIL_15_34[j]) * (1 - exp(-0.1 * 6))
+     
+     a_P_2["LSIL", "LSIL", i, j] <- 1 - (v_p_mort_lessHPV[i] + (LSIL_15_34[j] * 0.9) + 
+                                          (LSIL_15_34[j] - (LSIL_15_34[j] * 0.9)) + 
+                                          (1 - LSIL_15_34[j]) * (1 - exp(-0.1 * 6)))
     }
 }
-# Check:
-# a_P_2["LSIL", "LSIL", 22, ] + a_P_2["LSIL", "Death", 22, ] + a_P_2["LSIL", "HSIL", 22, ] + 
-# a_P_2["LSIL", "Infection", 22, ] + a_P_2["LSIL", "Well", 22, ]
 
-# The following enters all transition probabilities for ages ≥35 for each transition from
+# The following enters all transition probabilities for ages ≥25 for each transition from
 # the state LSIL, across the appropriate time horizon i and all probabilistic 
-# simulations j. Note: all state transitions are dependent on any regression or death less HPV
-# from that occurs within the state.
+# simulations j.
 for (i in 36:86) {
     for (j in 1:n.sims) {
-     a_P_2["LSIL", "Well", i, j] <- (LSIL_35_End[i] * 0.9)
-     a_P_2["LSIL", "Infection", i, j] <- (LSIL_35_End[i] - (LSIL_35_End[i] * 0.9))
-     a_P_2["LSIL", "HSIL", i, j] <- (1 - LSIL_35_End[i]) * (1 - exp(-0.35 * 6))
+     a_P_2["LSIL", "Well", i, j] <- (LSIL_35_85[j] * 0.9)
+     
      a_P_2["LSIL", "Death", i, j] <- v_p_mort_lessHPV[i]
-     a_P_2["LSIL", "LSIL", i, j] <- (1 - LSIL_35_End[i]) - ((1 - LSIL_35_End[i]) * 
-                                                         (1 - exp(-0.1 * 6)) + 
-                                                         v_p_mort_lessHPV[i])
+     
+     a_P_2["LSIL", "Infection", i, j] <- (LSIL_35_85[j] - (LSIL_35_85[j] * 0.9))
+     
+     a_P_2["LSIL", "HSIL", i, j] <- (1 - LSIL_35_85[j]) * (1 - exp(-0.1 * 6))
+     
+     a_P_2["LSIL", "LSIL", i, j] <- 1 - (v_p_mort_lessHPV[i] + (LSIL_35_85[j] * 0.9) + 
+                                          (LSIL_35_85[j] - (LSIL_35_85[j] * 0.9)) + 
+                                          (1 - LSIL_35_85[j]) * (1 - exp(-0.1 * 6)))
     }
 }
-
 
 # Transitions from HSIL State ---------------------------------------------
 
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state HSIl, across the appropriate time horizon i and all probabilistic 
-# simulations j. Note: all state transitions are dependent on any regression or death less HPV
-# from that occurs within the state.
+# simulations j.
 
 for (i in 16:86) {
     for (j in 1:n.sims) {
-
+     a_P_2["HSIL", "Well", i, j] <- (HSIL_n[j] * 0.5)
+     
+     a_P_2["HSIL", "Death", i, j] <- v_p_mort_lessHPV[i]
+     
+     a_P_2["HSIL", "LSIL", i, j] <- (HSIL_n[j] - (HSIL_n[j] * 0.5))
+     
+     a_P_2["HSIL", "Stage-I Cancer", i, j] <- (1 - HSIL_n[j]) * (1 - exp(-0.4 * 10))
+     
+     a_P_2["HSIL", "HSIL", i, j] <- 1 - ((HSIL_n[j] * 0.5) + (HSIL_n[j] - (HSIL_n[j] * 0.5)) + 
+                                          ((1 - HSIL_n[j]) * (1 - exp(-0.4 * 10))))
     }
 }
-
-
-# HSIL to Normal:
-HSIL_n * 0.5
-# HSIL to LSIL:
-(HSIL_n - (HSIL_n * 0.5))
-# HSIL to Stage I Cancer:
-HSILCANC <- ((1 - (HSIL_n + v_p_mort_lessHPV[22])) * (1 - exp(-0.4 * 10)))
-# HSIL to Death:
-HSILDEAD <- v_p_mort_lessHPV[22]
-# HSIL to HSIL:
-HSILHSIL <- 1 - (HSILCANC + HSILDEAD + HSIL_n)
-
-
-
-
 
 # Code run time:
 end_time <- Sys.time()
