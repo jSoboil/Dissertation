@@ -140,11 +140,13 @@ HPV_Death_30plus
 
 # HPV to LSIL -------------------------------------------------------------
 # Ages 15-24:
-HPV_LSIL_15 <- (1 - (HPV_Normal_15 + HPV_Death_15)) * ((1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1))
+HPV_LSIL_15 <- (1 - (HPV_Normal_15 + HPV_Death_15)) * (
+ (1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1))
 HPV_LSIL_15
 
 # Ages 25-29:
-HPV_LSIL_25 <- (1 - (HPV_Normal_25 + HPV_Death_25)) * ((1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1))
+HPV_LSIL_25 <- (1 - (HPV_Normal_25 + HPV_Death_25)) * (
+ (1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1))
 HPV_LSIL_25
 
 # Ages ≥30:
@@ -193,19 +195,20 @@ HPV_HPV_30up + HPV_HSIL_30plus + HPV_LSIL_30plus + HPV_Death_30plus + HPV_Normal
 # ====================================================================================
 # To Infection or Normal ----------------------------------------
 # Simulation distribution parameter values Ages 15-34:
-# This is extremely odd - I have had to necessarily reduce the rate by 0.1 in order for the 
-# equations to conform. My gut feeling is this is a result of a mismatch between the death rates of 
-# original study and those used by Edina et al. 
-LSIL_15to34 <- (1 - exp(-0.5 * 6))
+
+# It is important to place an upper bound on this distribution in order to make the probabilities
+# sensible. Truncation is placed on either distribution as T(0, 0.75-0.90).
+
+LSIL_15to34 <- (1 - exp(-0.65 * 6))
 
 alpha.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.025)$alpha
 beta.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.025)$beta
 
-# Simulation distribution parameter values Ages ≥ 35:
-LSIL_35up <- (1 - exp(-0.4 * 6))
+# Simulation distribution parameter values Ages 25-50:
+LSIL_35to85 <- (1 - exp(-0.4 * 6))
 
-alpha.LSIL_35up <- beta_params(mean = LSIL_35up, sigma = 0.025)$alpha
-beta.LSIL_35up <- beta_params(mean = LSIL_35up, sigma = 0.025)$beta
+alpha.LSIL_35to85 <- beta_params(mean = LSIL_35to85, sigma = 0.025)$alpha
+beta.LSIL_35to85 <- beta_params(mean = LSIL_35to85, sigma = 0.025)$beta
 
 # State Equations ---------------------------------------------------------
 # Transition to Death:
@@ -225,13 +228,13 @@ LSILtoHSIL
 LSILtoLSIL <- 1 - (LSILtoDeath + LSILNORM + LSILINF + LSILtoHSIL)
 LSILtoLSIL
 # LOTP check:
-
+LSILtoDeath + LSILNORM + LSILINF + LSILtoHSIL + LSILtoLSIL
 
 # ====================================================================================
 # Sub-Model for progressions from HSIL --------------------
 # ====================================================================================
 HSIL <- (1 - exp(-.35 * 6))
-
+HSIL
 alpha.HSIL <- beta_params(mean = HSIL, sigma = 0.025)$alpha
 beta.HSIL <- beta_params(mean = HSIL, sigma = 0.025)$beta
 
