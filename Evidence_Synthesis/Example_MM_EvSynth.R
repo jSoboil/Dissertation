@@ -300,7 +300,7 @@ sum((1 - beta_dth[, 2]) + beta_dth[, 2]) / n.sims
 # and death is obvious...
 
 # ==========================================================================================
-# Run Markov model --------------------------------------------------------
+# Run Markov models --------------------------------------------------------
 # ==========================================================================================
 ## Initial state vector
 # All starting healthy
@@ -323,7 +323,7 @@ m_M_ad[1:2, ,  ]
 a_A <- array(0,
              dim = c(n_states, n_states, n_t + 1, n.sims),
              dimnames = list(v_n, v_n, 0:n_t, 1:n.sims))
-dim(a_A)
+
 # Set first slice of A with the initial state vector in its diagonal
 for (i in 1:n.sims) {
  diag(a_A[, , 1, i]) <- v_s_init

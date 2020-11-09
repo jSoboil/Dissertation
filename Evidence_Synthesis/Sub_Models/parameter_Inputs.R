@@ -1,12 +1,12 @@
+# ==========================================================================================
+# Parameter Input Values --------------------------------------------------
+# ==========================================================================================
 # Note: the following script is the source code for all model input parameter values.
 
-
-# Informative prior -------------------------------------------------------
-# Most data is derived from:
-# 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
-# papillomavirus vaccine to the cervical cancer screening programme in South Africa.
-
-# See Collated Studies.R file. for vaccine RCT data.
+# Most data are derived from (Sinanovic, E., et al. 2009): "The potential cost-effectiveness of 
+# adding a human papillomavirus vaccine to the cervical cancer screening programme in South 
+# Africa." Most parameters are simulated using an empirical Bayes' appraoch, bar vaccine
+# efficacy.
 
 # ==========================================================================================
 # Normal/Well State Progression -------------------------------------------

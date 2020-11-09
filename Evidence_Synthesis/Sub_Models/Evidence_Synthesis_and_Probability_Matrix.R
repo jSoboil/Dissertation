@@ -1,24 +1,13 @@
-library(tidyverse)
-library(dampack)
-library(readxl)
-library(rjags)
-library(R2jags)
-library(bayesplot)
-library(tidyverse)
-library(dampack)
-library(MCMCpack)
-library(Compositional)
-library(rbenchmark)
-
-start_time <- Sys.time()
-
-# This script is the source of the evidence synthesis model as well as the transition array used 
-# to compute the Markov Model trace.
+# ==========================================================================================
+# Evidence Synthesis and Transition Probability Matrix source code ---------------------
+# ==========================================================================================
+# This is source code that is called from the Markov Model script for the evidence synthesis 
+# model as well as the Probability Matrix used to compute the Markov Model trace.
 
 source("parameter_Inputs.R")
 
 # ==========================================================================================
-# Sub-model 3 ------------------------------------------------------
+# Evidence Synthesis Model ------------------------------------------------
 # ==========================================================================================
 model_String <- "
 model {
@@ -28,7 +17,7 @@ model {
 # as it is technically sampling directly from a prior and is not propogated into a 
 # posterior using a likelihood model. However, a hyperprior is used for the population 
 # variance to account for a greater uncertainty in each age-population.
-  for (i in 1:86) {
+  for (i in 1:85) {
     # Monte Carlo:
     # No vaccine:
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])T(0, )
@@ -47,8 +36,8 @@ model {
  
 # END OF SUB-MODEL 1.
 
-# SUB-MODEL 2: VACCINE-EFFICACY. Note: this is a fully integrated Bayesian model, as it combines
-# evidence directly via the likelihood and combines it with a prior. 
+# SUB-MODEL 2: POP. LEVEL VACCINE-EFFICACY. Note: this is a fully integrated Bayesian model, as 
+# it combines evidence directly via the likelihood and combines it with a prior. 
 # Model parameters abbreviated by .vac.
   for (i in 1:Nstud.vac) {
     # Likelihood:
@@ -139,7 +128,7 @@ model {
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
 # directly from a prior and it is *not* propogated into a posterior using a likelihood 
 # model. I have had to truncate these distributions in order for the ASSA mortality data 
-# to be properly combined and the state transition probabilities to be proper.
+# to be properly combined and for the state transition probabilities to be proper.
    LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, 0.95)
    LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.785)
    HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.90)
@@ -247,10 +236,16 @@ mod_JAGS
 attach.jags(mod_JAGS)
 
 # ==========================================================================================
-# Markov Model Setup: -----------------------------------------------------------
+# Probability Matrix --------------------------------------------------
 # ==========================================================================================
+# The following sections fill in the Probability Matrix across both the time horizon and all
+# probabilistic simulations. First is the non-treatment, which is non-vaccine ('Status-Quo') 
+# probabilities. Second is the the New treatment, which is vaccine associated 
+# probabilities. 
+
+# The following sets up the structure of the transitions between Health States:
 n_age_init <- 0 # age at baseline
-n_age_max <- 86 # maximum age of follow up - note: the maximum age is actually 85, however, 
+n_age_max <- 85 # maximum age of follow up - note: the maximum age is actually 85, however, 
 # due to starting at 0, it has to be compensated for by adding n + 1.
 n_t <- n_age_max - n_age_init # time horizon, number of cycles
 n_t
@@ -276,13 +271,6 @@ a_P_1 <- array(0, dim = c(n_states, n_states, n_t, n.sims),
 a_P_2 <- array(0, dim = c(n_states, n_states, n_t, n.sims),
              dimnames = list(v_n, v_n, 0:(n_t - 1), 1:n.sims))
 
-# Transition Array ------------------------------------------------
-# The following sections fill in the transition array probabilities across both the time
-# horizon and all probabilistic simulations.
-
-# First is the Status-quo treatment, which is non-vaccine probabilities. Second is the the 
-# New treatment, which is vaccine associated probabilities. 
-
 # ==========================================================================================
 # Status-Quo  ----------------------------------------------------------
 # ==========================================================================================
@@ -294,7 +282,7 @@ a_P_2 <- array(0, dim = c(n_states, n_states, n_t, n.sims),
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state Well, across the appropriate time horizon i and all probabilistic 
 # simulations j.
-for (i in 1:86) {
+for (i in 1:85) {
  for (j in 1:n.sims) {
   a_P_1["Well", "Death", i, j] <-  v_p_mort_lessHPV[i]
   
@@ -308,15 +296,14 @@ for (i in 1:86) {
 # Note: all transition probabilities for ages 0-14 are already filled by the natural structure
 # of the transition array, i.e., all initial transitions are = 0 before being filled in by the
 # proceeding code. This is why one can omit these transitions where applicable from the for 
-# loop. Also see that this is why the mortality data for deaths from well state are the only
-# data filled in for age groups 0-14.
+# loop, except for death.
 
 # Transitions from Infection State ----------------------------------------
 
 # The following enters all transition probabilities for ages 15-24 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
- for (i in 16:25) {
+ for (i in 15:24) {
      for (j in 1:n.sims) {
       a_P_1["Infection", "Well", i, j] <- HPV_Well_15to24[j]
       
@@ -338,7 +325,7 @@ for (i in 1:86) {
 # The following enters all transition probabilities for ages 25-29 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
- for (i in 26:30) {
+ for (i in 25:29) {
      for (j in 1:n.sims) {
       a_P_1["Infection", "Well", i, j] <- HPV_Well_25to29[j]
       
@@ -360,7 +347,7 @@ for (i in 1:86) {
 # The following enters all transition probabilities for ages 30-85 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
- for (i in 31:86) {
+ for (i in 30:85) {
      for (j in 1:n.sims) {
       a_P_1["Infection", "Well", i, j] <- HPV_Well_30toEnd[j]
       
@@ -384,7 +371,7 @@ for (i in 1:86) {
 # The following enters all transition probabilities for ages 15-34 for each transition from
 # the state LSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
-for (i in 16:35) {
+for (i in 15:34) {
     for (j in 1:n.sims) {
      a_P_1["LSIL", "Well", i, j] <- (LSIL_15_34[j] * 0.9)
      
@@ -403,7 +390,7 @@ for (i in 16:35) {
 # The following enters all transition probabilities for ages ≥25 for each transition from
 # the state LSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
-for (i in 36:86) {
+for (i in 35:85) {
     for (j in 1:n.sims) {
      a_P_1["LSIL", "Well", i, j] <- (LSIL_35_85[j] * 0.9)
      
@@ -425,7 +412,7 @@ for (i in 36:86) {
 # the state HSIl, across the appropriate time horizon i and all probabilistic 
 # simulations j.
 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_1["HSIL", "Well", i, j] <- (HSIL_n[j] * 0.5)
      
@@ -445,7 +432,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-I Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_1["Stage-I Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -465,7 +452,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-II Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_1["Stage-II Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -486,7 +473,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-III Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_1["Stage-III Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -506,7 +493,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-IV Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_1["Stage-IV Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -523,7 +510,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-I Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_1["Detected.Stage-I Year 1", "Detected.Stage-I Year 2", i, j] <- surv.StageI_year1[j]
      
@@ -558,7 +545,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-II Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_1["Detected.Stage-II Year 1", "Detected.Stage-II Year 2", i, j] <- surv.StageII_year1[j]
      
@@ -593,7 +580,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-III Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_1["Detected.Stage-III Year 1", "Detected.Stage-III Year 2", i, j] <- surv.StageIII_year1[j]
      
@@ -628,7 +615,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-IV Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_1["Detected.Stage-IV Year 1", "Detected.Stage-IV Year 2", i, j] <- surv.StageIV_year1[j]
      
@@ -663,7 +650,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state of Cancer Survivor, across the appropriate time horizon i and all 
 # probabilistic simulations j.
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_1["Cancer Survivor", "Cancer Survivor", i, j] <- (1 - v_p_mort_lessHPV[i])
      
@@ -676,7 +663,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state of Death, across the appropriate time horizon i and all 
 # probabilistic simulations j.
-for (i in 1:86) {
+for (i in 1:85) {
     for (j in 1:n.sims) {
      a_P_1["Death", "Death", i, j] <- 1
     }
@@ -693,14 +680,14 @@ for (i in 1:86) {
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state Well, across the appropriate time horizon i and all probabilistic 
 # simulations j
-for (i in 1:86) {
+for (i in 1:85) {
  for (j in 1:n.sims) {
   a_P_2["Well", "Death", i, j] <-  v_p_mort_lessHPV[i]
   
-  a_P_2["Well", "Infection", i, j] <- (omega.age[j, i] * (1 - pEfficacy.vac[j]))
+  a_P_2["Well", "Infection", i, j] <- ((omega.age[j, i] * 0.80) * (1 - pEfficacy.vac[j]))
   
   a_P_2["Well", "Well", i, j] <- 1 - (v_p_mort_lessHPV[i] + (
-   omega.age[j, i] * (1 - pEfficacy.vac[j])))
+   (omega.age[j, i] * 0.80) * (1 - pEfficacy.vac[j])))
   
  }
 }
@@ -716,7 +703,7 @@ for (i in 1:86) {
 # The following enters all transition probabilities for ages 15-24 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
- for (i in 16:25) {
+ for (i in 15:24) {
      for (j in 1:n.sims) {
       a_P_2["Infection", "Well", i, j] <- HPV_Well_15to24[j]
       
@@ -738,7 +725,7 @@ for (i in 1:86) {
 # The following enters all transition probabilities for ages 25-29 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
- for (i in 26:30) {
+ for (i in 25:29) {
      for (j in 1:n.sims) {
       a_P_2["Infection", "Well", i, j] <- HPV_Well_25to29[j]
       
@@ -760,7 +747,7 @@ for (i in 1:86) {
 # The following enters all transition probabilities for ages 30-85 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
- for (i in 31:86) {
+ for (i in 30:85) {
      for (j in 1:n.sims) {
       a_P_2["Infection", "Well", i, j] <- HPV_Well_30toEnd[j]
       
@@ -784,7 +771,7 @@ for (i in 1:86) {
 # The following enters all transition probabilities for ages 15-34 for each transition from
 # the state LSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
-for (i in 16:35) {
+for (i in 15:34) {
     for (j in 1:n.sims) {
      a_P_2["LSIL", "Well", i, j] <- (LSIL_15_34[j] * 0.9)
      
@@ -803,7 +790,7 @@ for (i in 16:35) {
 # The following enters all transition probabilities for ages ≥25 for each transition from
 # the state LSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
-for (i in 36:86) {
+for (i in 35:85) {
     for (j in 1:n.sims) {
      a_P_2["LSIL", "Well", i, j] <- (LSIL_35_85[j] * 0.9)
      
@@ -825,7 +812,7 @@ for (i in 36:86) {
 # the state HSIl, across the appropriate time horizon i and all probabilistic 
 # simulations j.
 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_2["HSIL", "Well", i, j] <- (HSIL_n[j] * 0.5)
      
@@ -845,7 +832,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-I Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_2["Stage-I Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -865,7 +852,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-II Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_2["Stage-II Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -886,7 +873,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-III Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_2["Stage-III Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -906,7 +893,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-IV Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_2["Stage-IV Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -923,7 +910,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-I Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_2["Detected.Stage-I Year 1", "Detected.Stage-I Year 2", i, j] <- surv.StageI_year1[j]
      
@@ -958,7 +945,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-II Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_2["Detected.Stage-II Year 1", "Detected.Stage-II Year 2", i, j] <- surv.StageII_year1[j]
      
@@ -993,7 +980,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-III Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_2["Detected.Stage-III Year 1", "Detected.Stage-III Year 2", i, j] <- surv.StageIII_year1[j]
      
@@ -1028,7 +1015,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-IV Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_2["Detected.Stage-IV Year 1", "Detected.Stage-IV Year 2", i, j] <- surv.StageIV_year1[j]
      
@@ -1063,7 +1050,7 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state of Cancer Survivor, across the appropriate time horizon i and all 
 # probabilistic simulations j.
-for (i in 16:86) {
+for (i in 15:85) {
     for (j in 1:n.sims) {
      a_P_2["Cancer Survivor", "Cancer Survivor", i, j] <- (1 - v_p_mort_lessHPV[i])
      
@@ -1076,17 +1063,10 @@ for (i in 16:86) {
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state of Death, across the appropriate time horizon i and all 
 # probabilistic simulations j.
-for (i in 1:86) {
+for (i in 1:85) {
     for (j in 1:n.sims) {
      a_P_2["Death", "Death", i, j] <- 1
     }
 }
-
-# ==========================================================================================
-# Code run time -----------------------------------------------------------
-# ==========================================================================================
-end_time <- Sys.time()
-# Model run time:
-end_time - start_time
 
 # End file ----------------------------------------------------------------

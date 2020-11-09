@@ -6,7 +6,7 @@ model {
 # as it is technically sampling directly from a prior and is not propogated into a 
 # posterior using a likelihood model. However, a hyperprior is used for the population 
 # variance to account for a greater uncertainty in each age-population.
-  for (i in 1:86) {
+  for (i in 1:85) {
     # Monte Carlo:
     # No vaccine:
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])T(0, )
@@ -25,8 +25,8 @@ model {
  
 # END OF SUB-MODEL 1.
 
-# SUB-MODEL 2: VACCINE-EFFICACY. Note: this is a fully integrated Bayesian model, as it combines
-# evidence directly via the likelihood and combines it with a prior. 
+# SUB-MODEL 2: POP. LEVEL VACCINE-EFFICACY. Note: this is a fully integrated Bayesian model, as 
+# it combines evidence directly via the likelihood and combines it with a prior. 
 # Model parameters abbreviated by .vac.
   for (i in 1:Nstud.vac) {
     # Likelihood:
@@ -117,7 +117,7 @@ model {
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
 # directly from a prior and it is *not* propogated into a posterior using a likelihood 
 # model. I have had to truncate these distributions in order for the ASSA mortality data 
-# to be properly combined and the state transition probabilities to be proper.
+# to be properly combined and for the state transition probabilities to be proper.
    LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, 0.95)
    LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.785)
    HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.90)
