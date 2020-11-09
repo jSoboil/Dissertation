@@ -12,8 +12,8 @@ library(rbenchmark)
 
 start_time <- Sys.time()
 
-# This script adds sub-model 6 to the overall model. Specifically, all progression from Cancer
-# states to cancer survivor states.
+# This script is the source of the evidence synthesis model as well as the transition array used 
+# to compute the Markov Model trace.
 
 source("parameter_Inputs.R")
 
@@ -138,22 +138,17 @@ model {
 # SUB-MODEL 5: LSIL & HSIL PROGRESSION:
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
 # directly from a prior and it is *not* propogated into a posterior using a likelihood 
-<<<<<<< HEAD
 # model. I have had to truncate these distributions in order for the ASSA mortality data 
 # to be properly combined and the state transition probabilities to be proper.
    LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, 0.95)
-=======
-# model. 
-   LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, 0.90)
->>>>>>> f15571a5b392f73137b7d8e8d67f9757be4a08be
-   LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.75)
+   LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.785)
    HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.90)
 
 # END OF SUB-MODEL 5.
 
  }
 "
-writeLines(text = model_String, con = "SUBMOD6.txt")
+writeLines(text = model_String, con = "Diss_HPV_EvSynth.txt")
 
 # Transform data into list format so that can be read by JAGS:
 data_JAGS <- list(
@@ -245,7 +240,7 @@ n.thin <- floor((n.iter - n.burnin) / 250)
 
 # Run MCMC model:
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
-                 model.file = "SUBMOD6.txt", n.chains = 4, 
+                 model.file = "Diss_HPV_EvSynth.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 mod_JAGS
 
@@ -865,7 +860,6 @@ for (i in 16:86) {
     }
 }
 
-
 # Transitions from Stage-II Cervix Cancer State ---------------------------
 
 # The following enters all transition probabilities for ages 15-85 for each transition from
@@ -906,7 +900,6 @@ for (i in 16:86) {
      
     }
 }
-
 
 # Transitions from Stage-IV Cervix Cancer State ---------------------------
 
@@ -1064,8 +1057,6 @@ for (i in 16:86) {
      
     }
 }
-
-
 
 # Transitions from Cancer Survivor State ----------------------------------
 

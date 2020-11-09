@@ -27,12 +27,6 @@ Prevalence <- c(rep(0, length(0:14)), rep(0.09516258, length(15:16)),
 length(Prevalence)
 mu.a.log <- log(Prevalence)
 
-# Optional 'emprical bayes' method:
-# mu.a.log <- lnorm_params(m = Prevalence, v = .01)$mu
-# sigma.a.log <- lnorm_params(m = Prevalence, v = .01)$sigma
-# prec.age <- 1 / (sigma.a.log * sigma.a.log)
-# prec.age
-
 # Normal to Death ---------------------------------------------------------
 # Import ASSA mortality table:
 mort_data <- read_excel(
@@ -54,34 +48,17 @@ v_p_mort_lessHPV <- as.matrix(v_p_mort_All[1:86, ] - v_p_mort_HPV[1:86, ])
 colnames(v_p_mort_lessHPV) <- c("Death_less.HPV")
 v_p_mort_lessHPV
 
-# annual.mortality_1to14 <- v_p_mort_lessHPV[1:15, 2]
-# Ages 15:24
-# annual.mortality_15to24 <- v_p_mort_lessHPV[16:25, 2]
-# Ages 25:29
-# annual.mortality_25to29 <- v_p_mort_lessHPV[26:30, 2]
-# Ages ≥30:
-# annual.mortality_30plus <- v_p_mort_lessHPV[31:86, 2]
-
-# State equations ---------------------------------------------------------
-# Well to death:
-# v_p_mort_lessHPV[1:86]
-# Well to Infection:
-# ((1 - v_p_mort_lessHPV[1:86]) * omega.age[, 1:86])
-# Well to Well:
-# (1 - (v_p_mort_lessHPV[1:86] + ((1 - v_p_mort_lessHPV[1:86]) * omega.age[, 1:86])))
-
-# LOTP check:
-# (1 - (v_p_mort_lessHPV[1:86] + ((1 - v_p_mort_lessHPV[1:86]) * omega.age[, 1:86]))) + (
-#  (1 - v_p_mort_lessHPV[1:86]) * omega.age[, 1:86]) + v_p_mort_lessHPV[1:86]
-
-
 # ==========================================================================================
 # Vaccine efficacy data ----------------------------------------------------
 # ==========================================================================================
 # PLACEBO (A) AND VACCINE(B).
+# Number of studies:
 Nstud.vac <- 11
+# Positive participants in Control group:
 rA.vac <- c(435, 41, 28, 38, 219, 15, 10, 21, 56, 20, 17)
+# Total number of participants in control group:
 nA.vac <- c(5375, 355, 277, 2239, 2924, 392, 175, 7838, 7312, 372, 2502)
+# Positive participants in Trial group:
 rB.vac <- c(32, 12, 1, 3, 61, 0, 0, 2, 4, 0, 1)
 nB.vac <- c(5406, 366, 310, 2190, 2910, 387, 193, 7788, 7344, 401, 2497)
 
@@ -111,85 +88,6 @@ beta.HPVtoNormal_25to29 <- beta_params(mean = HPV_Normal_25, sigma = 0.025)$beta
 alpha.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.025)$alpha
 beta.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.025)$beta
 
-
-# State Equations ---------------------------------------------------------
-# HPV to Death ------------------------------------------------------------
-# Death independent on regression to normal...
-# Ages 15-24:
-HPV_Death_15 <- v_p_mort_lessHPV[15:24]
-HPV_Death_15
-
-# Ages 25-29:
-HPV_Death_25 <- v_p_mort_lessHPV[25:29]
-HPV_Death_25
-
-# Ages ≥30:
-HPV_Death_30plus <- v_p_mort_lessHPV[30:86]
-HPV_Death_30plus
-
-# The complement set of Normal by age group:
-# Ages 15-24:
-(1 - (HPV_Normal_15 + HPV_Death_15))
-
-# Ages 25-29:
-1 - HPV_Normal_25
-
-# Ages ≥30:
-1 - HPV_Normal_30plus
-
-
-# HPV to LSIL -------------------------------------------------------------
-# Ages 15-24:
-HPV_LSIL_15 <- (1 - (HPV_Normal_15 + HPV_Death_15)) * (
- (1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1))
-HPV_LSIL_15
-
-# Ages 25-29:
-HPV_LSIL_25 <- (1 - (HPV_Normal_25 + HPV_Death_25)) * (
- (1 - exp(-.2 * 3)) - ((1 - exp(-.2 * 3)) * .1))
-HPV_LSIL_25
-
-# Ages ≥30:
-HPV_LSIL_30plus <- (1 - (HPV_Normal_30plus + HPV_Death_30plus))  * ((1 - exp(-.2 * 3)) - 
-                                               ((1 - exp(-.2 * 3)) * .1))
-HPV_LSIL_30plus
-
-# HPV to HSIL -------------------------------------------------------------
-# Ages 15-24:
-HPV_HSIL_15 <- ((1 - (HPV_Normal_15 + HPV_Death_15)) * ((1 - exp(-.2 * 3)) * .1))
-HPV_HSIL_15
-
-# Ages 25-29:
-HPV_HSIL_25 <- ((1 - (HPV_Normal_25 + HPV_Death_25)) * ((1 - exp(-.2 * 3)) * .1))
-HPV_HSIL_25
-
-# Ages ≥30:
-HPV_HSIL_30plus <- ((1 - (HPV_Normal_30plus + HPV_Death_30plus)) * ((1 - exp(-.2 * 3)) * .1))
-HPV_HSIL_30plus
-
-# HPV to HPV --------------------------------------------------------------
-# Ages 15-24:
-HPV_HPV_15 <- (1 - (HPV_Normal_15 + HPV_Death_15)) - (HPV_LSIL_15 + 
-                                HPV_HSIL_15)
-
-# Ages 25-29:
-HPV_HPV_25 <- (1 - (HPV_Normal_25 + HPV_Death_25)) - (HPV_LSIL_25 + 
-                                HPV_HSIL_25)
-
-# Ages ≥30:
-HPV_HPV_30up <- (1 - (HPV_Normal_30plus + HPV_Death_30plus)) - (HPV_LSIL_30plus + 
-                                HPV_HSIL_30plus)
-
-# State Calibration -------------------------------------------------------------
-# Calibration - Ages 15-34. Must equal 1 across all ages:
-HPV_HPV_15 + HPV_HSIL_15 + HPV_LSIL_15 + HPV_Death_15 + HPV_Normal_15
-
-# Calibration - Ages 25-29. Must equal 1 across all ages:
-HPV_HPV_25 + HPV_HSIL_25 + HPV_LSIL_25 + HPV_Death_25 + HPV_Normal_25
-
-# Calibration - Ages ≥30. Must equal 1 across all ages:
-HPV_HPV_30up + HPV_HSIL_30plus + HPV_LSIL_30plus + HPV_Death_30plus + HPV_Normal_30plus
-
 # ====================================================================================
 # Sub-Model for progressions from LSIL --------------------
 # ====================================================================================
@@ -209,26 +107,6 @@ LSIL_35to85 <- (1 - exp(-0.4 * 6))
 alpha.LSIL_35to85 <- beta_params(mean = LSIL_35to85, sigma = 0.025)$alpha
 beta.LSIL_35to85 <- beta_params(mean = LSIL_35to85, sigma = 0.025)$beta
 
-# State Equations ---------------------------------------------------------
-# Transition to Death:
-LSILtoDeath <- (v_p_mort_lessHPV[16:35])
-# To Normal:
-LSILNORM <-  (LSIL_15to24 * 0.9)
-LSILNORM
-# To Infection:
-LSILINF <- (LSIL_15to24) -  (LSIL_15to24 * 0.9)
-LSILINF
-
-# Transition to HSIL
-LSILtoHSIL <- (1 - LSIL_15to24) * (1 - exp(-0.1 * 6))
-LSILtoHSIL
-
-# Transition to LSIL
-LSILtoLSIL <- 1 - (LSILtoDeath + LSILNORM + LSILINF + LSILtoHSIL)
-LSILtoLSIL
-# LOTP check:
-LSILtoDeath + LSILNORM + LSILINF + LSILtoHSIL + LSILtoLSIL
-
 # ====================================================================================
 # Sub-Model for progressions from HSIL --------------------
 # ====================================================================================
@@ -236,23 +114,6 @@ HSIL <- (1 - exp(-.35 * 6))
 HSIL
 alpha.HSIL <- beta_params(mean = HSIL, sigma = 0.025)$alpha
 beta.HSIL <- beta_params(mean = HSIL, sigma = 0.025)$beta
-
-
-# State Equations ---------------------------------------------------------
-# Transition to Normal:
-HSILtoNormal <- ((1 - exp(-.35 * 6)) * .5)
-# Transition to LSIL:
-HSILtoLSIL <- (1 - exp(-.35 * 6)) - ((1 - exp(-.35 * 6)) * .5)
-# Transition to Stage I Cancer:
-HSILtoStageI <- ((1 - HSIL) * (1 - exp(-0.4 * 10)))
-
-
-# Transition to HSIL
-HSILtoHSIL <- 1 - (HSILtoNormal + HSILtoLSIL + HSILtoStageI)
-HSILtoHSIL
-
-# LOTP check:
-HSILtoHSIL + HSILtoLSIL + HSILtoNormal + HSILtoStageI
 
 # ==========================================================================================
 # All Cancer States Progression ------------------------------------------------
@@ -441,26 +302,5 @@ beta.StageIV_YearV <- beta_params(mean = 0.8592, sigma = 0.025)$beta
 
 # 5 year survival:
 ((0.3986) * (0.4982) * (0.7638) * (0.8652) * (0.8592))
-
-# State equations ---------------------------------------------------------
-# Death from cancer, for example:
-# 1 - (surv.StageI_year1 - v_p_mort_lessHPV[1, 2])
-
-# Death from cancer, for example:
-# 1 - (surv.StageI_year1 - v_p_mort_lessHPV[1, 2])
-
-# Stage I-IV equations for example DELETE WHEN FINISHED:
-# StageItoStageII <- (Stage.I.canc - (Stage.I.canc * 0.15))
-# StageItoStageII
-
-# StageItoTreat <- (Stage.I.canc * 0.15)
-# StageItoTreat
-
-# StageItoDeath <- v_p_mort_lessHPV[22]
-
-# StageItoStageI <- 1 - (StageItoDeath + StageItoTreat + StageItoStageII)
-
-# LOTP Check:
-# (StageItoDeath + StageItoTreat + StageItoStageII + StageItoStageI)
 
 # End file ----------------------------------------------------------------
