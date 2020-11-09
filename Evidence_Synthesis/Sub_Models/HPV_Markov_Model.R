@@ -1,5 +1,3 @@
-source("Evidence_Synthesis_and_Probability_Matrix.R")
-
 # ==========================================================================================
 # Markov Model ------------------------------------------------------------
 # ==========================================================================================
@@ -7,6 +5,8 @@ source("Evidence_Synthesis_and_Probability_Matrix.R")
 # 2009): "The potential cost-effectiveness of adding a human papillomavirus vaccine to the 
 # cervical cancer screening programme in South Africa." Note that this code sits on top of the 
 # code for the evidence synthesis model as well as the probability matrix. 
+
+source("Evidence_Synthesis_and_Probability_Matrix.R")
 
 # m_M_ad_1 is the Status Quo treatment model; m_M_ad_2 is the vaccine treatment model.
 
