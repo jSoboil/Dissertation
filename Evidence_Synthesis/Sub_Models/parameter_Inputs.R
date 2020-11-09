@@ -198,7 +198,6 @@ HPV_HPV_30up + HPV_HSIL_30plus + HPV_LSIL_30plus + HPV_Death_30plus + HPV_Normal
 
 # It is important to place an upper bound on this distribution in order to make the probabilities
 # sensible. Truncation is placed on either distribution as T(0, 0.75-0.90).
-
 LSIL_15to34 <- (1 - exp(-0.65 * 6))
 
 alpha.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.025)$alpha
@@ -214,14 +213,14 @@ beta.LSIL_35to85 <- beta_params(mean = LSIL_35to85, sigma = 0.025)$beta
 # Transition to Death:
 LSILtoDeath <- (v_p_mort_lessHPV[16:35])
 # To Normal:
-LSILNORM <-  (LSIL_15to34 * 0.9)
+LSILNORM <-  (LSIL_15to24 * 0.9)
 LSILNORM
 # To Infection:
-LSILINF <- (LSIL_15to34) -  (LSIL_15to34 * 0.9)
+LSILINF <- (LSIL_15to24) -  (LSIL_15to24 * 0.9)
 LSILINF
 
 # Transition to HSIL
-LSILtoHSIL <- (1 - LSIL_15to34) * (1 - exp(-0.1 * 6))
+LSILtoHSIL <- (1 - LSIL_15to24) * (1 - exp(-0.1 * 6))
 LSILtoHSIL
 
 # Transition to LSIL
