@@ -9,6 +9,18 @@
 # efficacy.
 
 # ==========================================================================================
+# Probability Dying less HPV for all States -------------------------------
+# ==========================================================================================
+# Import ASSA mortality table:
+mort_data <- read_excel(
+"/Users/joshuamusson/Desktop/Analytics/R/Dissertation/Evidence_Synthesis/mortality tables.xls", 
+                        sheet = "ASSA data", range = "I3:I89")
+v_p_mort_lessHPV <- as.matrix(mort_data[1])
+colnames(v_p_mort_lessHPV) <- c("Prob Dying all less HPV")
+# Probability of mortality less HPV:
+v_p_mort_lessHPV
+
+# ==========================================================================================
 # Normal/Well State Progression -------------------------------------------
 # ==========================================================================================
 # Normal to HPV -----------------------------------------------------------:
@@ -26,27 +38,6 @@ Prevalence <- c(rep(0, length(0:14)), rep(0.09516258, length(15:16)),
                 rep(0.009950166, length(30:49)), rep(0.004987521, length(50:85)))
 length(Prevalence)
 mu.a.log <- log(Prevalence)
-
-# Normal to Death ---------------------------------------------------------
-# Import ASSA mortality table:
-mort_data <- read_excel(
-"/Users/joshuamusson/Desktop/Analytics/R/Dissertation/Evidence_Synthesis/mortality tables.xls", 
-                        sheet = "ASSA data", range = "A3:H94")
-mort_data
-
-# Total Pop. divided by total deaths:
-v_p_mort_All <- mort_data[1:86, 3] / mort_data[1:86, 2]
-v_p_mort_All
-
-# Probability of mortality Cervical Cancer from HPV:
-v_p_mort_HPV <- mort_data[1:86, 8]
-colnames(v_p_mort_HPV) <- "Death_HPV"
-v_p_mort_HPV
-
-# Probability of mortality less HPV:
-v_p_mort_lessHPV <- as.matrix(v_p_mort_All[1:86, ] - v_p_mort_HPV[1:86, ])
-colnames(v_p_mort_lessHPV) <- c("Death_less.HPV")
-v_p_mort_lessHPV
 
 # ==========================================================================================
 # Vaccine efficacy data ----------------------------------------------------
