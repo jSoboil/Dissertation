@@ -14,11 +14,10 @@
 # Import ASSA mortality table:
 mort_data <- read_excel(
 "/Users/joshuamusson/Desktop/Analytics/R/Dissertation/Evidence_Synthesis/mortality tables.xls", 
-                        sheet = "ASSA data", range = "I3:I89")
+                        sheet = "final tables", range = "D1:D87")
 v_p_mort_lessHPV <- as.matrix(mort_data[1])
-colnames(v_p_mort_lessHPV) <- c("Prob Dying all less HPV")
 # Probability of mortality less HPV:
-v_p_mort_lessHPV
+length(v_p_mort_lessHPV)
 
 # ==========================================================================================
 # Normal/Well State Progression -------------------------------------------

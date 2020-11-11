@@ -18,20 +18,6 @@ rateConv.consR <- function(r, t) {
 # subject to bias as the reasons for non-compliance may be related to treatment 
 # (Cochrane.org/glossary).
 
-# Note on conversion between rates and probabilities (Fleurence R., 2007):
-# If an event occurs at a constant rate r per time unit t, then the probability that an 
-# event will occur during time t is given by equation 1 (note that the unit of time used
-# in r and t must be the same):
-
-#    p = 1 - exp(-r * t)
-
-# On the other hand, if we have a probability and we want to convert it to a rate,
-
-#    r = - (1 / t) * log(1 - p)
-
-# Note: the included statistics are for HPV-16 and HPV-18 as model assesses bivalent vaccine 
-# efficacy.
-
 # ==========================================================================================
 # Age-specific all cause mortality --------------------------------------------------
 # ==========================================================================================

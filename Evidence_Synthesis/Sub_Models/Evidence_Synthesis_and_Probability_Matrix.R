@@ -17,7 +17,7 @@ model {
 # as it is technically sampling directly from a prior and is not propogated into a 
 # posterior using a likelihood model. However, a hyperprior is used for the population 
 # variance to account for a greater uncertainty in each age-population.
-  for (i in 1:85) {
+  for (i in 1:86) {
     # Monte Carlo:
     # No vaccine:
     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])T(0, )
@@ -32,7 +32,7 @@ model {
   }
   
    # Wide hyper-prior on prior variance parameter for SUB-MODEL 1:
-   eta.age ~ dunif(0, 1000)
+   eta.age ~ dunif(0, 100)
  
 # END OF SUB-MODEL 1.
 
@@ -57,7 +57,7 @@ model {
    # Hyperpriors for SUB-MODEL 2:
    psi.vac ~ dnorm(0, 1.0e-6)
    prec.vac <- pow(tau.vac, -2)
-   tau.vac ~  dunif(0, 10)
+   tau.vac ~  dunif(0, 1000)
   
   # Transformations for SUB-MODEL 2:
    # Convert LOR to OR
@@ -130,8 +130,8 @@ model {
 # model. I have had to truncate these distributions in order for the ASSA mortality data 
 # to be properly combined and for the state transition probabilities to be proper.
    LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, 0.95)
-   LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.785)
-   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.90)
+   LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.85)
+   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.85)
 
 # END OF SUB-MODEL 5.
 
@@ -238,14 +238,12 @@ attach.jags(mod_JAGS)
 # ==========================================================================================
 # Probability Matrix --------------------------------------------------
 # ==========================================================================================
-# The following sections fill in the Probability Matrix across both the time horizon and all
-# probabilistic simulations. First is the non-treatment, which is non-vaccine ('Status-Quo') 
-# probabilities. Second is the the New treatment, which is vaccine associated 
-# probabilities. 
+ # The following creates a transition array that is then used to simulate the Markov cohort for both
+# treatments, Status Quo and New Treatment.
 
 # The following sets up the structure of the transitions between Health States:
 n_age_init <- 0 # age at baseline
-n_age_max <- 85 # maximum age of follow up - note: the maximum age is actually 85, however, 
+n_age_max <- 86 # maximum age of follow up - note: the maximum age is actually 85, however, 
 # due to starting at 0, it has to be compensated for by adding n + 1.
 n_t <- n_age_max - n_age_init # time horizon, number of cycles
 n_t
@@ -267,20 +265,22 @@ a_P_1 <- array(0, dim = c(n_states, n_states, n_t, n.sims),
 a_P_2 <- array(0, dim = c(n_states, n_states, n_t, n.sims),
              dimnames = list(v_n, v_n, 0:(n_t - 1), 1:n.sims))
 
-# Note: all progression probabilities are assumed dependent on regression probabilities.
+# Note: all progression probabilities are assumed dependent on the probability of regression. Moreover, 
+# due to the natural structure of the transition array, there is no need to fill in probabilities = 0, 
+# such as the transitions from Infection to LSIL for ages ≤ 14. However, the exception is for infection 
+# transitions in order to make the coding of the transition from Well to Death easier.
 
 # ==========================================================================================
 # Status-Quo  ----------------------------------------------------------
 # ==========================================================================================
-# These are all the state transitions with no vaccine treatment. The following creates a
-# transition array that is then used to simulate the Markov cohort without treatment.
+# These are for all the state transitions with no vaccine treatment.
 
 # Transitions from Well State ---------------------------------------------
 
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state Well, across the appropriate time horizon i and all probabilistic 
 # simulations j
-for (i in 1:85) {
+for (i in 0:n_t) {
  for (j in 1:n.sims) {
   a_P_1["Well", "Death", i, j] <-  v_p_mort_lessHPV[i]
   
@@ -296,60 +296,41 @@ for (i in 1:85) {
 
 # Transitions from Infection State ----------------------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state Infection, across the appropriate time horizon i and all probabilistic 
-# simulations j.
- for (i in 0:14) {
-     for (j in 1:n.sims) {
-      a_P_1["Infection", "Well", i, j] <- 0
-      
-      a_P_1["Infection", "Death", i, j] <- 0
-      
-      a_P_1["Infection", "LSIL", i, j] <- 0
-      
-      a_P_1["Infection", "HSIL", i, j] <- 0
-      
-      a_P_1["Infection", "Infection", i, j] <- 0
-
-     }
- }
 # The following enters all transition probabilities for ages 15-24 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
- for (i in 15:24) {
+ for (i in 16:25) {
      for (j in 1:n.sims) {
       a_P_1["Infection", "Well", i, j] <- HPV_Well_15to24[j]
       
       a_P_1["Infection", "Death", i, j] <- v_p_mort_lessHPV[i]
       
-      a_P_1["Infection", "LSIL", i, j] <- ((1 - HPV_Well_15to24[j]) * (1 - exp(-.2 * 3))) * 0.9
+      a_P_1["Infection", "LSIL", i, j] <- ((1 - (HPV_Well_15to24[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.9
                                            
-      a_P_1["Infection", "HSIL", i, j] <- ((1 - HPV_Well_15to24[j]) * (1 - exp(-.2 * 3))) * 0.1
+      a_P_1["Infection", "HSIL", i, j] <- ((1 - (HPV_Well_15to24[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.1
       
-      a_P_1["Infection", "Infection", i, j] <- 1 - (HPV_Well_15to24[j] + 
-                                        v_p_mort_lessHPV[i] + 
-                                         (((1 - HPV_Well_15to24[j]) * (1 - exp(-.2 * 3))) * 0.9) + 
-                                        (((1 - HPV_Well_15to24[j]) * (1 - exp(-.2 * 3))) * 0.1))
+      a_P_1["Infection", "Infection", i, j] <- 1 - (HPV_Well_15to24[j] + v_p_mort_lessHPV[i] + 
+                                                     (((1 - (HPV_Well_15to24[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.9) + 
+                                                     ((1 - (HPV_Well_15to24[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.1)
 
      }
  }
+                                                     
 # The following enters all transition probabilities for ages 25-29 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
- for (i in 25:29) {
+ for (i in 26:30) {
      for (j in 1:n.sims) {
       a_P_1["Infection", "Well", i, j] <- HPV_Well_25to29[j]
       
       a_P_1["Infection", "Death", i, j] <- v_p_mort_lessHPV[i]
       
-      a_P_1["Infection", "LSIL", i, j] <- ((1 - HPV_Well_25to29[j]) * (1 - exp(-.2 * 3))) * 0.9
+      a_P_1["Infection", "LSIL", i, j] <- ((1 - (HPV_Well_25to29[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.9
                                            
-      a_P_1["Infection", "HSIL", i, j] <- ((1 - HPV_Well_25to29[j]) * (1 - exp(-.2 * 3))) * 0.1
+      a_P_1["Infection", "HSIL", i, j] <- ((1 - (HPV_Well_25to29[j] +v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.1
       
-      a_P_1["Infection", "Infection", i, j] <- 1 - (HPV_Well_25to29[j] + 
-                                        v_p_mort_lessHPV[i] + 
-                                         (((1 - HPV_Well_25to29[j]) * (1 - exp(-.2 * 3))) * 0.9) + 
-                                        (((1 - HPV_Well_25to29[j]) * (1 - exp(-.2 * 3))) * 0.1))
+      a_P_1["Infection", "Infection", i, j] <- 1 - (HPV_Well_25to29[j] + v_p_mort_lessHPV[i] + (((1 - (HPV_Well_25to29[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.9) + 
+                                                     (((1 - (HPV_Well_25to29[j] +v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.1))
 
      }
  }
@@ -357,47 +338,28 @@ for (i in 1:85) {
 # The following enters all transition probabilities for ages 30-85 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
- for (i in 30:85) {
+ for (i in 31:86) {
      for (j in 1:n.sims) {
       a_P_1["Infection", "Well", i, j] <- HPV_Well_30toEnd[j]
       
       a_P_1["Infection", "Death", i, j] <- v_p_mort_lessHPV[i]
       
-      a_P_1["Infection", "LSIL", i, j] <- ((1 - HPV_Well_30toEnd[j]) * (1 - exp(-.2 * 3))) * 0.9
+      a_P_1["Infection", "LSIL", i, j] <- ((1 - (HPV_Well_30toEnd[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.9
                                            
-      a_P_1["Infection", "HSIL", i, j] <- ((1 - HPV_Well_30toEnd[j]) * (1 - exp(-.2 * 3))) * 0.1
+      a_P_1["Infection", "HSIL", i, j] <- ((1 - (HPV_Well_30toEnd[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.1
       
-      a_P_1["Infection", "Infection", i, j] <- 1 - (HPV_Well_30toEnd[j] + 
-                                        v_p_mort_lessHPV[i] + 
-                                         (((1 - HPV_Well_30toEnd[j]) * (1 - exp(-.2 * 3))) * 0.9) + 
-                                        (((1 - HPV_Well_30toEnd[j]) * (1 - exp(-.2 * 3))) * 0.1))
+      a_P_1["Infection", "Infection", i, j] <- 1 - (HPV_Well_30toEnd[j] + v_p_mort_lessHPV[i] + (((1 - (HPV_Well_30toEnd[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.9) + 
+                                                     (((1 - (HPV_Well_30toEnd[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.1))
 
      }
  }
 
 # Transitions from LSIL State ---------------------------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state LSIL, across the appropriate time horizon i and all probabilistic 
-# simulations j.
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_1["LSIL", "Well", i, j] <- 0
-     
-     a_P_1["LSIL", "Death", i, j] <- 0
-     
-     a_P_1["LSIL", "Infection", i, j] <- 0
-     
-     a_P_1["LSIL", "HSIL", i, j] <- 0
-     
-     a_P_1["LSIL", "LSIL", i, j] <- 0
-    }
-}
-
 # The following enters all transition probabilities for ages 15-34 for each transition from
 # the state LSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
-for (i in 15:34) {
+for (i in 16:35) {
     for (j in 1:n.sims) {
      a_P_1["LSIL", "Well", i, j] <- (LSIL_15_34[j] * 0.9)
      
@@ -405,17 +367,16 @@ for (i in 15:34) {
      
      a_P_1["LSIL", "Infection", i, j] <- (LSIL_15_34[j] * 0.1)
      
-     a_P_1["LSIL", "HSIL", i, j] <- (1 - LSIL_15_34[j]) * (1 - exp(-0.1 * 6))
+     a_P_1["LSIL", "HSIL", i, j] <- (1 - (LSIL_15_34[j] + v_p_mort_lessHPV[i])) * (1 - exp(-0.1 * 6))
      
-     a_P_1["LSIL", "LSIL", i, j] <- 1 - (v_p_mort_lessHPV[i] + LSIL_15_34[j] + (
-      (1 - LSIL_15_34[j]) * (1 - exp(-0.1 * 6))))
+     a_P_1["LSIL", "LSIL", i, j] <- 1 - (LSIL_15_34[j] + v_p_mort_lessHPV[i] + 
+                                           ((1 - (LSIL_15_34[j] + v_p_mort_lessHPV[i])) * (1 - exp(-0.1 * 6))))
     }
 }
-
 # The following enters all transition probabilities for ages ≥25 for each transition from
 # the state LSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
-for (i in 35:85) {
+for (i in 36:86) {
     for (j in 1:n.sims) {
      a_P_1["LSIL", "Well", i, j] <- (LSIL_35_85[j] * 0.9)
      
@@ -423,36 +384,17 @@ for (i in 35:85) {
      
      a_P_1["LSIL", "Infection", i, j] <- (LSIL_35_85[j] * 0.1)
      
-     a_P_1["LSIL", "HSIL", i, j] <- (1 - LSIL_35_85[j]) * (1 - exp(-0.35 * 6))
+     a_P_1["LSIL", "HSIL", i, j] <- (1 - (LSIL_35_85[j] + v_p_mort_lessHPV[i])) * (1 - exp(-0.35 * 6))
      
-     a_P_1["LSIL", "LSIL", i, j] <- 1 - (v_p_mort_lessHPV[i] + LSIL_35_85[j] + (
-      (1 - LSIL_35_85[j]) * (1 - exp(-0.35 * 6))))
+     a_P_1["LSIL", "LSIL", i, j] <- 1 - (LSIL_35_85[j] + v_p_mort_lessHPV[i] + (1 - (LSIL_35_85[j] + v_p_mort_lessHPV[i])) * (1 - exp(-0.35 * 6)))
     }
 }
-
 # Transitions from HSIL State ---------------------------------------------
-
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state HSIL, across the appropriate time horizon i and all probabilistic 
-# simulations j.
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_1["HSIL", "Well", i, j] <- 0
-     
-     a_P_1["HSIL", "Death", i, j] <- 0
-     
-     a_P_1["HSIL", "LSIL", i, j] <- 0
-     
-     a_P_1["HSIL", "Stage-I Cancer", i, j] <- 0
-     
-     a_P_1["HSIL", "HSIL", i, j] <- 0
-    }
-}
 
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state HSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_1["HSIL", "Well", i, j] <- (HSIL_n[j] * 0.5)
      
@@ -460,37 +402,19 @@ for (i in 15:85) {
      
      a_P_1["HSIL", "LSIL", i, j] <- (HSIL_n[j] * 0.5)
      
-     a_P_1["HSIL", "Stage-I Cancer", i, j] <- (1 - HSIL_n[j]) * (1 - exp(-0.4 * 10))
+     a_P_1["HSIL", "Stage-I Cancer", i, j] <- (1 - (HSIL_n[j] + v_p_mort_lessHPV[i])) * (1 - exp(-0.4 * 10))
      
-     a_P_1["HSIL", "HSIL", i, j] <- 1 - (v_p_mort_lessHPV[i] + (HSIL_n[j] * 0.5) + 
-                                          (HSIL_n[j] * 0.5) + (
-                                           (1 - HSIL_n[j]) * (1 - exp(-0.4 * 10)))
-                                         )
+     a_P_1["HSIL", "HSIL", i, j] <- 1 - (HSIL_n[j] + v_p_mort_lessHPV[i] + 
+                                          ((1 - (HSIL_n[j] + v_p_mort_lessHPV[i])) * (1 - exp(-0.4 * 10))))
     }
 }
 
 # Transitions from Stage-I Cervix Cancer State ----------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state Stage-I Cancer, across the appropriate time horizon i and all probabilistic 
-# simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_1["Stage-I Cancer", "Death", i, j] <- 0
-     
-     a_P_1["Stage-I Cancer", "Stage-II Cancer", i, j] <- 0
-     
-     a_P_1["Stage-I Cancer", "Detected.Stage-I Year 1", i, j] <- 0
-     
-     a_P_1["Stage-I Cancer", "Stage-I Cancer", i, j] <- 0
-     
-    }
-}
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-I Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_1["Stage-I Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -507,25 +431,10 @@ for (i in 15:85) {
 
 # Transitions from Stage-II Cervix Cancer State ---------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state Stage-II Cancer, across the appropriate time horizon i and all probabilistic 
-# simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_1["Stage-II Cancer", "Death", i, j] <- 0
-     
-     a_P_1["Stage-II Cancer", "Stage-III Cancer", i, j] <- 0
-     
-     a_P_1["Stage-II Cancer", "Detected.Stage-II Year 1", i, j] <- 0
-     
-     a_P_1["Stage-II Cancer", "Stage-II Cancer", i, j] <- 0
-     
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-II Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_1["Stage-II Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -543,25 +452,10 @@ for (i in 15:85) {
 
 # Transitions from Stage-III Cervix Cancer State --------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state Stage-III Cancer, across the appropriate time horizon i and all probabilistic 
-# simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_1["Stage-III Cancer", "Death", i, j] <- 0
-     
-     a_P_1["Stage-III Cancer", "Stage-IV Cancer", i, j] <- 0
-     
-     a_P_1["Stage-III Cancer", "Detected.Stage-III Year 1", i, j] <- 0
-     
-     a_P_1["Stage-III Cancer", "Stage-III Cancer", i, j] <- 0
-     
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-III Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_1["Stage-III Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -577,24 +471,10 @@ for (i in 15:85) {
 
 # Transitions from Stage-IV Cervix Cancer State ---------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state Stage-IV Cancer, across the appropriate time horizon i and all probabilistic 
-# simulations j. 
-for (i in 15:85) {
-    for (j in 1:n.sims) {
-     a_P_1["Stage-IV Cancer", "Death", i, j] <- 0
-     
-     a_P_1["Stage-IV Cancer", "Detected.Stage-IV Year 1", i, j] <- 0
-     
-     a_P_1["Stage-IV Cancer", "Stage-IV Cancer", i, j] <- 0
-     
-    }
-}
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-IV Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_1["Stage-IV Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -608,245 +488,129 @@ for (i in 15:85) {
 
 # Transitions from All Stage-I Cancer Survivor/Detected States ---------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# all states of Detected Stage-I Cancer, across the appropriate time horizon i and all 
-# probabilistic simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_1["Detected.Stage-I Year 1", "Detected.Stage-I Year 2", i, j] <- 0
-     
-     a_P_1["Detected.Stage-I Year 1", "Death", i, j] <- 0
-     
-     a_P_1["Detected.Stage-I Year 2", "Detected.Stage-I Year 3", i, j] <- 0
-     
-     a_P_1["Detected.Stage-I Year 2", "Death", i, j] <- 0
-     
-     a_P_1["Detected.Stage-I Year 3", "Detected.Stage-I Year 4", i, j] <- 0
-     
-     a_P_1["Detected.Stage-I Year 3", "Death", i, j] <- 0
-
-     a_P_1["Detected.Stage-I Year 4", "Detected.Stage-I Year 5", i, j] <- 0
-     
-     a_P_1["Detected.Stage-I Year 4", "Death", i, j] <- 0
-     
-     a_P_1["Detected.Stage-I Year 5", "Cancer Survivor", i, j] <- 0
-     
-     a_P_1["Detected.Stage-I Year 5", "Death", i, j] <- 0
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-I Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_1["Detected.Stage-I Year 1", "Detected.Stage-I Year 2", i, j] <- surv.StageI_year1[j]
      
      a_P_1["Detected.Stage-I Year 1", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageI_year1[j])
      
-     a_P_1["Detected.Stage-I Year 2", "Detected.Stage-I Year 3", i, j] <- surv.StageI_year2[j]
+     a_P_1["Detected.Stage-I Year 2", "Detected.Stage-I Year 3", i, j] <- surv.StageI_year1[j] * surv.StageI_year2[j]
      
-     a_P_1["Detected.Stage-I Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageI_year2[j])
+     a_P_1["Detected.Stage-I Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageI_year1[j] * surv.StageI_year2[j]))
      
-     a_P_1["Detected.Stage-I Year 3", "Detected.Stage-I Year 4", i, j] <- surv.StageI_year3[j]
+     a_P_1["Detected.Stage-I Year 3", "Detected.Stage-I Year 4", i, j] <- surv.StageI_year1[j] * surv.StageI_year2[j] * surv.StageI_year3[j]
      
-     a_P_1["Detected.Stage-I Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageI_year3[j])
+     a_P_1["Detected.Stage-I Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageI_year1[j] * surv.StageI_year2[j] * surv.StageI_year3[j]))
 
-     a_P_1["Detected.Stage-I Year 4", "Detected.Stage-I Year 5", i, j] <- surv.StageI_year4[j]
+     a_P_1["Detected.Stage-I Year 4", "Detected.Stage-I Year 5", i, j] <- surv.StageI_year1[j] * surv.StageI_year2[j] * surv.StageI_year3[j] * surv.StageI_year4[j]
      
-     a_P_1["Detected.Stage-I Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageI_year4[j])
+     a_P_1["Detected.Stage-I Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageI_year1[j] * surv.StageI_year2[j] * surv.StageI_year3[j] * surv.StageI_year4[j]))
      
-     a_P_1["Detected.Stage-I Year 5", "Cancer Survivor", i, j] <- surv.StageI_year5[j]
+     a_P_1["Detected.Stage-I Year 5", "Cancer Survivor", i, j] <- surv.StageI_year1[j] * surv.StageI_year2[j] * surv.StageI_year3[j] * surv.StageI_year4[j] * surv.StageI_year5[j]
      
-     a_P_1["Detected.Stage-I Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageI_year5[j])
+     a_P_1["Detected.Stage-I Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageI_year1[j] * surv.StageI_year2[j] * surv.StageI_year3[j] * surv.StageI_year4[j] * surv.StageI_year5[j]))
     }
 }
 
 # Transitions from All Stage-II Cancer Survivor/Detected States -----------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# all states of Detected Stage-II Cancer, across the appropriate time horizon i and all 
-# probabilistic simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_1["Detected.Stage-II Year 1", "Detected.Stage-II Year 2", i, j] <- 0
-     
-     a_P_1["Detected.Stage-II Year 1", "Death", i, j] <- 0
-     
-     a_P_1["Detected.Stage-II Year 2", "Detected.Stage-II Year 3", i, j] <- 0
-     
-     a_P_1["Detected.Stage-II Year 2", "Death", i, j] <- 0
-     
-     a_P_1["Detected.Stage-II Year 3", "Detected.Stage-II Year 4", i, j] <- 0
-     
-     a_P_1["Detected.Stage-II Year 3", "Death", i, j] <- 0
-
-     a_P_1["Detected.Stage-II Year 4", "Detected.Stage-II Year 5", i, j] <- 0
-     
-     a_P_1["Detected.Stage-II Year 4", "Death", i, j] <- 0
-     
-     a_P_1["Detected.Stage-II Year 5", "Cancer Survivor", i, j] <- 0
-     
-     a_P_1["Detected.Stage-II Year 5", "Death", i, j] <- 0
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-II Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_1["Detected.Stage-II Year 1", "Detected.Stage-II Year 2", i, j] <- surv.StageII_year1[j]
      
      a_P_1["Detected.Stage-II Year 1", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageII_year1[j])
      
-     a_P_1["Detected.Stage-II Year 2", "Detected.Stage-II Year 3", i, j] <- surv.StageII_year2[j]
+     a_P_1["Detected.Stage-II Year 2", "Detected.Stage-II Year 3", i, j] <- surv.StageII_year1[j] * surv.StageII_year2[j]
      
-     a_P_1["Detected.Stage-II Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageII_year2[j])
+     a_P_1["Detected.Stage-II Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageII_year1[j] * surv.StageII_year2[j]))
      
-     a_P_1["Detected.Stage-II Year 3", "Detected.Stage-II Year 4", i, j] <- surv.StageII_year3[j]
+     a_P_1["Detected.Stage-II Year 3", "Detected.Stage-II Year 4", i, j] <- surv.StageII_year1[j] * surv.StageII_year2[j] * surv.StageII_year3[j]
      
-     a_P_1["Detected.Stage-II Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageII_year3[j])
+     a_P_1["Detected.Stage-II Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageII_year1[j] * surv.StageII_year2[j] * surv.StageII_year3[j]))
 
-     a_P_1["Detected.Stage-II Year 4", "Detected.Stage-II Year 5", i, j] <- surv.StageII_year4[j]
+     a_P_1["Detected.Stage-II Year 4", "Detected.Stage-II Year 5", i, j] <- surv.StageII_year1[j] * surv.StageII_year2[j] * surv.StageII_year3[j] * surv.StageII_year4[j]
      
-     a_P_1["Detected.Stage-II Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageII_year4[j])
+     a_P_1["Detected.Stage-II Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageII_year1[j] * surv.StageII_year2[j] * surv.StageII_year3[j] * surv.StageII_year4[j]))
      
-     a_P_1["Detected.Stage-II Year 5", "Cancer Survivor", i, j] <- surv.StageII_year5[j]
+     a_P_1["Detected.Stage-II Year 5", "Cancer Survivor", i, j] <- surv.StageII_year1[j] * surv.StageII_year2[j] * surv.StageII_year3[j] * surv.StageII_year4[j] * surv.StageII_year5[j]
      
-     a_P_1["Detected.Stage-II Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageII_year5[j])
+     a_P_1["Detected.Stage-II Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageII_year1[j] * surv.StageII_year2[j] * surv.StageII_year3[j] * surv.StageII_year4[j] * surv.StageII_year5[j]))
      
     }
 }
 
 # Transitions from All Stage-III Cancer Survivor/Detected States ----------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# all states of Detected Stage-III Cancer, across the appropriate time horizon i and all 
-# probabilistic simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_1["Detected.Stage-III Year 1", "Detected.Stage-III Year 2", i, j] <- 0
-     
-     a_P_1["Detected.Stage-III Year 1", "Death", i, j] <- 0
-     
-     a_P_1["Detected.Stage-III Year 2", "Detected.Stage-III Year 3", i, j] <- 0
-     
-     a_P_1["Detected.Stage-III Year 2", "Death", i, j] <- 0
-     
-     a_P_1["Detected.Stage-III Year 3", "Detected.Stage-III Year 4", i, j] <- 0
-     
-     a_P_1["Detected.Stage-III Year 3", "Death", i, j] <- 0
-
-     a_P_1["Detected.Stage-III Year 4", "Detected.Stage-III Year 5", i, j] <- 0
-     
-     a_P_1["Detected.Stage-III Year 4", "Death", i, j] <- 0
-     
-     a_P_1["Detected.Stage-III Year 5", "Cancer Survivor", i, j] <- 0
-     
-     a_P_1["Detected.Stage-III Year 5", "Death", i, j] <- 0
-     
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-III Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_1["Detected.Stage-III Year 1", "Detected.Stage-III Year 2", i, j] <- surv.StageIII_year1[j]
      
      a_P_1["Detected.Stage-III Year 1", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIII_year1[j])
      
-     a_P_1["Detected.Stage-III Year 2", "Detected.Stage-III Year 3", i, j] <- surv.StageIII_year2[j]
+     a_P_1["Detected.Stage-III Year 2", "Detected.Stage-III Year 3", i, j] <- surv.StageIII_year1[j] * surv.StageIII_year2[j]
      
-     a_P_1["Detected.Stage-III Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIII_year2[j])
+     a_P_1["Detected.Stage-III Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIII_year1[j] * surv.StageIII_year2[j]))
      
-     a_P_1["Detected.Stage-III Year 3", "Detected.Stage-III Year 4", i, j] <- surv.StageIII_year3[j]
+     a_P_1["Detected.Stage-III Year 3", "Detected.Stage-III Year 4", i, j] <- surv.StageIII_year1[j] * surv.StageIII_year2[j] * surv.StageIII_year3[j]
      
-     a_P_1["Detected.Stage-III Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIII_year2[j])
+     a_P_1["Detected.Stage-III Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIII_year1[j] * surv.StageIII_year2[j] * surv.StageIII_year3[j]))
 
-     a_P_1["Detected.Stage-III Year 4", "Detected.Stage-III Year 5", i, j] <- surv.StageIII_year4[j]
+     a_P_1["Detected.Stage-III Year 4", "Detected.Stage-III Year 5", i, j] <- surv.StageIII_year1[j] * surv.StageIII_year2[j] * surv.StageIII_year3[j] * surv.StageIII_year4[j]
      
-     a_P_1["Detected.Stage-III Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIII_year2[j])
+     a_P_1["Detected.Stage-III Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIII_year1[j] * surv.StageIII_year2[j] * surv.StageIII_year3[j] * surv.StageIII_year4[j]))
      
-     a_P_1["Detected.Stage-III Year 5", "Cancer Survivor", i, j] <- surv.StageIII_year5[j]
+     a_P_1["Detected.Stage-III Year 5", "Cancer Survivor", i, j] <- surv.StageIII_year1[j] * surv.StageIII_year2[j] * surv.StageIII_year3[j] * surv.StageIII_year4[j] * surv.StageIII_year5[j]
      
-     a_P_1["Detected.Stage-III Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIII_year2[j])
+     a_P_1["Detected.Stage-III Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIII_year1[j] * surv.StageIII_year2[j] * surv.StageIII_year3[j] * surv.StageIII_year4[j] * surv.StageIII_year5[j]))
      
     }
 }
 
 # Transitions from All Stage-IV Cancer Survivor/Detected States -----------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# all states of Detected Stage-IV Cancer, across the appropriate time horizon i and all 
-# probabilistic simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_1["Detected.Stage-IV Year 1", "Detected.Stage-IV Year 2", i, j] <- 0
-     
-     a_P_1["Detected.Stage-IV Year 1", "Death", i, j] <- 0
-     
-     a_P_1["Detected.Stage-IV Year 2", "Detected.Stage-IV Year 3", i, j] <- 0
-     
-     a_P_1["Detected.Stage-IV Year 2", "Death", i, j] <- 0
-     
-     a_P_1["Detected.Stage-IV Year 3", "Detected.Stage-IV Year 4", i, j] <- 0
-     
-     a_P_1["Detected.Stage-IV Year 3", "Death", i, j] <- 0
-     
-     a_P_1["Detected.Stage-IV Year 4", "Detected.Stage-IV Year 5", i, j] <- 0
-     
-     a_P_1["Detected.Stage-IV Year 4", "Death", i, j] <- 0
-     
-     a_P_1["Detected.Stage-IV Year 5", "Cancer Survivor", i, j] <- 0
-     
-     a_P_1["Detected.Stage-IV Year 5", "Death", i, j] <- 0
-     
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-IV Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_1["Detected.Stage-IV Year 1", "Detected.Stage-IV Year 2", i, j] <- surv.StageIV_year1[j]
      
      a_P_1["Detected.Stage-IV Year 1", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIV_year1[j])
      
-     a_P_1["Detected.Stage-IV Year 2", "Detected.Stage-IV Year 3", i, j] <- surv.StageIV_year2[j]
+     a_P_1["Detected.Stage-IV Year 2", "Detected.Stage-IV Year 3", i, j] <- surv.StageIV_year1[j] * surv.StageIV_year2[j]
      
-     a_P_1["Detected.Stage-IV Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIV_year2[j])
+     a_P_1["Detected.Stage-IV Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIV_year1[j] * surv.StageIV_year2[j]))
      
-     a_P_1["Detected.Stage-IV Year 3", "Detected.Stage-IV Year 4", i, j] <- surv.StageIV_year3[j]
+     a_P_1["Detected.Stage-IV Year 3", "Detected.Stage-IV Year 4", i, j] <- surv.StageIV_year1[j] * surv.StageIV_year2[j] * surv.StageIV_year3[j]
      
-     a_P_1["Detected.Stage-IV Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIV_year3[j])
+     a_P_1["Detected.Stage-IV Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIV_year1[j] * surv.StageIV_year2[j] * surv.StageIV_year3[j]))
 
-     a_P_1["Detected.Stage-IV Year 4", "Detected.Stage-IV Year 5", i, j] <- surv.StageIV_year4[j]
+     a_P_1["Detected.Stage-IV Year 4", "Detected.Stage-IV Year 5", i, j] <- surv.StageIV_year1[j] * surv.StageIV_year2[j] * surv.StageIV_year3[j] * surv.StageIV_year4[j]
      
-     a_P_1["Detected.Stage-IV Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIV_year4[j])
+     a_P_1["Detected.Stage-IV Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIV_year1[j] * surv.StageIV_year2[j] * surv.StageIV_year3[j] * surv.StageIV_year4[j]))
      
-     a_P_1["Detected.Stage-IV Year 5", "Cancer Survivor", i, j] <- surv.StageIV_year5[j]
+     a_P_1["Detected.Stage-IV Year 5", "Cancer Survivor", i, j] <- surv.StageIV_year1[j] * surv.StageIV_year2[j] * surv.StageIV_year3[j] * surv.StageIV_year4[j] * surv.StageIV_year5[j]
      
-     a_P_1["Detected.Stage-IV Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIV_year5[j])
+     a_P_1["Detected.Stage-IV Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIV_year1[j] * surv.StageIV_year2[j] * surv.StageIV_year3[j] * surv.StageIV_year4[j] * surv.StageIV_year5[j]))
      
     }
 }
 
 # Transitions from Cancer Survivor State ----------------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state of Cancer Survivor, across the appropriate time horizon i and all 
-# probabilistic simulations j.
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_1["Cancer Survivor", "Cancer Survivor", i, j] <- 0
-     
-     a_P_1["Cancer Survivor", "Death", i, j] <- 0
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state of Cancer Survivor, across the appropriate time horizon i and all 
 # probabilistic simulations j.
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_1["Cancer Survivor", "Cancer Survivor", i, j] <- (1 - v_p_mort_lessHPV[i])
      
@@ -859,7 +623,7 @@ for (i in 15:85) {
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state of Death, across the appropriate time horizon i and all 
 # probabilistic simulations j.
-for (i in 1:85) {
+for (i in 0:n_t) {
  for (j in 1:n.sims) {
   a_P_1["Death", "Death", i, j] <- 1
   }
@@ -876,7 +640,7 @@ for (i in 1:85) {
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state Well, across the appropriate time horizon i and all probabilistic 
 # simulations j
-for (i in 1:85) {
+for (i in 0:n_t) {
  for (j in 1:n.sims) {
   a_P_2["Well", "Death", i, j] <-  v_p_mort_lessHPV[i]
   
@@ -890,62 +654,42 @@ for (i in 1:85) {
  } 
 }
 
-# Transitions from Infection State ----------------------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state Infection, across the appropriate time horizon i and all probabilistic 
-# simulations j.
- for (i in 0:14) {
-     for (j in 1:n.sims) {
-      a_P_2["Infection", "Well", i, j] <- 0
-      
-      a_P_2["Infection", "Death", i, j] <- 0
-      
-      a_P_2["Infection", "LSIL", i, j] <- 0
-      
-      a_P_2["Infection", "HSIL", i, j] <- 0
-      
-      a_P_2["Infection", "Infection", i, j] <- 0
-
-     }
- }
 # The following enters all transition probabilities for ages 15-24 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
- for (i in 15:24) {
+ for (i in 16:25) {
      for (j in 1:n.sims) {
       a_P_2["Infection", "Well", i, j] <- HPV_Well_15to24[j]
       
       a_P_2["Infection", "Death", i, j] <- v_p_mort_lessHPV[i]
       
-      a_P_2["Infection", "LSIL", i, j] <- ((1 - HPV_Well_15to24[j]) * (1 - exp(-.2 * 3))) * 0.9
+      a_P_2["Infection", "LSIL", i, j] <- ((1 - (HPV_Well_15to24[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.9
                                            
-      a_P_2["Infection", "HSIL", i, j] <- ((1 - HPV_Well_15to24[j]) * (1 - exp(-.2 * 3))) * 0.1
+      a_P_2["Infection", "HSIL", i, j] <- ((1 - (HPV_Well_15to24[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.1
       
-      a_P_2["Infection", "Infection", i, j] <- 1 - (HPV_Well_15to24[j] + 
-                                        v_p_mort_lessHPV[i] + 
-                                         (((1 - HPV_Well_15to24[j]) * (1 - exp(-.2 * 3))) * 0.9) + 
-                                        (((1 - HPV_Well_15to24[j]) * (1 - exp(-.2 * 3))) * 0.1))
+      a_P_2["Infection", "Infection", i, j] <- 1 - (HPV_Well_15to24[j] + v_p_mort_lessHPV[i] + 
+                                                     (((1 - (HPV_Well_15to24[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.9) + 
+                                                     ((1 - (HPV_Well_15to24[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.1)
 
      }
  }
+                                                     
 # The following enters all transition probabilities for ages 25-29 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
- for (i in 25:29) {
+ for (i in 26:30) {
      for (j in 1:n.sims) {
       a_P_2["Infection", "Well", i, j] <- HPV_Well_25to29[j]
       
       a_P_2["Infection", "Death", i, j] <- v_p_mort_lessHPV[i]
       
-      a_P_2["Infection", "LSIL", i, j] <- ((1 - HPV_Well_25to29[j]) * (1 - exp(-.2 * 3))) * 0.9
+      a_P_2["Infection", "LSIL", i, j] <- ((1 - (HPV_Well_25to29[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.9
                                            
-      a_P_2["Infection", "HSIL", i, j] <- ((1 - HPV_Well_25to29[j]) * (1 - exp(-.2 * 3))) * 0.1
+      a_P_2["Infection", "HSIL", i, j] <- ((1 - (HPV_Well_25to29[j] +v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.1
       
-      a_P_2["Infection", "Infection", i, j] <- 1 - (HPV_Well_25to29[j] + 
-                                        v_p_mort_lessHPV[i] + 
-                                         (((1 - HPV_Well_25to29[j]) * (1 - exp(-.2 * 3))) * 0.9) + 
-                                        (((1 - HPV_Well_25to29[j]) * (1 - exp(-.2 * 3))) * 0.1))
+      a_P_2["Infection", "Infection", i, j] <- 1 - (HPV_Well_25to29[j] + v_p_mort_lessHPV[i] + (((1 - (HPV_Well_25to29[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.9) + 
+                                                     (((1 - (HPV_Well_25to29[j] +v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.1))
 
      }
  }
@@ -953,47 +697,28 @@ for (i in 1:85) {
 # The following enters all transition probabilities for ages 30-85 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
- for (i in 30:85) {
+ for (i in 31:86) {
      for (j in 1:n.sims) {
       a_P_2["Infection", "Well", i, j] <- HPV_Well_30toEnd[j]
       
       a_P_2["Infection", "Death", i, j] <- v_p_mort_lessHPV[i]
       
-      a_P_2["Infection", "LSIL", i, j] <- ((1 - HPV_Well_30toEnd[j]) * (1 - exp(-.2 * 3))) * 0.9
+      a_P_2["Infection", "LSIL", i, j] <- ((1 - (HPV_Well_30toEnd[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.9
                                            
-      a_P_2["Infection", "HSIL", i, j] <- ((1 - HPV_Well_30toEnd[j]) * (1 - exp(-.2 * 3))) * 0.1
+      a_P_2["Infection", "HSIL", i, j] <- ((1 - (HPV_Well_30toEnd[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.1
       
-      a_P_2["Infection", "Infection", i, j] <- 1 - (HPV_Well_30toEnd[j] + 
-                                        v_p_mort_lessHPV[i] + 
-                                         (((1 - HPV_Well_30toEnd[j]) * (1 - exp(-.2 * 3))) * 0.9) + 
-                                        (((1 - HPV_Well_30toEnd[j]) * (1 - exp(-.2 * 3))) * 0.1))
+      a_P_2["Infection", "Infection", i, j] <- 1 - (HPV_Well_30toEnd[j] + v_p_mort_lessHPV[i] + (((1 - (HPV_Well_30toEnd[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.9) + 
+                                                     (((1 - (HPV_Well_30toEnd[j] + v_p_mort_lessHPV[i])) * (1 - exp(-.2 * 3))) * 0.1))
 
      }
  }
 
 # Transitions from LSIL State ---------------------------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state LSIL, across the appropriate time horizon i and all probabilistic 
-# simulations j.
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_2["LSIL", "Well", i, j] <- 0
-     
-     a_P_2["LSIL", "Death", i, j] <- 0
-     
-     a_P_2["LSIL", "Infection", i, j] <- 0
-     
-     a_P_2["LSIL", "HSIL", i, j] <- 0
-     
-     a_P_2["LSIL", "LSIL", i, j] <- 0
-    }
-}
-
 # The following enters all transition probabilities for ages 15-34 for each transition from
 # the state LSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
-for (i in 15:34) {
+for (i in 16:35) {
     for (j in 1:n.sims) {
      a_P_2["LSIL", "Well", i, j] <- (LSIL_15_34[j] * 0.9)
      
@@ -1001,17 +726,16 @@ for (i in 15:34) {
      
      a_P_2["LSIL", "Infection", i, j] <- (LSIL_15_34[j] * 0.1)
      
-     a_P_2["LSIL", "HSIL", i, j] <- (1 - LSIL_15_34[j]) * (1 - exp(-0.1 * 6))
+     a_P_2["LSIL", "HSIL", i, j] <- (1 - (LSIL_15_34[j] + v_p_mort_lessHPV[i])) * (1 - exp(-0.1 * 6))
      
-     a_P_2["LSIL", "LSIL", i, j] <- 1 - (v_p_mort_lessHPV[i] + LSIL_15_34[j] + (
-      (1 - LSIL_15_34[j]) * (1 - exp(-0.1 * 6))))
+     a_P_2["LSIL", "LSIL", i, j] <- 1 - (LSIL_15_34[j] + v_p_mort_lessHPV[i] + 
+                                           ((1 - (LSIL_15_34[j] + v_p_mort_lessHPV[i])) * (1 - exp(-0.1 * 6))))
     }
 }
-
 # The following enters all transition probabilities for ages ≥25 for each transition from
 # the state LSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
-for (i in 35:85) {
+for (i in 36:86) {
     for (j in 1:n.sims) {
      a_P_2["LSIL", "Well", i, j] <- (LSIL_35_85[j] * 0.9)
      
@@ -1019,36 +743,17 @@ for (i in 35:85) {
      
      a_P_2["LSIL", "Infection", i, j] <- (LSIL_35_85[j] * 0.1)
      
-     a_P_2["LSIL", "HSIL", i, j] <- (1 - LSIL_35_85[j]) * (1 - exp(-0.35 * 6))
+     a_P_2["LSIL", "HSIL", i, j] <- (1 - (LSIL_35_85[j] + v_p_mort_lessHPV[i])) * (1 - exp(-0.35 * 6))
      
-     a_P_2["LSIL", "LSIL", i, j] <- 1 - (v_p_mort_lessHPV[i] + LSIL_35_85[j] + (
-      (1 - LSIL_35_85[j]) * (1 - exp(-0.35 * 6))))
+     a_P_2["LSIL", "LSIL", i, j] <- 1 - (LSIL_35_85[j] + v_p_mort_lessHPV[i] + (1 - (LSIL_35_85[j] + v_p_mort_lessHPV[i])) * (1 - exp(-0.35 * 6)))
     }
 }
-
 # Transitions from HSIL State ---------------------------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
+# The following enters all transition probabilities for ages 15-85 for each transition from
 # the state HSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_2["HSIL", "Well", i, j] <- 0
-     
-     a_P_2["HSIL", "Death", i, j] <- 0
-     
-     a_P_2["HSIL", "LSIL", i, j] <- 0
-     
-     a_P_2["HSIL", "Stage-I Cancer", i, j] <- 0
-     
-     a_P_2["HSIL", "HSIL", i, j] <- 0
-    }
-}
-
-# The following enters all transition probabilities for ages 15-85 for each transition from
-# the state HSIl, across the appropriate time horizon i and all probabilistic 
-# simulations j.
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_2["HSIL", "Well", i, j] <- (HSIL_n[j] * 0.5)
      
@@ -1056,36 +761,19 @@ for (i in 15:85) {
      
      a_P_2["HSIL", "LSIL", i, j] <- (HSIL_n[j] * 0.5)
      
-     a_P_2["HSIL", "Stage-I Cancer", i, j] <- (1 - HSIL_n[j]) * (1 - exp(-0.4 * 10))
+     a_P_2["HSIL", "Stage-I Cancer", i, j] <- (1 - (HSIL_n[j] + v_p_mort_lessHPV[i])) * (1 - exp(-0.4 * 10))
      
-     a_P_2["HSIL", "HSIL", i, j] <- 1 - (v_p_mort_lessHPV[i] + (HSIL_n[j] * 0.5) + 
-                                          (HSIL_n[j] * 0.5) + (
-                                           (1 - HSIL_n[j]) * (1 - exp(-0.4 * 10))))
+     a_P_2["HSIL", "HSIL", i, j] <- 1 - (HSIL_n[j] + v_p_mort_lessHPV[i] + 
+                                          ((1 - (HSIL_n[j] + v_p_mort_lessHPV[i])) * (1 - exp(-0.4 * 10))))
     }
 }
 
 # Transitions from Stage-I Cervix Cancer State ----------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state Stage-I Cancer, across the appropriate time horizon i and all probabilistic 
-# simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_2["Stage-I Cancer", "Death", i, j] <- 0
-     
-     a_P_2["Stage-I Cancer", "Stage-II Cancer", i, j] <- 0
-     
-     a_P_2["Stage-I Cancer", "Detected.Stage-I Year 1", i, j] <- 0
-     
-     a_P_2["Stage-I Cancer", "Stage-I Cancer", i, j] <- 0
-     
-    }
-}
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-I Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_2["Stage-I Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -1102,25 +790,10 @@ for (i in 15:85) {
 
 # Transitions from Stage-II Cervix Cancer State ---------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state Stage-II Cancer, across the appropriate time horizon i and all probabilistic 
-# simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_2["Stage-II Cancer", "Death", i, j] <- 0
-     
-     a_P_2["Stage-II Cancer", "Stage-III Cancer", i, j] <- 0
-     
-     a_P_2["Stage-II Cancer", "Detected.Stage-II Year 1", i, j] <- 0
-     
-     a_P_2["Stage-II Cancer", "Stage-II Cancer", i, j] <- 0
-     
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-II Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_2["Stage-II Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -1138,32 +811,16 @@ for (i in 15:85) {
 
 # Transitions from Stage-III Cervix Cancer State --------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state Stage-III Cancer, across the appropriate time horizon i and all probabilistic 
-# simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_2["Stage-III Cancer", "Death", i, j] <- 0
-     
-     a_P_2["Stage-III Cancer", "Stage-IV Cancer", i, j] <- 0
-     
-     a_P_2["Stage-III Cancer", "Detected.Stage-III Year 1", i, j] <- 0
-     
-     a_P_2["Stage-III Cancer", "Stage-III Cancer", i, j] <- 0
-     
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-III Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_2["Stage-III Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
      a_P_2["Stage-III Cancer", "Stage-IV Cancer", i, j] <- Stage.III.canc[j]
      
-     a_P_2["Stage-III Cancer", "Detected.Stage-III Year 1", i, j] <- (
-      (1 - (Stage.III.canc[j])) * 0.6)
+     a_P_2["Stage-III Cancer", "Detected.Stage-III Year 1", i, j] <- ((1 - (Stage.III.canc[j])) * 0.6)
      
      a_P_2["Stage-III Cancer", "Stage-III Cancer", i, j] <- 1 - (
       Stage.III.canc[j] + v_p_mort_lessHPV[i] + ((1 - (Stage.III.canc[j])) * 0.6))
@@ -1173,24 +830,10 @@ for (i in 15:85) {
 
 # Transitions from Stage-IV Cervix Cancer State ---------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state Stage-IV Cancer, across the appropriate time horizon i and all probabilistic 
-# simulations j. 
-for (i in 15:85) {
-    for (j in 1:n.sims) {
-     a_P_2["Stage-IV Cancer", "Death", i, j] <- 0
-     
-     a_P_2["Stage-IV Cancer", "Detected.Stage-IV Year 1", i, j] <- 0
-     
-     a_P_2["Stage-IV Cancer", "Stage-IV Cancer", i, j] <- 0
-     
-    }
-}
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-IV Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_2["Stage-IV Cancer", "Death", i, j] <- v_p_mort_lessHPV[i]
      
@@ -1204,245 +847,129 @@ for (i in 15:85) {
 
 # Transitions from All Stage-I Cancer Survivor/Detected States ---------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# all states of Detected Stage-I Cancer, across the appropriate time horizon i and all 
-# probabilistic simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_2["Detected.Stage-I Year 1", "Detected.Stage-I Year 2", i, j] <- 0
-     
-     a_P_2["Detected.Stage-I Year 1", "Death", i, j] <- 0
-     
-     a_P_2["Detected.Stage-I Year 2", "Detected.Stage-I Year 3", i, j] <- 0
-     
-     a_P_2["Detected.Stage-I Year 2", "Death", i, j] <- 0
-     
-     a_P_2["Detected.Stage-I Year 3", "Detected.Stage-I Year 4", i, j] <- 0
-     
-     a_P_2["Detected.Stage-I Year 3", "Death", i, j] <- 0
-
-     a_P_2["Detected.Stage-I Year 4", "Detected.Stage-I Year 5", i, j] <- 0
-     
-     a_P_2["Detected.Stage-I Year 4", "Death", i, j] <- 0
-     
-     a_P_2["Detected.Stage-I Year 5", "Cancer Survivor", i, j] <- 0
-     
-     a_P_2["Detected.Stage-I Year 5", "Death", i, j] <- 0
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-I Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_2["Detected.Stage-I Year 1", "Detected.Stage-I Year 2", i, j] <- surv.StageI_year1[j]
      
      a_P_2["Detected.Stage-I Year 1", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageI_year1[j])
      
-     a_P_2["Detected.Stage-I Year 2", "Detected.Stage-I Year 3", i, j] <- surv.StageI_year2[j]
+     a_P_2["Detected.Stage-I Year 2", "Detected.Stage-I Year 3", i, j] <- surv.StageI_year1[j] * surv.StageI_year2[j]
      
-     a_P_2["Detected.Stage-I Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageI_year2[j])
+     a_P_2["Detected.Stage-I Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageI_year1[j] * surv.StageI_year2[j]))
      
-     a_P_2["Detected.Stage-I Year 3", "Detected.Stage-I Year 4", i, j] <- surv.StageI_year3[j]
+     a_P_2["Detected.Stage-I Year 3", "Detected.Stage-I Year 4", i, j] <- surv.StageI_year1[j] * surv.StageI_year2[j] * surv.StageI_year3[j]
      
-     a_P_2["Detected.Stage-I Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageI_year3[j])
+     a_P_2["Detected.Stage-I Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageI_year1[j] * surv.StageI_year2[j] * surv.StageI_year3[j]))
 
-     a_P_2["Detected.Stage-I Year 4", "Detected.Stage-I Year 5", i, j] <- surv.StageI_year4[j]
+     a_P_2["Detected.Stage-I Year 4", "Detected.Stage-I Year 5", i, j] <- surv.StageI_year1[j] * surv.StageI_year2[j] * surv.StageI_year3[j] * surv.StageI_year4[j]
      
-     a_P_2["Detected.Stage-I Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageI_year4[j])
+     a_P_2["Detected.Stage-I Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageI_year1[j] * surv.StageI_year2[j] * surv.StageI_year3[j] * surv.StageI_year4[j]))
      
-     a_P_2["Detected.Stage-I Year 5", "Cancer Survivor", i, j] <- surv.StageI_year5[j]
+     a_P_2["Detected.Stage-I Year 5", "Cancer Survivor", i, j] <- surv.StageI_year1[j] * surv.StageI_year2[j] * surv.StageI_year3[j] * surv.StageI_year4[j] * surv.StageI_year5[j]
      
-     a_P_2["Detected.Stage-I Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageI_year5[j])
+     a_P_2["Detected.Stage-I Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageI_year1[j] * surv.StageI_year2[j] * surv.StageI_year3[j] * surv.StageI_year4[j] * surv.StageI_year5[j]))
     }
 }
 
 # Transitions from All Stage-II Cancer Survivor/Detected States -----------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# all states of Detected Stage-II Cancer, across the appropriate time horizon i and all 
-# probabilistic simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_2["Detected.Stage-II Year 1", "Detected.Stage-II Year 2", i, j] <- 0
-     
-     a_P_2["Detected.Stage-II Year 1", "Death", i, j] <- 0
-     
-     a_P_2["Detected.Stage-II Year 2", "Detected.Stage-II Year 3", i, j] <- 0
-     
-     a_P_2["Detected.Stage-II Year 2", "Death", i, j] <- 0
-     
-     a_P_2["Detected.Stage-II Year 3", "Detected.Stage-II Year 4", i, j] <- 0
-     
-     a_P_2["Detected.Stage-II Year 3", "Death", i, j] <- 0
-
-     a_P_2["Detected.Stage-II Year 4", "Detected.Stage-II Year 5", i, j] <- 0
-     
-     a_P_2["Detected.Stage-II Year 4", "Death", i, j] <- 0
-     
-     a_P_2["Detected.Stage-II Year 5", "Cancer Survivor", i, j] <- 0
-     
-     a_P_2["Detected.Stage-II Year 5", "Death", i, j] <- 0
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-II Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_2["Detected.Stage-II Year 1", "Detected.Stage-II Year 2", i, j] <- surv.StageII_year1[j]
      
      a_P_2["Detected.Stage-II Year 1", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageII_year1[j])
      
-     a_P_2["Detected.Stage-II Year 2", "Detected.Stage-II Year 3", i, j] <- surv.StageII_year2[j]
+     a_P_2["Detected.Stage-II Year 2", "Detected.Stage-II Year 3", i, j] <- surv.StageII_year1[j] * surv.StageII_year2[j]
      
-     a_P_2["Detected.Stage-II Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageII_year2[j])
+     a_P_2["Detected.Stage-II Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageII_year1[j] * surv.StageII_year2[j]))
      
-     a_P_2["Detected.Stage-II Year 3", "Detected.Stage-II Year 4", i, j] <- surv.StageII_year3[j]
+     a_P_2["Detected.Stage-II Year 3", "Detected.Stage-II Year 4", i, j] <- surv.StageII_year1[j] * surv.StageII_year2[j] * surv.StageII_year3[j]
      
-     a_P_2["Detected.Stage-II Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageII_year3[j])
+     a_P_2["Detected.Stage-II Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageII_year1[j] * surv.StageII_year2[j] * surv.StageII_year3[j]))
 
-     a_P_2["Detected.Stage-II Year 4", "Detected.Stage-II Year 5", i, j] <- surv.StageII_year4[j]
+     a_P_2["Detected.Stage-II Year 4", "Detected.Stage-II Year 5", i, j] <- surv.StageII_year1[j] * surv.StageII_year2[j] * surv.StageII_year3[j] * surv.StageII_year4[j]
      
-     a_P_2["Detected.Stage-II Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageII_year4[j])
+     a_P_2["Detected.Stage-II Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageII_year1[j] * surv.StageII_year2[j] * surv.StageII_year3[j] * surv.StageII_year4[j]))
      
-     a_P_2["Detected.Stage-II Year 5", "Cancer Survivor", i, j] <- surv.StageII_year5[j]
+     a_P_2["Detected.Stage-II Year 5", "Cancer Survivor", i, j] <- surv.StageII_year1[j] * surv.StageII_year2[j] * surv.StageII_year3[j] * surv.StageII_year4[j] * surv.StageII_year5[j]
      
-     a_P_2["Detected.Stage-II Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageII_year5[j])
+     a_P_2["Detected.Stage-II Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageII_year1[j] * surv.StageII_year2[j] * surv.StageII_year3[j] * surv.StageII_year4[j] * surv.StageII_year5[j]))
      
     }
 }
 
 # Transitions from All Stage-III Cancer Survivor/Detected States ----------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# all states of Detected Stage-III Cancer, across the appropriate time horizon i and all 
-# probabilistic simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_2["Detected.Stage-III Year 1", "Detected.Stage-III Year 2", i, j] <- 0
-     
-     a_P_2["Detected.Stage-III Year 1", "Death", i, j] <- 0
-     
-     a_P_2["Detected.Stage-III Year 2", "Detected.Stage-III Year 3", i, j] <- 0
-     
-     a_P_2["Detected.Stage-III Year 2", "Death", i, j] <- 0
-     
-     a_P_2["Detected.Stage-III Year 3", "Detected.Stage-III Year 4", i, j] <- 0
-     
-     a_P_2["Detected.Stage-III Year 3", "Death", i, j] <- 0
-
-     a_P_2["Detected.Stage-III Year 4", "Detected.Stage-III Year 5", i, j] <- 0
-     
-     a_P_2["Detected.Stage-III Year 4", "Death", i, j] <- 0
-     
-     a_P_2["Detected.Stage-III Year 5", "Cancer Survivor", i, j] <- 0
-     
-     a_P_2["Detected.Stage-III Year 5", "Death", i, j] <- 0
-     
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-III Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_2["Detected.Stage-III Year 1", "Detected.Stage-III Year 2", i, j] <- surv.StageIII_year1[j]
      
      a_P_2["Detected.Stage-III Year 1", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIII_year1[j])
      
-     a_P_2["Detected.Stage-III Year 2", "Detected.Stage-III Year 3", i, j] <- surv.StageIII_year2[j]
+     a_P_2["Detected.Stage-III Year 2", "Detected.Stage-III Year 3", i, j] <- surv.StageIII_year1[j] * surv.StageIII_year2[j]
      
-     a_P_2["Detected.Stage-III Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIII_year2[j])
+     a_P_2["Detected.Stage-III Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIII_year1[j] * surv.StageIII_year2[j]))
      
-     a_P_2["Detected.Stage-III Year 3", "Detected.Stage-III Year 4", i, j] <- surv.StageIII_year3[j]
+     a_P_2["Detected.Stage-III Year 3", "Detected.Stage-III Year 4", i, j] <- surv.StageIII_year1[j] * surv.StageIII_year2[j] * surv.StageIII_year3[j]
      
-     a_P_2["Detected.Stage-III Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIII_year2[j])
+     a_P_2["Detected.Stage-III Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIII_year1[j] * surv.StageIII_year2[j] * surv.StageIII_year3[j]))
 
-     a_P_2["Detected.Stage-III Year 4", "Detected.Stage-III Year 5", i, j] <- surv.StageIII_year4[j]
+     a_P_2["Detected.Stage-III Year 4", "Detected.Stage-III Year 5", i, j] <- surv.StageIII_year1[j] * surv.StageIII_year2[j] * surv.StageIII_year3[j] * surv.StageIII_year4[j]
      
-     a_P_2["Detected.Stage-III Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIII_year2[j])
+     a_P_2["Detected.Stage-III Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIII_year1[j] * surv.StageIII_year2[j] * surv.StageIII_year3[j] * surv.StageIII_year4[j]))
      
-     a_P_2["Detected.Stage-III Year 5", "Cancer Survivor", i, j] <- surv.StageIII_year5[j]
+     a_P_2["Detected.Stage-III Year 5", "Cancer Survivor", i, j] <- surv.StageIII_year1[j] * surv.StageIII_year2[j] * surv.StageIII_year3[j] * surv.StageIII_year4[j] * surv.StageIII_year5[j]
      
-     a_P_2["Detected.Stage-III Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIII_year2[j])
+     a_P_2["Detected.Stage-III Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIII_year1[j] * surv.StageIII_year2[j] * surv.StageIII_year3[j] * surv.StageIII_year4[j] * surv.StageIII_year5[j]))
      
     }
 }
 
 # Transitions from All Stage-IV Cancer Survivor/Detected States -----------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# all states of Detected Stage-IV Cancer, across the appropriate time horizon i and all 
-# probabilistic simulations j. 
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_2["Detected.Stage-IV Year 1", "Detected.Stage-IV Year 2", i, j] <- 0
-     
-     a_P_2["Detected.Stage-IV Year 1", "Death", i, j] <- 0
-     
-     a_P_2["Detected.Stage-IV Year 2", "Detected.Stage-IV Year 3", i, j] <- 0
-     
-     a_P_2["Detected.Stage-IV Year 2", "Death", i, j] <- 0
-     
-     a_P_2["Detected.Stage-IV Year 3", "Detected.Stage-IV Year 4", i, j] <- 0
-     
-     a_P_2["Detected.Stage-IV Year 3", "Death", i, j] <- 0
-     
-     a_P_2["Detected.Stage-IV Year 4", "Detected.Stage-IV Year 5", i, j] <- 0
-     
-     a_P_2["Detected.Stage-IV Year 4", "Death", i, j] <- 0
-     
-     a_P_2["Detected.Stage-IV Year 5", "Cancer Survivor", i, j] <- 0
-     
-     a_P_2["Detected.Stage-IV Year 5", "Death", i, j] <- 0
-     
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-IV Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_2["Detected.Stage-IV Year 1", "Detected.Stage-IV Year 2", i, j] <- surv.StageIV_year1[j]
      
      a_P_2["Detected.Stage-IV Year 1", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIV_year1[j])
      
-     a_P_2["Detected.Stage-IV Year 2", "Detected.Stage-IV Year 3", i, j] <- surv.StageIV_year2[j]
+     a_P_2["Detected.Stage-IV Year 2", "Detected.Stage-IV Year 3", i, j] <- surv.StageIV_year1[j] * surv.StageIV_year2[j]
      
-     a_P_2["Detected.Stage-IV Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIV_year2[j])
+     a_P_2["Detected.Stage-IV Year 2", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIV_year1[j] * surv.StageIV_year2[j]))
      
-     a_P_2["Detected.Stage-IV Year 3", "Detected.Stage-IV Year 4", i, j] <- surv.StageIV_year3[j]
+     a_P_2["Detected.Stage-IV Year 3", "Detected.Stage-IV Year 4", i, j] <- surv.StageIV_year1[j] * surv.StageIV_year2[j] * surv.StageIV_year3[j]
      
-     a_P_2["Detected.Stage-IV Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIV_year3[j])
+     a_P_2["Detected.Stage-IV Year 3", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIV_year1[j] * surv.StageIV_year2[j] * surv.StageIV_year3[j]))
 
-     a_P_2["Detected.Stage-IV Year 4", "Detected.Stage-IV Year 5", i, j] <- surv.StageIV_year4[j]
+     a_P_2["Detected.Stage-IV Year 4", "Detected.Stage-IV Year 5", i, j] <- surv.StageIV_year1[j] * surv.StageIV_year2[j] * surv.StageIV_year3[j] * surv.StageIV_year4[j]
      
-     a_P_2["Detected.Stage-IV Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIV_year4[j])
+     a_P_2["Detected.Stage-IV Year 4", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIV_year1[j] * surv.StageIV_year2[j] * surv.StageIV_year3[j] * surv.StageIV_year4[j]))
      
-     a_P_2["Detected.Stage-IV Year 5", "Cancer Survivor", i, j] <- surv.StageIV_year5[j]
+     a_P_2["Detected.Stage-IV Year 5", "Cancer Survivor", i, j] <- surv.StageIV_year1[j] * surv.StageIV_year2[j] * surv.StageIV_year3[j] * surv.StageIV_year4[j] * surv.StageIV_year5[j]
      
-     a_P_2["Detected.Stage-IV Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - surv.StageIV_year5[j])
+     a_P_2["Detected.Stage-IV Year 5", "Death", i, j] <- v_p_mort_lessHPV[i] + (1 - (surv.StageIV_year1[j] * surv.StageIV_year2[j] * surv.StageIV_year3[j] * surv.StageIV_year4[j] * surv.StageIV_year5[j]))
      
     }
 }
 
 # Transitions from Cancer Survivor State ----------------------------------
 
-# The following enters all transition probabilities for ages 0-14 for each transition from
-# the state of Cancer Survivor, across the appropriate time horizon i and all 
-# probabilistic simulations j.
-for (i in 0:14) {
-    for (j in 1:n.sims) {
-     a_P_2["Cancer Survivor", "Cancer Survivor", i, j] <- 0
-     
-     a_P_2["Cancer Survivor", "Death", i, j] <- 0
-    }
-}
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state of Cancer Survivor, across the appropriate time horizon i and all 
 # probabilistic simulations j.
-for (i in 15:85) {
+for (i in 16:86) {
     for (j in 1:n.sims) {
      a_P_2["Cancer Survivor", "Cancer Survivor", i, j] <- (1 - v_p_mort_lessHPV[i])
      
@@ -1455,7 +982,7 @@ for (i in 15:85) {
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state of Death, across the appropriate time horizon i and all 
 # probabilistic simulations j.
-for (i in 1:85) {
+for (i in 0:n_t) {
  for (j in 1:n.sims) {
   a_P_2["Death", "Death", i, j] <- 1
   }

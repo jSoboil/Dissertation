@@ -1,7 +1,7 @@
 # ==========================================================================================
 # Markov Model ------------------------------------------------------------
 # ==========================================================================================
-# This is code that runs a Markov Model script for the HPV model develop by Sinanovic, E., et al. 
+# The following code runs a Markov Model script for the HPV model developed by Sinanovic, E., et al. 
 # 2009): "The potential cost-effectiveness of adding a human papillomavirus vaccine to the 
 # cervical cancer screening programme in South Africa." Note that this code sits on top of the 
 # code for the evidence synthesis model as well as the probability matrix. 
@@ -84,19 +84,19 @@ cols <- c("Well" = "#BD1B00",     "Infection" = "#FA7700", "LSIL" = "#FAD343",
 lty <-  c("Well" = 1,     "Infection" = 2, "LSIL" = 3,
           "HSIL" = 3, "Stage-I Cancer" = 4,
           "Stage-II Cancer" = 4, "Stage-III Cancer" = 4,
-          "Stage-IV Cancer" = 4, "Detected.Stage-I Year 1" = 5,
-          "Detected.Stage-I Year 2" = 5, "Detected.Stage-I Year 3" = 5,
-          "Detected.Stage-I Year 4" = 5, "Detected.Stage-I Year 5" = 5,
-          "Detected.Stage-II Year 1" = 5,
-          "Detected.Stage-II Year 2" = 5,
-          "Detected.Stage-II Year 3" = 5,
-          "Detected.Stage-II Year 4" = 5,
-          "Detected.Stage-II Year 5" = 5,
-          "Detected.Stage-III Year 1" = 5,
-          "Detected.Stage-III Year 2" = 5,
-          "Detected.Stage-III Year 3" = 5,
-          "Detected.Stage-III Year 4" = 5,
-          "Detected.Stage-III Year 5" = 5,
+          "Stage-IV Cancer" = 4, "Detected.Stage-I Year 1" = 2,
+          "Detected.Stage-I Year 2" = 2, "Detected.Stage-I Year 3" = 2,
+          "Detected.Stage-I Year 4" = 2, "Detected.Stage-I Year 5" = 2,
+          "Detected.Stage-II Year 1" = 3,
+          "Detected.Stage-II Year 2" = 3,
+          "Detected.Stage-II Year 3" = 3,
+          "Detected.Stage-II Year 4" = 3,
+          "Detected.Stage-II Year 5" = 3,
+          "Detected.Stage-III Year 1" = 4,
+          "Detected.Stage-III Year 2" = 4,
+          "Detected.Stage-III Year 3" = 4,
+          "Detected.Stage-III Year 4" = 4,
+          "Detected.Stage-III Year 5" = 4,
           "Detected.Stage-IV Year 1" = 5,
           "Detected.Stage-IV Year 2" = 5,
           "Detected.Stage-IV Year 3" = 5,
@@ -108,12 +108,12 @@ lty <-  c("Well" = 1,     "Infection" = 2, "LSIL" = 3,
 # Visualisation of cohort proportions for Markov Model 1:
 ggplot(melt(apply(m_M_ad_1, c(1, 2), mean)), aes(x = Var1, y = value, 
                       color = Var2, linetype = Var2)) +
- geom_line(size = 1) +
+ geom_line(size = 0.5) +
  scale_colour_manual(name = "Health state", 
                      values = cols) +
   scale_linetype_manual(name = "Health state",
                        values = lty) +
-  # scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent) +
   xlab("Cycle") +
   ylab("Proportion of the cohort") +
   theme_light(base_size = 14) +
@@ -125,7 +125,7 @@ v_S_ad_1 <- rowSums(apply(m_M_ad_1[, -30, ], c(1, 2), mean))  # vector with surv
 ggplot(data.frame(Cycle = 0:n_t, Survival = v_S_ad_1), 
        aes(x = Cycle, y = Survival)) +
   geom_line(size = 1.3) +
-  # scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent) +
   xlab("Cycle") +
   ylab("Proportion alive") +
   theme_bw(base_size = 14) +
@@ -134,12 +134,12 @@ ggplot(data.frame(Cycle = 0:n_t, Survival = v_S_ad_1),
 # Visualisation of cohort proportions for Markov Model 2:
 ggplot(melt(apply(m_M_ad_2, c(1, 2), mean)), aes(x = Var1, y = value, 
                       color = Var2, linetype = Var2)) +
- geom_line(size = 1) +
+ geom_line(size = 0.5) +
  scale_colour_manual(name = "Health state", 
                      values = cols) +
   scale_linetype_manual(name = "Health state",
                        values = lty) +
-  # scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent) +
   xlab("Cycle") +
   ylab("Proportion of the cohort") +
   theme_light(base_size = 14) +
@@ -151,28 +151,30 @@ v_S_ad_2 <- rowSums(apply(m_M_ad_2[, -30, ], c(1, 2), mean))  # vector with surv
 ggplot(data.frame(Cycle = 0:n_t, Survival = v_S_ad_2), 
        aes(x = Cycle, y = Survival)) +
   geom_line(size = 1.3) +
-  # scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent) +
   xlab("Cycle") +
   ylab("Proportion alive") +
   theme_bw(base_size = 14) +
   theme()
 
 # Life expectancy for average individual in Markov model 1 cohort:
-le_ad_1 <- sum(v_S_ad_1) / 100000
+le_ad_1 <- sum(v_S_ad_1)
 le_ad_1
 # Life expectancy for average individual in Markov model  cohort:
-le_ad_2 <- sum(v_S_ad_2) / 100000
+le_ad_2 <- sum(v_S_ad_2)
 le_ad_2
 
-# Prevalence of LSIL in Model 1:
-v_prev_LSIL_1 <- apply(m_M_ad_1[, "Infection", ], 1, mean)
-# Prevalence of LSIL in Model 2:
-v_prev_LSIL_2 <- apply(m_M_ad_2[, "LSIL", ], 1, mean)
+# Prevalence of Infection in Model 1:
+v_prev_Infection_1 <- apply(m_M_ad_1[, "Infection", ], c(2, 1), mean)
+v_prev_Infection_1 <- apply(v_prev_Infection_1, 2, mean) / v_S_ad_1
+# Prevalence of Infection in Model 2:
+v_prev_Infection_2 <- apply(m_M_ad_2[, "Infection", ], c(2, 1), mean)
+v_prev_Infection_2 <- apply(v_prev_Infection_2, 2, mean) / v_S_ad_2
 ggplot() +
- geom_line(aes(x = 0:n_t, y = v_prev_LSIL_1), size = 1.3, colour = "skyblue", na.rm = TRUE) +
- geom_line(aes(x = 0:n_t, y = v_prev_LSIL_2), size = 1.3, colour = "darkred", 
+ geom_line(aes(x = 0:n_t, y = v_prev_Infection_1), size = 1.3, colour = "skyblue", na.rm = TRUE) +
+ geom_line(aes(x = 0:n_t, y = v_prev_Infection_2), size = 1.3, colour = "darkred", 
            alpha = 0.65, na.rm = TRUE) + 
- # scale_y_continuous(labels = scales::percent) +
+ scale_y_continuous(labels = scales::percent) +
  xlab("Cycle") +
  ylab("Prevalence (%): HPV Infection") +
  xlim(15, 85) +
@@ -180,14 +182,16 @@ ggplot() +
  theme()
 
 # Prevalence of LSIL in Model 1:
-v_prev_LSIL_1 <- apply(m_M_ad_1[, "LSIL", ], 1, mean)
+v_prev_LSIL_1 <- apply(m_M_ad_1[, "LSIL", ], c(2, 1), mean)
+v_prev_LSIL_1 <- apply(v_prev_LSIL_1, 2, mean) / v_S_ad_1
 # Prevalence of LSIL in Model 2:
-v_prev_LSIL_2 <- apply(m_M_ad_2[, "LSIL", ], 1, mean)
+v_prev_LSIL_2 <- apply(m_M_ad_2[, "LSIL", ], c(2, 1), mean)
+v_prev_LSIL_2 <- apply(v_prev_LSIL_2, 2, mean) / v_S_ad_2
 ggplot() +
  geom_line(aes(x = 0:n_t, y = v_prev_LSIL_1), size = 1.3, colour = "skyblue", na.rm = TRUE) +
  geom_line(aes(x = 0:n_t, y = v_prev_LSIL_2), size = 1.3, colour = "darkred", 
            alpha = 0.65, na.rm = TRUE) + 
- # scale_y_continuous(labels = scales::percent) +
+ scale_y_continuous(labels = scales::percent) +
  xlab("Cycle") +
  ylab("Prevalence (%): HPV LSIL") +
  xlim(15, 85) +
@@ -195,29 +199,50 @@ ggplot() +
  theme()
 
 # Prevalence of HSIL in Model 1:
-v_prev_HSIL_1 <- apply(m_M_ad_1[, "HSIL", ], 1, mean) / v_S_ad_1
+v_prev_HSIL_1 <- apply(m_M_ad_1[, "HSIL", ], c(2, 1), mean)
+v_prev_HSIL_1 <- apply(v_prev_HSIL_1, 2, mean) / v_S_ad_1
 # Prevalence of HSIL in Model 2:
-v_prev_HSIL_2 <- apply(m_M_ad_2[, "HSIL", ], 1, mean) / v_S_ad_2
+v_prev_HSIL_2 <- apply(m_M_ad_2[, "HSIL", ], c(2, 1), mean) 
+v_prev_HSIL_2 <- apply(v_prev_HSIL_2, 2, mean) / v_S_ad_2
 ggplot() +
  geom_line(aes(x = 0:n_t, y = v_prev_HSIL_1), size = 1.3, colour = "skyblue", na.rm = TRUE) +
  geom_line(aes(x = 0:n_t, y = v_prev_HSIL_2), size = 1.3, colour = "darkred", 
            alpha = 0.65, na.rm = TRUE) + 
- # scale_y_continuous(labels = scales::percent) +
+ scale_y_continuous(labels = scales::percent) +
  xlab("Cycle") +
  ylab("Prevalence (%): HSIL") +
  xlim(15, 85) +
  theme_bw(base_size = 14) +
  theme()
 
+# Prevalence of Stage I Cancer in Model 1:
+v_prev_StageI_1 <- apply(m_M_ad_1[, "Stage-I Cancer", ], c(2, 1), mean) 
+v_prev_StageI_1 <- apply(v_prev_StageI_1, 2, mean) / v_S_ad_1
+# Prevalence of Stage I Cancer in Model 2:
+v_prev_StageI_2 <- apply(m_M_ad_2[, "Stage-I Cancer", ], c(2, 1), mean)
+v_prev_StageI_2 <- apply(v_prev_StageI_2, 2, mean) / v_S_ad_2
+ggplot() +
+ geom_line(aes(x = 0:n_t, y = v_prev_StageI_1), size = 1.3, colour = "skyblue", na.rm = TRUE) +
+ geom_line(aes(x = 0:n_t, y = v_prev_StageI_2), size = 1.3, colour = "darkred", 
+           alpha = 0.65, na.rm = TRUE) + 
+ scale_y_continuous(labels = scales::percent) +
+ xlab("Cycle") +
+ ylab("Prevalence (%): Stage I Cancer") +
+ xlim(15, 85) +
+ theme_bw(base_size = 14) +
+ theme()
+
 # Prevalence of Stage IV Cancer in Model 1:
-v_prev_StageIV_1 <- apply(m_M_ad_1[, "Stage-IV Cancer", ], 1, mean) / v_S_ad_1
+v_prev_StageIV_1 <- apply(m_M_ad_1[, "Stage-IV Cancer", ], c(2, 1), mean) 
+v_prev_StageIV_1 <- apply(v_prev_StageIV_1, 2, mean) / v_S_ad_1
 # Prevalence of Stage IV Cancer in Model 2:
-v_prev_StageIV_2 <- apply(m_M_ad_2[, "Stage-IV Cancer", ], 1, mean) / v_S_ad_2
+v_prev_StageIV_2 <- apply(m_M_ad_2[, "Stage-IV Cancer", ], c(2, 1), mean) / v_S_ad_2
+v_prev_StageIV_2 <- apply(v_prev_StageIV_2, 2, mean) / v_S_ad_2
 ggplot() +
  geom_line(aes(x = 0:n_t, y = v_prev_StageIV_1), size = 1.3, colour = "skyblue", na.rm = TRUE) +
  geom_line(aes(x = 0:n_t, y = v_prev_StageIV_2), size = 1.3, colour = "darkred", 
            alpha = 0.65, na.rm = TRUE) + 
- # scale_y_continuous(labels = scales::percent) +
+ scale_y_continuous(labels = scales::percent) +
  xlab("Cycle") +
  ylab("Prevalence (%): Stage IV Cancer") +
  xlim(15, 85) +
@@ -225,16 +250,17 @@ ggplot() +
  theme()
 
 # Mortality in Model 1:
-v_prev_Mort_1 <- apply(m_M_ad_1[, "Death", ], 1, mean) / v_S_ad_1
+v_D_ad_1 <- rowSums(apply(m_M_ad_1[, 30, ], c(1, 2), mean))
 # Mortality in Model 1:
-v_prev_Mort_2 <- apply(m_M_ad_2[, "Death", ], 1, mean) / v_S_ad_2
+v_D_ad_2 <- rowSums(apply(m_M_ad_2[, 30, ], c(1, 2), mean))
 ggplot() +
- geom_point(aes(x = 0:n_t, y = v_prev_Mort_1), size = 2, colour = "blue", na.rm = TRUE) +
- geom_point(aes(x = 0:n_t, y = v_prev_Mort_2), size = 1.3, colour = "red", 
-           alpha = 0.75, na.rm = TRUE) + 
+ geom_line(aes(x = 0:n_t, y = v_D_ad_1), size = 2, colour = "navyblue", na.rm = TRUE, 
+            alpha = 1) +
+ geom_point(aes(x = 0:n_t, y = v_D_ad_2), size = 1.5, colour = "red", 
+           alpha = 0.95, na.rm = TRUE) + 
  # scale_y_continuous(labels = scales::percent) +
  xlab("Cycle") +
- ylab("Relative Deaths") +
+ ylab("Comparative no. Deaths") +
  xlim(15, 85) +
  theme_bw(base_size = 14) +
  theme()
@@ -246,7 +272,7 @@ barplot(apply(m_M_ad_1, c(2, 1), mean), space = 1,
 legend("topright", legend = c("Well", "Infection"), 
        fill = c("Well" = "#BD1B00",     "Infection" = "#FA7700"), 
        cex = .5, box.lwd = 2,
-       horiz = TRUE)
+       horiz = FALSE)
 # Visualisation of cohort proportions for Markov Model 2:
 barplot(apply(m_M_ad_2, c(2, 1), mean), space = 1,
         ylab = "Proportion of patients in each state",
@@ -254,6 +280,6 @@ barplot(apply(m_M_ad_2, c(2, 1), mean), space = 1,
 legend("topright", legend = c("Well", "Infection"), 
        fill = c("Well" = "#BD1B00",     "Infection" = "#FA7700"), 
        cex = .5, box.lwd = 2,
-       horiz = TRUE)
+       horiz = FALSE)
 
 # End file ----------------------------------------------------------------
