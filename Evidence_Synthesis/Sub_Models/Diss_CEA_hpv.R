@@ -20,7 +20,12 @@ source("HPV_Markov_Model.R")
 # developed by Sinanovic, E., et al. 2009): "The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa." Note that 
 # this code sits on top of the code for the Markov Models for either treatment.
-# Note: m_M_ad_1 is the Status Quo treatment model; m_M_ad_2 is the New Treatment model.
+
+# Note: m_M_ad_1 is the Status Quo treatment model
+m_M_ad_1
+# m_M_ad_2 is the New Treatment model.
+m_M_ad_2
+
 # Health State utilities --------------------------------------------------
 u_Well <- 1 # utility of being in Well for one cycle
 u_Infection <- 1 # utility of being in Infected for one cycle
@@ -71,8 +76,8 @@ c_Vaccine <- 570 # once off cost of vaccine from age 12.
 
 # All costs for LSIL, HSIL, Infection, and Cancer Stages are at screening intervals of 
 # 30, 40, and 50:
-c_Infection <- 42 # cost of Infection screening
-c_LSIL <- 61 #0 cost of LSIL screening
+c_Infection <- 309 + 75 # cost of Infection screening
+c_LSIL <- 61 # cost of LSIL screening
 c_HSIL <- 764 # cost of HSIL screening
 c_Cancer <- 93 # cost of cervical cytology screening
 
@@ -84,13 +89,13 @@ c_StageIV <- 8615 # cost of treatment of Stage IV Cancer for one cycle
 
 # Vector of state costs under Status Quo without screening interval:
 v_c_SQ <- c("Well" = 0, 
-                        "Infection" = c_Infection, 
-                        "LSIL" = c_LSIL, 
-                        "HSIL" = c_HSIL,
-                        "Stage-I Cancer" = c_StageI, 
-                        "Stage-II Cancer" = c_StageII,
-                        "Stage-III Cancer" = c_StageIII, 
-                        "Stage-IV Cancer" = c_StageIV,
+                        "Infection" = 0, 
+                        "LSIL" = 0, 
+                        "HSIL" = 0,
+                        "Stage-I Cancer" = 0, 
+                        "Stage-II Cancer" = 0,
+                        "Stage-III Cancer" = 0, 
+                        "Stage-IV Cancer" = 0,
                         "Detected.Stage-I Year 1" = c_StageI,
                         "Detected.Stage-I Year 2" = c_StageI,
                         "Detected.Stage-I Year 3" = c_StageI,
@@ -116,13 +121,13 @@ v_c_SQ <- c("Well" = 0,
 
 # Vector of state costs under New Treatment without screening interval:
 v_c_NT <- c("Well" = 0,
-            "Infection" = c_Infection,
-            "LSIL" = c_LSIL,
-            "HSIL" = c_HSIL,
-            "Stage-I Cancer" = c_StageI,
-            "Stage-II Cancer" = c_StageII,
-            "Stage-III Cancer" = c_StageIII,
-            "Stage-IV Cancer" = c_StageIV,
+            "Infection" = 0,
+            "LSIL" = 0,
+            "HSIL" = 0,
+            "Stage-I Cancer" = 0,
+            "Stage-II Cancer" = 0,
+            "Stage-III Cancer" = 0,
+            "Stage-IV Cancer" = 0,
             "Detected.Stage-I Year 1" = c_StageI,
             "Detected.Stage-I Year 2" = c_StageI,
             "Detected.Stage-I Year 3" = c_StageI,
@@ -146,8 +151,55 @@ v_c_NT <- c("Well" = 0,
             "Cancer Survivor" = 0,
             "Death" = 0)
 
-m_utilities_NT <- m_costs_NT <- m_utilities_SQ <- m_costs_SQ <- matrix(0, n.sims, n_t)
 
+# Initialize transition array
+a_A <- array(0, 
+             dim = c(n_states, n_states, (n_t + 1), n.sims), 
+             dimnames = list(v_n, v_n, 0:n_t, 1:n.sims))
+
+
+# Set first slice of A equal to the initial state vector in its diagonal 
+for (i in 1:n.sims) {
+ diag(a_A[, , 1, i]) <- v_s_init
+}
+
+# Iterative solution to produce the transition array
+for (i in 1:n.sims) {
+ for (t in 1:n_t){
+  a_A[, , t + 1, i] <- m_M_ad_1[t, , i] * a_P_1[, , t, i]
+  }
+ }
+
+# Array of state and transition utilities under Usual Care
+a_R_u <- aperm(array(v_u_All,
+                     dim = c(n_states, n_states, n_t + 1, n.sims),
+                     dimnames = list(v_n, v_n, 0:n_t, 1:n.sims)), perm = c(2, 1, 3, 4))
+# Array of state and transition costs under Usual Care
+a_R_c_SQ <- aperm(array(v_c_SQ,
+                        dim = c(n_states, n_states, n_t + 1, n.sims),
+                        dimnames = list(v_n, v_n, 0:n_t, 1:n.sims)), perm = c(2, 1, 3, 4))
+
+a_R_c_SQ["Infection", "Infection", c(31, 41,51), ] + c_Infection
+a_R_c_SQ["Infection", "LSIL", c(31, 41,51), ] + c_Infection
+a_R_c_SQ["Infection", "HSIL", c(31, 41,51), ] + c_Infection
+
+a_R_c_SQ["Stage-I Cancer", "Stage-I Cancer", c(31, 41,51), ] + c_Infection
+a_R_c_SQ["Stage-II Cancer", "Stage-II Cancer", c(31, 41,51), ] + c_Infection
+a_R_c_SQ["Stage-III Cancer", "Stage-III Cancer", c(31, 41,51), ] + c_Infection
+a_R_c_SQ["Stage-IV Cancer", "Stage-IV Cancer", c(31, 41,51), ] + c_Infection
+
+
+for (i in 1:n.sims) {
+ x <- (a_A[, , , i] * 0.5) * (a_R_c_SQ["Well", "Infection", c(31, 41,51), i] + c_Infection) 
+}
+
+
+
+
+
+
+# Create cost matrices:
+m_utilities_NT <- m_costs_NT <- m_utilities_SQ <- m_costs_SQ <- matrix(0, n.sims, n_t)
 for (i in 1:n.sims) {
  for (j in 0:n_t) {
   ### For Status Quo (screening only):
@@ -162,8 +214,11 @@ for (i in 1:n.sims) {
   m_utilities_NT[i, j] <- v_u_All %*% m_M_ad_2[j, , i]
  }
 }
-# Add vaccine cost at Age 12:
-m_costs_NT[, 12] <- (m_M_ad_2[12, 1, ] * c_Vaccine)
+
+mean(apply(m_costs_SQ, 1, sum))
+mean(apply(m_utilities_SQ, 1, sum))
+mean(apply(m_costs_NT, 1, sum))
+mean(apply(m_utilities_NT, 1, sum))
 
 # Discount rates:
 d_e <- 0.03
@@ -191,11 +246,6 @@ for (i in 1:n.sims) {
  }
 }
 
-apply(m_costs_SQdisc, 1, sum)
-apply(m_utilities_SQdisc, 1, sum)
-apply(m_costs_NTdisc, 1, sum)
-apply(m_utilities_NTdisc, 1, sum)
-
 # Sum costs and effectiveness across all time points:
 Effects <- Costs <- matrix(0, n.sims, 2)
 ### For Status Quo (screening only):
@@ -219,9 +269,11 @@ contour2(df_cea, wtp = 500, graph = "ggplot")
 ## Expected Costs and Utility for both treatments:
 E_c <- apply(Costs, 2, mean)
 E_u <- apply(Effects, 2, mean)
+(E_c[2] - E_c[1]) / (E_u[2] - E_u[1])
 
 cea_summary <- dampack::calculate_icers(cost = E_c, effect = E_u, strategies = v_names_str)
 cea_summary
+
 # Model run time ----------------------------------------------------------
 end_time <- Sys.time()
 end_time - start_time

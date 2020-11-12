@@ -119,8 +119,8 @@ model {
 # model. I have had to truncate these distributions in order for the ASSA mortality data 
 # to be properly combined and for the state transition probabilities to be proper.
    LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, 0.95)
-   LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.85)
-   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.85)
+   LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.865)
+   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.865)
 
 # END OF SUB-MODEL 5.
 
