@@ -69,7 +69,7 @@ m_u_SQ <- m_u_NT <- matrix(c("Well" = u_Well,
                              "Detected.Stage-IV Year 5" = u_StageIV,
                              "Cancer Survivor" = u_CancerSurvivor,
                              "Death" = u_Death), 
-                           n_states, n_t, dimnames = list(v_n, 0:(n_t - 1)))
+                           n_states, n_t + 1, dimnames = list(v_n, 0:(n_t)))
 
 # Health State costs ------------------------------------------------------
 # All costs in $US:
@@ -116,42 +116,44 @@ m_c_SQ <- matrix(c("Well" = 0,
             "Detected.Stage-IV Year 5" = c_StageIV,
             "Cancer Survivor" = 0,
             "Death" = 0), 
-            n_states, n_t, dimnames = list(v_n, 0:(n_t - 1)))
+            n_states, n_t + 1, dimnames = list(v_n, 0:(n_t)))
 # Add screening costs for ages 30, 40, and 50:
 m_c_SQ["Infection", c(31, 41, 51)] <-(m_c_SQ["Infection", c(31, 41, 51)] + c_Screening_DNA)
             
 # Matrix of state costs based on time interval t under New Treatment:
 m_c_NT <- m_c_SQ
-
-# Add vaccine costsL
-m_c_NT["Well", 13] <- m_c_NT["Well", 13] + c_Vaccine
-
+# Add vaccine cost:
+m_c_NT["Well", c(12)] <-(m_c_NT["Well", c(12)] + c_Vaccine)
 # Create cost and effects matrices:
-m_utilities_NT <- m_costs_NT <- m_utilities_SQ <- m_costs_SQ <- matrix(0, n.sims, n_t, 
-                                                                       dimnames = list(1:n.sims, 0:(n_t - 1)))
-
-
-m_M_ad_1[1, 1, 1] %*% t(m_c_SQ)[1, 1]
+m_utilities_NT <- m_costs_NT <- m_utilities_SQ <- m_costs_SQ <- matrix(0, n.sims, n_t + 1, 
+                                                                       dimnames = list(1:n.sims, 0:(n_t)))
 
 # Loop costs over time interval t and n.sims i:
 for (i in 1:n.sims) {
  for (t in 0:n_t) {
   ### For Status-Quo (screening only)
   ## Costs
-  m_costs_SQ[i, t]  <- m_M_ad_1[t, , i] %*% m_c_SQ[, t]
+  m_costs_SQ[i, t]  <- (m_M_ad_1[t, , i] * 0.5) %*% m_c_SQ[, t]
   ## QALYs
   m_utilities_SQ[i, t]  <- m_M_ad_1[t, , i] %*% m_u_SQ[, t]
   ### For New Treatment (screening and vaccine):
   ## Costs
-  m_costs_NT[i, t] <- m_M_ad_2[t, , i] %*% m_c_NT[, t]
+  m_costs_NT[i, t] <- (m_M_ad_2[t, , i] * 0.5) %*% m_c_NT[, t]
   ## QALYs
   m_utilities_NT[i, t] <- m_M_ad_2[t, , i] %*% m_u_NT[, t]
  }
 }
+
 # Undiscounted costs and effects:
+### For Status Quo (screening only):
+## Costs
 mean(apply(m_costs_SQ, 1, sum))
+## QALYs
 mean(apply(m_utilities_SQ, 1, sum))
+### For New Treatment (screening and vaccine):
+## Costs
 mean(apply(m_costs_NT, 1, sum))
+## QALYs
 mean(apply(m_utilities_NT, 1, sum))
 
 # Discount rates:
@@ -163,21 +165,20 @@ v_dwc <- 1 / ((1 + d_c) ^ (0:(n_t)))
 v_dwe <- 1 / ((1 + d_e) ^ (0:(n_t)))
 
 # Discounted costs and utilities matrices:
-m_utilities_NTdisc <- m_costs_NTdisc <- m_utilities_SQdisc <- m_costs_SQdisc <- matrix(0, n.sims, n_t,
-                                                                                       dimnames = list(1:n.sims, 0:(n_t - 1)))
+m_utilities_NTdisc <- m_costs_NTdisc <- m_utilities_SQdisc <- m_costs_SQdisc <- matrix(0, n.sims, n_t + 1, 
+                                                                       dimnames = list(1:n.sims, 0:n_t))
+
 for (i in 1:n.sims) {
- for (t in 0:n_t) {
   ### For Status Quo (screening only):
   ## Costs
-  m_costs_SQdisc[i, t] <- m_costs_SQ[i, t] / v_dwc[t]
+  m_costs_SQdisc[i, ] <- m_costs_SQ[i, ] / v_dwc
   ## QALYs
-  m_utilities_SQdisc[i, t] <- m_utilities_SQ[i, t] / v_dwe[t]
+  m_utilities_SQdisc[i, ] <- m_utilities_SQ[i, ] / v_dwe
   ### For New Treatment (screening and vaccine):
   ## Costs
-  m_costs_NTdisc[i, t] <- m_costs_NT[i, t] / v_dwc[t]
+  m_costs_NTdisc[i, ] <- m_costs_NT[i, ] / v_dwc
   ## QALYs
-  m_utilities_NTdisc[i, t] <- m_utilities_NT[i, t] / v_dwe[t]
- }
+  m_utilities_NTdisc[i, ] <- m_utilities_NT[i, ] / v_dwe
 }
 
 # Sum costs and effectiveness across all time points:
@@ -193,18 +194,18 @@ Costs[, 2] <- apply(m_costs_NTdisc, 1, sum)
 ## QALYs
 Effects[, 2] <- apply(m_utilities_NTdisc, 1, sum)
 
-## Expected Costs and Utility for both treatments:
-E_c <- apply(Costs, 2, mean)
-E_u <- apply(Effects, 2, mean)
-# Manual ICER:
-(E_c[2] - E_c[1]) / (E_u[2] - E_u[1])
-
 # Strategy names:
 v_names_str <- c("Status Quo: screening only", "New Treatment: screening & vaccine")
 
 # BCEA package summary:
 df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str, Kmax = 1500, plot = TRUE)
 summary.bcea(df_cea)
+
+## Expected Costs and Utility for both treatments across all simulations:
+E_c <- apply(Costs, 2, mean)
+E_u <- apply(Effects, 2, mean)
+# Manual ICER:
+(E_c[2] - E_c[1]) / (E_u[2] - E_u[1])
 # dampack package summary:
 cea_summary <- dampack::calculate_icers(cost = E_c, effect = E_u, strategies = v_names_str)
 cea_summary
