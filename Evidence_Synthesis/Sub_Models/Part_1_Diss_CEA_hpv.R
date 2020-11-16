@@ -12,7 +12,7 @@ library(BCEA)
 start_time <- Sys.time()
 
 source("Part_2_HPV_Markov_Model.R")
-
+v_p_mort_lessHPV
 # ==========================================================================================
 # Cost-Effectiveness Analysis ---------------------------------------------
 # ==========================================================================================
@@ -24,7 +24,7 @@ source("Part_2_HPV_Markov_Model.R")
 # m_M_ad_1 is the Status Quo (Screening only) treatment model:
 m_M_ad_1
 # m_M_ad_2 is the New Treatment (Screening plus Vaccine) model:
-m_M_ad_2
+m_M_ad_2[, , 5]
 
 # Health State utilities --------------------------------------------------
 u_Well <- 1 # utility of being in Well for one cycle
@@ -70,7 +70,6 @@ m_u_SQ <- m_u_NT <- matrix(c("Well" = u_Well,
                              "Cancer Survivor" = u_CancerSurvivor,
                              "Death" = u_Death), 
                            n_states, n_t + 1, dimnames = list(v_n, 0:(n_t)))
-
 
 # Health costs from a societal perspective --------------------------------
 # All costs in $US.
@@ -200,7 +199,7 @@ Effects[, 2] <- apply(m_utilities_NTdisc, 1, sum)
 # Strategy names:
 v_names_str <- c("Status Quo: screening only", "New Treatment: screening & vaccine")
 
-# BCEA package summary:
+## BCEA package summary:
 df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str, Kmax = 2500, plot = TRUE)
 summary.bcea(df_cea)
 
@@ -209,7 +208,8 @@ E_c <- apply(Costs, 2, mean)
 E_u <- apply(Effects, 2, mean)
 # Manual ICER:
 (E_c[2] - E_c[1]) / (E_u[2] - E_u[1])
-# dampack package summary:
+
+## dampack package summary:
 cea_summary <- dampack::calculate_icers(cost = E_c, effect = E_u, strategies = v_names_str)
 cea_summary
 
