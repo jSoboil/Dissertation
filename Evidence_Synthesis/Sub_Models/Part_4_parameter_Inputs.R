@@ -16,8 +16,6 @@ mort_data <- read_excel(
 "/Users/joshuamusson/Desktop/Analytics/R/Dissertation/Evidence_Synthesis/mortality tables.xls", 
                         sheet = "final tables", range = "D1:D87")
 v_p_mort_lessHPV <- as.matrix(mort_data[1])
-# Probability of mortality less HPV:
-length(v_p_mort_lessHPV)
 
 # ==========================================================================================
 # Normal/Well State Progression -------------------------------------------
@@ -35,7 +33,8 @@ Prevalence <- c(rep(0, length(0:14)), rep(0.09516258, length(15:16)),
                 rep(0.1130796, length(21:21)), rep(0.09516258, length(22:23)), 
                 rep(0.04877058, length(24:29)), 
                 rep(0.009950166, length(30:49)), rep(0.004987521, length(50:85)))
-length(Prevalence)
+
+# log-transformation for input to JAGS:
 mu.a.log <- log(Prevalence)
 
 # ==========================================================================================

@@ -1,4 +1,4 @@
-source("Evidence_Synthesis_and_Probability_Matrix.R")
+source("Part_3_Evidence_Synthesis_and_Probability_Array.R")
 
 # ==========================================================================================
 # Markov Model ------------------------------------------------------------
@@ -177,74 +177,6 @@ ggplot() +
  scale_y_continuous(labels = scales::percent) +
  xlab("Cycle") +
  ylab("Prevalence (%): HPV Infection") +
- xlim(15, 85) +
- theme_bw(base_size = 14) +
- theme()
-
-# Prevalence of LSIL in Model 1:
-v_prev_LSIL_1 <- apply(m_M_ad_1[, "LSIL", ], c(2, 1), mean)
-v_prev_LSIL_1 <- apply(v_prev_LSIL_1, 2, mean) / v_S_ad_1
-# Prevalence of LSIL in Model 2:
-v_prev_LSIL_2 <- apply(m_M_ad_2[, "LSIL", ], c(2, 1), mean)
-v_prev_LSIL_2 <- apply(v_prev_LSIL_2, 2, mean) / v_S_ad_2
-ggplot() +
- geom_line(aes(x = 0:n_t, y = v_prev_LSIL_1), size = 1.3, colour = "skyblue", na.rm = TRUE) +
- geom_line(aes(x = 0:n_t, y = v_prev_LSIL_2), size = 1.3, colour = "darkred", 
-           alpha = 0.65, na.rm = TRUE) + 
- scale_y_continuous(labels = scales::percent) +
- xlab("Cycle") +
- ylab("Prevalence (%): HPV LSIL") +
- xlim(15, 85) +
- theme_bw(base_size = 14) +
- theme()
-
-# Prevalence of HSIL in Model 1:
-v_prev_HSIL_1 <- apply(m_M_ad_1[, "HSIL", ], c(2, 1), mean)
-v_prev_HSIL_1 <- apply(v_prev_HSIL_1, 2, mean) / v_S_ad_1
-# Prevalence of HSIL in Model 2:
-v_prev_HSIL_2 <- apply(m_M_ad_2[, "HSIL", ], c(2, 1), mean) 
-v_prev_HSIL_2 <- apply(v_prev_HSIL_2, 2, mean) / v_S_ad_2
-ggplot() +
- geom_line(aes(x = 0:n_t, y = v_prev_HSIL_1), size = 1.3, colour = "skyblue", na.rm = TRUE) +
- geom_line(aes(x = 0:n_t, y = v_prev_HSIL_2), size = 1.3, colour = "darkred", 
-           alpha = 0.65, na.rm = TRUE) + 
- scale_y_continuous(labels = scales::percent) +
- xlab("Cycle") +
- ylab("Prevalence (%): HSIL") +
- xlim(15, 85) +
- theme_bw(base_size = 14) +
- theme()
-
-# Prevalence of Stage I Cancer in Model 1:
-v_prev_StageI_1 <- apply(m_M_ad_1[, "Stage-I Cancer", ], c(2, 1), mean) 
-v_prev_StageI_1 <- apply(v_prev_StageI_1, 2, mean) / v_S_ad_1
-# Prevalence of Stage I Cancer in Model 2:
-v_prev_StageI_2 <- apply(m_M_ad_2[, "Stage-I Cancer", ], c(2, 1), mean)
-v_prev_StageI_2 <- apply(v_prev_StageI_2, 2, mean) / v_S_ad_2
-ggplot() +
- geom_line(aes(x = 0:n_t, y = v_prev_StageI_1), size = 1.3, colour = "skyblue", na.rm = TRUE) +
- geom_line(aes(x = 0:n_t, y = v_prev_StageI_2), size = 1.3, colour = "darkred", 
-           alpha = 0.65, na.rm = TRUE) + 
- scale_y_continuous(labels = scales::percent) +
- xlab("Cycle") +
- ylab("Prevalence (%): Stage I Cancer") +
- xlim(15, 85) +
- theme_bw(base_size = 14) +
- theme()
-
-# Prevalence of Stage IV Cancer in Model 1:
-v_prev_StageIV_1 <- apply(m_M_ad_1[, "Stage-IV Cancer", ], c(2, 1), mean) 
-v_prev_StageIV_1 <- apply(v_prev_StageIV_1, 2, mean) / v_S_ad_1
-# Prevalence of Stage IV Cancer in Model 2:
-v_prev_StageIV_2 <- apply(m_M_ad_2[, "Stage-IV Cancer", ], c(2, 1), mean) / v_S_ad_2
-v_prev_StageIV_2 <- apply(v_prev_StageIV_2, 2, mean) / v_S_ad_2
-ggplot() +
- geom_line(aes(x = 0:n_t, y = v_prev_StageIV_1), size = 1.3, colour = "skyblue", na.rm = TRUE) +
- geom_line(aes(x = 0:n_t, y = v_prev_StageIV_2), size = 1.3, colour = "darkred", 
-           alpha = 0.65, na.rm = TRUE) + 
- scale_y_continuous(labels = scales::percent) +
- xlab("Cycle") +
- ylab("Prevalence (%): Stage IV Cancer") +
  xlim(15, 85) +
  theme_bw(base_size = 14) +
  theme()

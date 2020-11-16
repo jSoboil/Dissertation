@@ -11,7 +11,7 @@ library(BCEA)
 
 start_time <- Sys.time()
 
-source("HPV_Markov_Model.R")
+source("Part_2_HPV_Markov_Model.R")
 
 # ==========================================================================================
 # Cost-Effectiveness Analysis ---------------------------------------------
@@ -21,9 +21,9 @@ source("HPV_Markov_Model.R")
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa." Note that 
 # this code sits on top of the code for the Markov Models for either treatment.
 
-# Note: m_M_ad_1 is the Status Quo treatment model
+# m_M_ad_1 is the Status Quo (Screening only) treatment model:
 m_M_ad_1
-# m_M_ad_2 is the New Treatment model.
+# m_M_ad_2 is the New Treatment (Screening plus Vaccine) model:
 m_M_ad_2
 
 # Health State utilities --------------------------------------------------
@@ -118,12 +118,12 @@ m_c_SQ <- matrix(c("Well" = 0,
             "Cancer Survivor" = 0,
             "Death" = 0), 
             n_states, n_t + 1, dimnames = list(v_n, 0:(n_t)))
+
 # Add screening costs for ages 30, 40, and 50:
 m_c_SQ["Well", c(31, 41, 51)] <-(m_c_SQ["Well", c(31, 41, 51)] + c_Screening)
-            
 # Matrix of state costs based on time interval t under New Treatment:
 m_c_NT <- m_c_SQ
-# Add vaccine cost:
+# Add vaccine cost at age 12:
 m_c_NT["Well", c(13)] <-(m_c_NT["Well", c(13)] + c_Vaccine)
 # Create cost and effects matrices:
 m_utilities_NT <- m_costs_NT <- m_utilities_SQ <- m_costs_SQ <- matrix(0, n.sims, n_t + 1, 
@@ -134,12 +134,12 @@ for (i in 1:n.sims) {
  for (t in 0:n_t) {
   ### For Status-Quo (screening only)
   ## Costs
-  m_costs_SQ[i, t]  <- (m_M_ad_1[t, , i] * 0.5) %*% m_c_SQ[, t]
+  m_costs_SQ[i, t]  <- (m_M_ad_1[t, , i] * 0.5) %*% m_c_SQ[, t] # Note: half of cohort assumed screened
   ## QALYs
   m_utilities_SQ[i, t]  <- m_M_ad_1[t, , i] %*% m_u_SQ[, t]
   ### For New Treatment (screening and vaccine):
   ## Costs
-  m_costs_NT[i, t] <- (m_M_ad_2[t, , i] * 0.5) %*% m_c_NT[, t]
+  m_costs_NT[i, t] <- (m_M_ad_2[t, , i] * 0.5) %*% m_c_NT[, t] # Note: half of cohort assumed screened
   ## QALYs
   m_utilities_NT[i, t] <- m_M_ad_2[t, , i] %*% m_u_NT[, t]
  }
