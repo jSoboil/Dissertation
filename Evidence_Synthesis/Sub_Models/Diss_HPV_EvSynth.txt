@@ -65,10 +65,10 @@ model {
 # transition probabilities to be proper.
 
    # Distribution according to Stage:
-    Stage.I.canc ~ dbeta(alpha.StageI, beta.StageI)T(0, 0.855)
-    Stage.II.canc ~ dbeta(alpha.StageII, beta.StageII)T(0, 0.835)
-    Stage.III.canc ~ dbeta(alpha.StageIII, beta.StageIII)T(0, 0.705)
-    StageIV.Detected ~ dbeta(alpha.StageIV, beta.StageIV)T(0, 0.875)
+    Stage.I.canc ~ dbeta(alpha.StageI, beta.StageI)T(0, 0.85)
+    Stage.II.canc ~ dbeta(alpha.StageII, beta.StageII)T(0, 0.80)
+    Stage.III.canc ~ dbeta(alpha.StageIII, beta.StageIII)T(0, 0.70)
+    StageIV.Detected ~ dbeta(alpha.StageIV, beta.StageIV)T(0, 0.85)
     
    # Stage I Cervical Cancer detected 5-year Survival:
    surv.StageI_year1 ~ dbeta(alpha.StageI_YearI, beta.StageI_YearI)
@@ -119,8 +119,8 @@ model {
 # model. I have had to truncate these distributions in order for the ASSA mortality data 
 # to be properly combined and for the state transition probabilities to be proper.
    LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, 0.90)
-   LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.865)
-   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.85)
+   LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.85)
+   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.845)
 
 # END OF SUB-MODEL 5.
 
