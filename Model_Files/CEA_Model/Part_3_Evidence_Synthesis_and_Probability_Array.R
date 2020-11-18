@@ -3,9 +3,11 @@ source("Part_4_parameter_Inputs.R")
 # ==========================================================================================
 # Evidence Synthesis and Transition Probability Matrix  ---------------------
 # ==========================================================================================
-# This is the source code that called from the Markov Model script for the evidence synthesis 
-# model as well as the Probability Matrix used to compute the Markov Model trace. The code below
-# sits on top of the parameter Inputs.R file, which is the source code for all parameter data.
+# This is the source code that is called from the Markov Model script for the evidence synthesis 
+# model as well as the Probability Matrix used to compute the Markov Model trace. 
+
+# Note: this code below sits on top of the parameter Inputs.R file, which is the source code for 
+# all parameter data (Part 4).
 
 # ==========================================================================================
 # Evidence Synthesis Model ------------------------------------------------
@@ -49,7 +51,7 @@ model {
     logit(pA.vac[i]) <- mu.vac[i]
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
-    # Average effect prior for sub-model 2:
+    # Average effect prior for SUB-MODEL 2:
     mu.vac[i] ~ dnorm(0, 1e-6)
     # Prior for sub-model 2 (Random. pop. effect):
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)

@@ -1,30 +1,41 @@
-library(tidyverse)
+# Load required libraries:
+library(bayesplot)
+library(BCEA)
 library(dampack)
 library(readxl)
+library(reshape2)
 library(rjags)
 library(R2jags)
-library(bayesplot)
 library(tidyverse)
-library(dampack)
-library(reshape2)
-library(BCEA)
 
+# Initialise start time counter:
 start_time <- Sys.time()
 
+# -------------------------------------------------------------------------
+## BEFORE RUNNING THE MODEL, PLEASE ENSURE THAT YOUR WORKING DIRECTORY IS SET TO 
+## "Model_Files/CEA_Model". IN R, THE EASIEST WAY TO DO THIS IS BY PRESSING 
+## Ctrl + Shift + H.
+# -------------------------------------------------------------------------
+
+# We have judged the advantages of using parallel processing to be negligible given the
+# size of the model.
+
 source("Part_2_HPV_Markov_Model.R")
-v_p_mort_lessHPV
+
 # ==========================================================================================
 # Cost-Effectiveness Analysis ---------------------------------------------
 # ==========================================================================================
 # This is the code that runs the final Cost-Effectiveness Analysis script for the HPV model 
 # developed by Sinanovic, E., et al. 2009): "The potential cost-effectiveness of adding a human 
-# papillomavirus vaccine to the cervical cancer screening programme in South Africa." Note that 
-# this code sits on top of the code for the Markov Models for either treatment.
+# papillomavirus vaccine to the cervical cancer screening programme in South Africa." 
+
+# Note that the source code for this section sits on top of the code for the Markov Models for 
+# either treatment (Part 2).
 
 # m_M_ad_1 is the Status Quo (Screening only) treatment model:
 m_M_ad_1
 # m_M_ad_2 is the New Treatment (Screening plus Vaccine) model:
-m_M_ad_2[, , 5]
+m_M_ad_2
 
 # Health State utilities --------------------------------------------------
 u_Well <- 1 # utility of being in Well for one cycle
@@ -144,7 +155,7 @@ for (i in 1:n.sims) {
  }
 }
 
-# Undiscounted costs and effects:
+#### Non-discounted costs and effects:
 ### For Status Quo (screening only):
 ## Costs
 mean(apply(m_costs_SQ, 1, sum))
@@ -156,6 +167,7 @@ mean(apply(m_costs_NT, 1, sum))
 ## QALYs
 mean(apply(m_utilities_NT, 1, sum))
 
+#### Discounted costs and effects
 # Discount rates:
 d_e <- 0.03
 d_c <- 0.03
@@ -214,5 +226,7 @@ cea_summary <- dampack::calculate_icers(cost = E_c, effect = E_u, strategies = v
 cea_summary
 
 # Model run time ----------------------------------------------------------
+# End time counter:
 end_time <- Sys.time()
+# Total run time:
 end_time - start_time

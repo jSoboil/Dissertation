@@ -12,9 +12,7 @@
 # Probability Dying less HPV for all States -------------------------------
 # ==========================================================================================
 # Import ASSA mortality table:
-mort_data <- read_excel(
-"/Users/joshuamusson/Desktop/Analytics/R/Dissertation/Evidence_Synthesis/mortality tables.xls", 
-                        sheet = "final tables", range = "D1:D87")
+mort_data <- read_excel("mortality tables.xls", sheet = "final tables", range = "D1:D87")
 v_p_mort_lessHPV <- as.matrix(mort_data[1])
 
 # ==========================================================================================

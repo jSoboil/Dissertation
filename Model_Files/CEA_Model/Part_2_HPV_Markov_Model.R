@@ -3,10 +3,12 @@ source("Part_3_Evidence_Synthesis_and_Probability_Array.R")
 # ==========================================================================================
 # Markov Model ------------------------------------------------------------
 # ==========================================================================================
-# The following code runs a Markov Model script for the HPV model developed by Sinanovic, E., et al. 
-# 2009): "The potential cost-effectiveness of adding a human papillomavirus vaccine to the 
-# cervical cancer screening programme in South Africa." Note that this code sits on top of the 
-# code for the evidence synthesis model as well as the probability matrix. 
+# The following code runs a Markov Model script for the HPV model developed by Sinanovic, E., 
+# et al. 2009): "The potential cost-effectiveness of adding a human papillomavirus vaccine to 
+# the cervical cancer screening programme in South Africa." 
+
+# Note that this code sits on top of the source code for the evidence synthesis model as well as 
+# the probability matrix (Part 3). 
 
 # m_M_ad_1 is the Status Quo treatment model; m_M_ad_2 is the vaccine treatment model.
 

@@ -25,8 +25,8 @@ model {
  
 # END OF SUB-MODEL 1.
 
-# SUB-MODEL 2: VACCINE-EFFICACY. Note: this is a fully integrated Bayesian model, as it combines
-# evidence directly via the likelihood and combines it with a prior. 
+# SUB-MODEL 2: POP. LEVEL VACCINE-EFFICACY. Note: this is a fully integrated Bayesian model, as 
+# it combines evidence directly via the likelihood and combines it with a prior. 
 # Model parameters abbreviated by .vac.
   for (i in 1:Nstud.vac) {
     # Likelihood:
@@ -37,7 +37,7 @@ model {
     logit(pA.vac[i]) <- mu.vac[i]
     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
-    # Average effect prior for sub-model 2:
+    # Average effect prior for SUB-MODEL 2:
     mu.vac[i] ~ dnorm(0, 1e-6)
     # Prior for sub-model 2 (Random. pop. effect):
     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
@@ -46,7 +46,7 @@ model {
    # Hyperpriors for SUB-MODEL 2:
    psi.vac ~ dnorm(0, 1.0e-6)
    prec.vac <- pow(tau.vac, -2)
-   tau.vac ~  dunif(0, 10)
+   tau.vac ~  dunif(0, 10000)
   
   # Transformations for SUB-MODEL 2:
    # Convert LOR to OR
@@ -60,17 +60,15 @@ model {
 # SUB-MODEL 3: CANCER PROGRESSION AND 5-YEAR SURVIVAL STAGES I-IV.
 # Model parameters abbreviated by .canc. Note: this is equivalent to a standard 
 # Monte Carlo PSA, as it is technically sampling directly from a prior and it is
-# *not* propogated into a posterior using a likelihood model. 
+# *not* propogated into a posterior using a likelihood model. I have had to truncate these 
+# distributions in order for the ASSA mortality data to be properly combined and the state
+# transition probabilities to be proper.
 
    # Distribution according to Stage:
-    Stage.I.canc ~ dbeta(alpha.StageI, beta.StageI)
-    Stage.II.canc ~ dbeta(alpha.StageII, beta.StageII)
-    Stage.III.canc ~ dbeta(alpha.StageIII, beta.StageIII)
-    StageIV.Detected ~ dbeta(alpha.StageIV, beta.StageIV)
-    
-    # Functional parameters for Cancer stages:
-    StageI.Detected <- Stage.I.canc * 0.15
-    StageII.Detected <- Stage.II.canc * 0.225
+    Stage.I.canc ~ dbeta(alpha.StageI, beta.StageI)T(0, 0.885)
+    Stage.II.canc ~ dbeta(alpha.StageII, beta.StageII)T(0, 0.875)
+    Stage.III.canc ~ dbeta(alpha.StageIII, beta.StageIII)T(0, 0.885)
+    StageIV.Detected ~ dbeta(alpha.StageIV, beta.StageIV)T(0, 0.875)
     
    # Stage I Cervical Cancer detected 5-year Survival:
    surv.StageI_year1 ~ dbeta(alpha.StageI_YearI, beta.StageI_YearI)
@@ -118,10 +116,11 @@ model {
 # SUB-MODEL 5: LSIL & HSIL PROGRESSION:
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
 # directly from a prior and it is *not* propogated into a posterior using a likelihood 
-# model. 
+# model. I have had to truncate these distributions in order for the ASSA mortality data 
+# to be properly combined and for the state transition probabilities to be proper.
    LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, 0.90)
-   LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.75)
-   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.90)
+   LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.85)
+   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.85)
 
 # END OF SUB-MODEL 5.
 
