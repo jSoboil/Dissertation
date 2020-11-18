@@ -11,11 +11,11 @@ library(tidyverse)
 # Initialise start time counter:
 start_time <- Sys.time()
 
-# -------------------------------------------------------------------------
-## BEFORE RUNNING THE MODEL, PLEASE ENSURE THAT YOUR WORKING DIRECTORY IS SET TO 
-## "Model_Files/CEA_Model". IN R, THE EASIEST WAY TO DO THIS IS BY PRESSING 
-## Ctrl + Shift + H.
-# -------------------------------------------------------------------------
+      ################################################################################
+      ## BEFORE RUNNING THE MODEL, PLEASE ENSURE THAT YOUR WORKING DIRECTORY IS SET ##
+      ## TO "Model_Files/CEA_Model". IN Rstudio, THE EASIEST WAY TO DO THIS IS BY   ##
+      ## PRESSING Ctrl + Shift + H.                                                 ##
+      ################################################################################
 
 # We have judged the advantages of using parallel processing to be negligible given the
 # size of the model.
@@ -230,3 +230,4 @@ cea_summary
 end_time <- Sys.time()
 # Total run time:
 end_time - start_time
+# End file ----------------------------------------------------------------
