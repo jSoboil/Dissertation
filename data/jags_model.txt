@@ -51,8 +51,7 @@ model {
   # Transformations for SUB-MODEL 2:
    # Convert LOR to OR
    OR.vac <- exp(psi.vac)
-   # Convert OR to probability
-   # for vaccine efficacy
+   # Convert OR to probability for vaccine efficacy
    pEfficacy.vac <- 1 / (1 + OR.vac)
 
 # END OF SUB-MODEL 2.

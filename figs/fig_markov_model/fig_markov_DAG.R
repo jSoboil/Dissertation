@@ -2,7 +2,7 @@ library(igraph)
 library(tidyverse)
 library(readxl)
 
-Clinical_states <- read_excel("Clinical_states.xlsx", col_names = FALSE)
+Clinical_states <- read_excel("figs/fig_markov_model/Clinical_states.xlsx", col_names = FALSE)
 
 nodes <- Clinical_states
 nodes

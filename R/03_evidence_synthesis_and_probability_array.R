@@ -1,5 +1,3 @@
-source("Part_4_parameter_Inputs.R")
-
 # ==========================================================================================
 # Evidence Synthesis and Transition Probability Matrix  ---------------------
 # ==========================================================================================
@@ -7,7 +5,9 @@ source("Part_4_parameter_Inputs.R")
 # model as well as the Probability Matrix used to compute the Markov Model trace. 
 
 # Note: this code below sits on top of the parameter Inputs.R file, which is the source code for 
-# all parameter data (Part 4).
+# all parameter data (04_parameter_inputs.R).
+
+source("R/04_parameter_inputs.R")
 
 # ==========================================================================================
 # Evidence Synthesis Model ------------------------------------------------
@@ -65,8 +65,7 @@ model {
   # Transformations for SUB-MODEL 2:
    # Convert LOR to OR
    OR.vac <- exp(psi.vac)
-   # Convert OR to probability
-   # for vaccine efficacy
+   # Convert OR to probability for vaccine efficacy
    pEfficacy.vac <- 1 / (1 + OR.vac)
 
 # END OF SUB-MODEL 2.
@@ -140,7 +139,7 @@ model {
 
  }
 "
-writeLines(text = model_String, con = "Diss_HPV_EvSynth.txt")
+writeLines(text = model_String, con = "data/jags_model.txt")
 
 # Transform data into list format so that can be read by JAGS:
 data_JAGS <- list(
@@ -232,7 +231,7 @@ n.thin <- floor((n.iter - n.burnin) / 250)
 
 # Run MCMC model:
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
-                 model.file = "Diss_HPV_EvSynth.txt", n.chains = 4, 
+                 model.file = "data/jags_model.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 mod_JAGS
 # Attach JAGS model to envir.
@@ -246,10 +245,9 @@ attach.jags(mod_JAGS)
 
 # The following sets up the structure of the transitions between Health States:
 n_age_init <- 0 # age at baseline
-n_age_max <- 85 # maximum age of follow up - note: the maximum age is actually 85, however, 
-# due to starting at 0, it has to be compensated for by adding n + 1.
+n_age_max <- 85 # maximum age of follow up
 n_t <- n_age_max - n_age_init # time horizon, number of cycles
-n_t
+
 # the 30 health states of the model:
 v_n <- c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer",
          "Stage-III Cancer", "Stage-IV Cancer", "Detected.Stage-I Year 1",

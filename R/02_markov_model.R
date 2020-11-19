@@ -1,5 +1,3 @@
-source("Part_3_Evidence_Synthesis_and_Probability_Array.R")
-
 # ==========================================================================================
 # Markov Model ------------------------------------------------------------
 # ==========================================================================================
@@ -8,7 +6,9 @@ source("Part_3_Evidence_Synthesis_and_Probability_Array.R")
 # the cervical cancer screening programme in South Africa." 
 
 # Note that this code sits on top of the source code for the evidence synthesis model as well as 
-# the probability matrix (Part 3). 
+# the probability matrix (03_evidence_synthesis_and_probability_array.R). 
+
+source("R/03_evidence_synthesis_and_probability_array.R")
 
 # m_M_ad_1 is the Status Quo treatment model; m_M_ad_2 is the vaccine treatment model.
 
@@ -28,7 +28,7 @@ v_s_init <- c("Well" = 1,     "Infection" = 0, "LSIL" = 0, "HSIL" = 0,
            "Detected.Stage-IV Year 4" = 0,  "Detected.Stage-IV Year 5" = 0,
                     "Cancer Survivor" = 0,                     "Death" = 0)
 
-# Initialize cohort trace for age-dependent cSTM
+# Initialize cohort trace for age-dependent cSTMs:
 m_M_ad_1 <- array(matrix(0, nrow = n_t + 1, ncol = n_states),
                 dim = c(c(n_t + 1, n_states), n.sims), 
                 dimnames = list(0:n_t, v_n, 1:n.sims))
@@ -184,15 +184,15 @@ ggplot() +
  theme()
 
 # Mortality in Model 1:
-v_D_ad_1 <- rowSums(apply(m_M_ad_1[, 30, ], c(1, 2), mean))
+v_D_ad_1 <- rowSums(apply(m_M_ad_1[ , "Death", ], c(1, 2), mean))
 # Mortality in Model 1:
-v_D_ad_2 <- rowSums(apply(m_M_ad_2[, 30, ], c(1, 2), mean))
+v_D_ad_2 <- rowSums(apply(m_M_ad_2[ , "Death", ], c(1, 2), mean))
 ggplot() +
  geom_line(aes(x = 0:n_t, y = v_D_ad_1), size = 2, colour = "navyblue", na.rm = TRUE, 
             alpha = 1) +
  geom_point(aes(x = 0:n_t, y = v_D_ad_2), size = 1.5, colour = "red", 
            alpha = 0.95, na.rm = TRUE) + 
- # scale_y_continuous(labels = scales::percent) +
+ scale_y_continuous(labels = scales::percent) +
  xlab("Cycle") +
  ylab("Comparative no. Deaths") +
  xlim(15, 85) +

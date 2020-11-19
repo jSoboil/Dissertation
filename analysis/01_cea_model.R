@@ -1,4 +1,10 @@
-# Load required libraries:
+        ################################################################################
+        ## BEFORE RUNNING THE MODEL, PLEASE ENSURE THAT YOUR WORKING DIRECTORY IS SET ##
+        ## TO THE WHERE THE DIRECTORY OF THE Rproj FOLDER IS SAVED ON YOUR COMPUTER.  ##
+        ## IN RSTUDIO, THE EASIEST WAY TO DO THIS IS BY PRESSING Ctrl + Shift + H.    ##
+        ################################################################################
+
+# Load libraries:
 library(bayesplot)
 library(BCEA)
 library(dampack)
@@ -11,16 +17,13 @@ library(tidyverse)
 # Initialise start time counter:
 start_time <- Sys.time()
 
-      ################################################################################
-      ## BEFORE RUNNING THE MODEL, PLEASE ENSURE THAT YOUR WORKING DIRECTORY IS SET ##
-      ## TO "Model_Files/CEA_Model". IN Rstudio, THE EASIEST WAY TO DO THIS IS BY   ##
-      ## PRESSING Ctrl + Shift + H.                                                 ##
-      ################################################################################
-
 # We have judged the advantages of using parallel processing to be negligible given the
-# size of the model.
+# size of the model and run time, which is consistently < 60secs on a relatively 
+# low-powered Macbook pro 2018 13".
 
-source("Part_2_HPV_Markov_Model.R")
+# Note that the source code for this section sits on top of the code for the Markov Models of 
+# either treatment found in the R folder (R/02_markov_model.R):
+source("R/02_markov_model.R")
 
 # ==========================================================================================
 # Cost-Effectiveness Analysis ---------------------------------------------
@@ -29,12 +32,9 @@ source("Part_2_HPV_Markov_Model.R")
 # developed by Sinanovic, E., et al. 2009): "The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa." 
 
-# Note that the source code for this section sits on top of the code for the Markov Models for 
-# either treatment (Part 2).
-
-# m_M_ad_1 is the Status Quo (Screening only) treatment model:
+# m_M_ad_1 is the Status Quo (Screening only) treatment Markov model:
 m_M_ad_1
-# m_M_ad_2 is the New Treatment (Screening plus Vaccine) model:
+# m_M_ad_2 is the New Treatment (Screening plus Vaccine) Markov model:
 m_M_ad_2
 
 # Health State utilities --------------------------------------------------
@@ -88,7 +88,7 @@ c_Vaccine <- 570 # once off cost of vaccine from age 12.
 c_Screening <- 75 + 309 + 93 # cost of screening using HPV DNA, VIA, and cancer cytology tests.
 c_LSIL <- 61 # cost of LSIL treatment*.
 c_HSIL <- 764 # cost of HSIL treatment*.
-# *HPV 16 & 18 assumed to be asymptomatic and therefore not treated.
+# *HPV 16 & 18 assumed to be asymptomatic and therefore not treated, i.e. no costs for LSIL or HSIL.
 
 # Cost for treating all cancer stages:
 c_StageI <- 4615 # cost of treatment of Stage I Cancer for one cycle.
@@ -214,6 +214,19 @@ v_names_str <- c("Status Quo: screening only", "New Treatment: screening & vacci
 ## BCEA package summary:
 df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str, Kmax = 2500, plot = TRUE)
 summary.bcea(df_cea)
+BCEA::contour2(df_cea, graph = "ggplot2")
+BCEA::ib.plot(df_cea, graph = "ggplot2")
+# In the plot below, r represents the risk aversion parameter which is the square root of the 
+# variance for the expected return on investment. Hence, the more averse, the more precise a 
+# decision-maker is wanting to be.
+riskev <- CEriskav(he = df_cea, r = c(
+ 0.00000001, 0.0000001, 0.000001, 0.00001, 0.0001)
+ )
+# The more risk averse the decision-maker, the greater the value of EVPI:
+BCEA::plot.CEriskav(riskev)
+# At an expected standard deviation of 0.0001, the the EVPI is virtually null and thus the 
+# decision-maker is theoretically willing to take on the expected variance in the investment 
+# return, given current information.
 
 ## Expected Costs and Utility for both treatments across all simulations:
 E_c <- apply(Costs, 2, mean)

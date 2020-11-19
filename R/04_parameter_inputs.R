@@ -5,14 +5,14 @@
 
 # Most data are derived from (Sinanovic, E., et al. 2009): "The potential cost-effectiveness of 
 # adding a human papillomavirus vaccine to the cervical cancer screening programme in South 
-# Africa." Most parameters are simulated using an empirical Bayes' appraoch, bar vaccine
+# Africa." Most parameters are simulated using an empirical Bayes' approach, bar vaccine
 # efficacy.
 
 # ==========================================================================================
 # Probability Dying less HPV for all States -------------------------------
 # ==========================================================================================
 # Import ASSA mortality table:
-mort_data <- read_excel("mortality tables.xls", sheet = "final tables", range = "D1:D87")
+mort_data <- read_excel("data-raw/mortality tables.xls", sheet = "final tables", range = "D1:D87")
 v_p_mort_lessHPV <- as.matrix(mort_data[1])
 
 # ==========================================================================================
