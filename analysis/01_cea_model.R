@@ -1,7 +1,7 @@
         ################################################################################
         ## BEFORE RUNNING THE MODEL, PLEASE ENSURE THAT YOUR WORKING DIRECTORY IS SET ##
-        ## TO THE WHERE THE DIRECTORY OF THE Rproj FOLDER IS SAVED ON YOUR COMPUTER.  ##
-        ## IN RSTUDIO, THE EASIEST WAY TO DO THIS IS BY PRESSING Ctrl + Shift + H.    ##
+        ## TO THE DIRECTORY OF THE Rproj FOLDER IS SAVED ON YOUR COMPUTER. IN RSTUDIO ##
+        ## THE EASIEST WAY TO DO THIS IS BY PRESSING Ctrl + Shift + H.                ##
         ################################################################################
 
 # Load libraries:
@@ -217,8 +217,8 @@ summary.bcea(df_cea)
 BCEA::contour2(df_cea, graph = "ggplot2")
 BCEA::ib.plot(df_cea, graph = "ggplot2")
 # In the plot below, r represents the risk aversion parameter which is the square root of the 
-# variance for the expected return on investment. Hence, the more averse, the more precise a 
-# decision-maker is wanting to be.
+# variance for the expected return on investment. Hence, simply speaking, the more averse, 
+# the more sure a decision-maker is wanting to be of the investment's return.
 riskev <- CEriskav(he = df_cea, r = c(
  0.00000001, 0.0000001, 0.000001, 0.00001, 0.0001)
  )

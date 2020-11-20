@@ -15,7 +15,7 @@ source("R/04_parameter_inputs.R")
 model_String <- "
 model {
 
-# SUB-MODEL 1: AGE-SPECIFIC PREVALENCE
+### SUB-MODEL 1: AGE-SPECIFIC PREVALENCE
 # Model parameters abbreviated by .age. Note: this is equivalent to Monte Carlo PSA, 
 # as it is technically sampling directly from a prior and is not propogated into a 
 # posterior using a likelihood model. However, a hyperprior is used for the population 
@@ -23,54 +23,70 @@ model {
   for (i in 1:86) {
     # Monte Carlo:
     # No vaccine:
-    omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])T(0, )
+     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])T(0, )
     
     # Note in use of pow() function, using -2 is a shorthand inverse
     # method equivalent to 1 / x^2.
-    log(prec.age[i]) <- pow(sigma.age[i], -2)
+     log(prec.age[i]) <- pow(sigma.age[i], -2)
     # Prior on variance for each age group. Note use of half Student-t to draw
     # variance away from 0. See Prior distribution for variance parameters in 
     # hierarchical models (Gelman, 2006):
-    sigma.age[i] ~ dt(0, eta.age, 1)T(0, )
+     sigma.age[i] ~ dt(0, eta.age, 1)T(0, )
   }
   
-   # Wide hyper-prior on prior variance parameter for SUB-MODEL 1:
-   eta.age ~ dunif(0, 1000)
+   # Wide hyper-prior on prior variance parameter on SUB-MODEL 1:
+    eta.age ~ dunif(0, 10000)
  
-# END OF SUB-MODEL 1.
+### END OF SUB-MODEL 1.
 
-# SUB-MODEL 2: POP. LEVEL VACCINE-EFFICACY. Note: this is a fully integrated Bayesian model, as 
-# it combines evidence directly via the likelihood and combines it with a prior. 
-# Model parameters abbreviated by .vac.
+### SUB-MODEL 2: POP. LEVEL VACCINE-EFFICACY. 
+# Note: this is a fully integrated Bayesian model, as it combines evidence directly via the 
+# likelihood and combines it with a prior. Model parameters abbreviated by .vac.
   for (i in 1:Nstud.vac) {
     # Likelihood:
-    rA.vac[i] ~ dbin(pA.vac[i], nA.vac[i])
-    rB.vac[i] ~ dbin(pB.vac[i], nB.vac[i])
-    
-    # Random Effect Logistic model:
-    logit(pA.vac[i]) <- mu.vac[i]
-    logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
+     rA.vac[i] ~ dbin(pA.vac[i], nA.vac[i])
+     rB.vac[i] ~ dbin(pB.vac[i], nB.vac[i])
+
+    # Logistic link function:
+     logit(pA.vac[i]) <- mu.vac[i]
+     logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
     # Average effect prior for SUB-MODEL 2:
-    mu.vac[i] ~ dnorm(0, 1e-6)
+     mu.vac[i] ~ dnorm(0, 1e-6)
     # Prior for sub-model 2 (Random. pop. effect):
-    delta.vac[i] ~ dnorm(psi.vac, prec.vac)
+     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
+    
+     ## Posterior predictive checks for SUB-MODEL 2:
+       # Predictive likelihood:
+        rA.mxd[i] ~ dbin(pA.new[i], nA.vac[i])
+        
+       # Predicted logit link function:
+        logit(pA.new[i]) <- mu.vac[i] + delta.new
+               
+       # Mixed predictve 
+       # p-value:
+        pA.mxd[i] <- step(rA.mxd[i] - rA.vac[i]) - 0.5 * equals(rA.mxd[i], rA.vac[i])
+
   }
   
    # Hyperpriors for SUB-MODEL 2:
-   psi.vac ~ dnorm(0, 1.0e-6)
-   prec.vac <- pow(tau.vac, -2)
-   tau.vac ~  dunif(0, 10000)
+    psi.vac ~ dnorm(0, 1.0e-6)
+    prec.vac <- pow(tau.vac, -2)
+    tau.vac ~  dunif(0, 10000)
   
   # Transformations for SUB-MODEL 2:
    # Convert LOR to OR
-   OR.vac <- exp(psi.vac)
+    OR.vac <- exp(psi.vac)
    # Convert OR to probability for vaccine efficacy
-   pEfficacy.vac <- 1 / (1 + OR.vac)
+    pEfficacy.vac <- 1 / (1 + OR.vac)
+   
+     # Predicted average 
+     # treatment effect:
+      delta.new ~ dnorm(psi.vac, prec.vac)
 
-# END OF SUB-MODEL 2.
+### END OF SUB-MODEL 2.
 
-# SUB-MODEL 3: CANCER PROGRESSION AND 5-YEAR SURVIVAL STAGES I-IV.
+### SUB-MODEL 3: CANCER PROGRESSION AND 5-YEAR SURVIVAL STAGES I-IV.
 # Model parameters abbreviated by .canc. Note: this is equivalent to a standard 
 # Monte Carlo PSA, as it is technically sampling directly from a prior and it is
 # *not* propogated into a posterior using a likelihood model. I have had to truncate these 
@@ -84,33 +100,33 @@ model {
     StageIV.Detected ~ dbeta(alpha.StageIV, beta.StageIV)T(0, 0.875)
     
    # Stage I Cervical Cancer detected 5-year Survival:
-   surv.StageI_year1 ~ dbeta(alpha.StageI_YearI, beta.StageI_YearI)
-   surv.StageI_year2 ~ dbeta(alpha.StageI_YearII, beta.StageI_YearII)
-   surv.StageI_year3 ~ dbeta(alpha.StageI_YearIII, beta.StageI_YearIII)
-   surv.StageI_year4 ~ dbeta(alpha.StageI_YearIV, beta.StageI_YearIV)
-   surv.StageI_year5 ~ dbeta(alpha.StageI_YearV, beta.StageI_YearV)
+    surv.StageI_year1 ~ dbeta(alpha.StageI_YearI, beta.StageI_YearI)T(0, 0.97)
+    surv.StageI_year2 ~ dbeta(alpha.StageI_YearII, beta.StageI_YearII)T(0, 0.96)
+    surv.StageI_year3 ~ dbeta(alpha.StageI_YearIII, beta.StageI_YearIII)T(0, 0.96)
+    surv.StageI_year4 ~ dbeta(alpha.StageI_YearIV, beta.StageI_YearIV)T(0, 0.98)
+    surv.StageI_year5 ~ dbeta(alpha.StageI_YearV, beta.StageI_YearV)T(0, 0.98)
    # Stage II Cervical Cancer detected 5-year Survival:
-   surv.StageII_year1 ~ dbeta(alpha.StageII_YearI, beta.StageII_YearI)
-   surv.StageII_year2 ~ dbeta(alpha.StageII_YearII, beta.StageII_YearII)
-   surv.StageII_year3 ~ dbeta(alpha.StageII_YearIII, beta.StageII_YearIII)
-   surv.StageII_year4 ~ dbeta(alpha.StageII_YearIV, beta.StageII_YearIV)
-   surv.StageII_year5 ~ dbeta(alpha.StageII_YearV, beta.StageII_YearV)
+    surv.StageII_year1 ~ dbeta(alpha.StageII_YearI, beta.StageII_YearI)T(0, 0.91)
+    surv.StageII_year2 ~ dbeta(alpha.StageII_YearII, beta.StageII_YearII)T(0, 0.88)
+    surv.StageII_year3 ~ dbeta(alpha.StageII_YearIII, beta.StageII_YearIII)T(0, 0.93)
+    surv.StageII_year4 ~ dbeta(alpha.StageII_YearIV, beta.StageII_YearIV)T(0, 0.94)
+    surv.StageII_year5 ~ dbeta(alpha.StageII_YearV, beta.StageII_YearV)T(0, 0.97)
    # Stage III Cervical Cancer detected 5-year Survival:
-   surv.StageIII_year1 ~ dbeta(alpha.StageIII_YearI, beta.StageIII_YearI)
-   surv.StageIII_year2 ~ dbeta(alpha.StageIII_YearII, beta.StageIII_YearII)
-   surv.StageIII_year3 ~ dbeta(alpha.StageIII_YearIII, beta.StageIII_YearIII)
-   surv.StageIII_year4 ~ dbeta(alpha.StageIII_YearIV, beta.StageIII_YearIV)
-   surv.StageIII_year5 ~ dbeta(alpha.StageIII_YearV, beta.StageIII_YearV)
+    surv.StageIII_year1 ~ dbeta(alpha.StageIII_YearI, beta.StageIII_YearI)T(0, 0.71)
+    surv.StageIII_year2 ~ dbeta(alpha.StageIII_YearII, beta.StageIII_YearII)T(0, 0.74)
+    surv.StageIII_year3 ~ dbeta(alpha.StageIII_YearIII, beta.StageIII_YearIII)T(0, 0.87)
+    surv.StageIII_year4 ~ dbeta(alpha.StageIII_YearIV, beta.StageIII_YearIV)T(0, 0.93)
+    surv.StageIII_year5 ~ dbeta(alpha.StageIII_YearV, beta.StageIII_YearV)T(0, 0.92)
    # Stage IV Cervical Cancer detected 5-year Survival:
-   surv.StageIV_year1 ~ dbeta(alpha.StageIV_YearI, beta.StageIV_YearI)
-   surv.StageIV_year2 ~ dbeta(alpha.StageIV_YearII, beta.StageIV_YearII)
-   surv.StageIV_year3 ~ dbeta(alpha.StageIV_YearIII, beta.StageIV_YearIII)
-   surv.StageIV_year4 ~ dbeta(alpha.StageIV_YearIV, beta.StageIV_YearIV)
-   surv.StageIV_year5 ~ dbeta(alpha.StageIV_YearV, beta.StageIV_YearV)
+    surv.StageIV_year1 ~ dbeta(alpha.StageIV_YearI, beta.StageIV_YearI)T(0, 0.40)
+    surv.StageIV_year2 ~ dbeta(alpha.StageIV_YearII, beta.StageIV_YearII)T(0, 0.50)
+    surv.StageIV_year3 ~ dbeta(alpha.StageIV_YearIII, beta.StageIV_YearIII)T(0, 0.78)
+    surv.StageIV_year4 ~ dbeta(alpha.StageIV_YearIV, beta.StageIV_YearIV)T(0, 0.87)
+    surv.StageIV_year5 ~ dbeta(alpha.StageIV_YearV, beta.StageIV_YearV)T(0, 0.86)
    
-# END OF SUB-MODEL 3.
+### END OF SUB-MODEL 3.
 
-# SUB-MODEL 4: INFECTION PROGRESSION:
+### SUB-MODEL 4: INFECTION PROGRESSION:
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
 # directly from a prior and it is *not* propogated into a posterior using a likelihood 
 # model. 
@@ -120,13 +136,13 @@ model {
    # Note: because all other states except Death are assumed to be dependent and disjoint for
    # regression to normal from state of HPV/Infection, one can calculate all other relevant 
    # states from the complement of the transitions that are obtained from the model below:
-    HPV_Well_15to24 ~ dbeta(alpha.HPVtoNormal_15to24, beta.HPVtoNormal_15to24)
-    HPV_Well_25to29 ~ dbeta(alpha.HPVtoNormal_25to29, beta.HPVtoNormal_25to29)
-    HPV_Well_30toEnd ~ dbeta(alpha.HPVtoNormal_30toPlus, beta.HPVtoNormal_30toPlus)
+    HPV_Well_15to24 ~ dbeta(alpha.HPVtoNormal_15to24, beta.HPVtoNormal_15to24)T(0, 0.65)
+    HPV_Well_25to29 ~ dbeta(alpha.HPVtoNormal_25to29, beta.HPVtoNormal_25to29)T(0, 0.55)
+    HPV_Well_30toEnd ~ dbeta(alpha.HPVtoNormal_30toPlus, beta.HPVtoNormal_30toPlus)T(0, 0.35)
 
-# END OF SUB-MODEL 4.
+### END OF SUB-MODEL 4.
 
-# SUB-MODEL 5: LSIL & HSIL PROGRESSION:
+### SUB-MODEL 5: LSIL & HSIL PROGRESSION:
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
 # directly from a prior and it is *not* propogated into a posterior using a likelihood 
 # model. I have had to truncate these distributions in order for the ASSA mortality data 
@@ -135,7 +151,7 @@ model {
    LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.85)
    HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.85)
 
-# END OF SUB-MODEL 5.
+### END OF SUB-MODEL 5.
 
  }
 "
@@ -221,7 +237,11 @@ params <- c(
   "surv.StageIII_year1", "surv.StageIII_year2", "surv.StageIII_year3",
   "surv.StageIII_year4", "surv.StageIII_year5",
   "surv.StageIV_year1", "surv.StageIV_year2", "surv.StageIV_year3",
-  "surv.StageIV_year4", "surv.StageIV_year5"
+  "surv.StageIV_year4", "surv.StageIV_year5",
+  
+  # Poster predictive check. Provides a conservative cross-validation p-value measure
+  # for inconsistency of evidence across studies:
+  "pA.mxd"
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
@@ -281,7 +301,7 @@ a_P_2 <- array(0, dim = c(n_states, n_states, n_t + 1, n.sims),
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state Well, across the appropriate time horizon i and all probabilistic 
 # simulations j
-for (i in 0:n_t) {
+for (i in 1:n_t) {
  for (j in 1:n.sims) {
   a_P_1["Well", "Death", i, j] <-  v_p_mort_lessHPV[i]
   
