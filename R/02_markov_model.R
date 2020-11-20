@@ -55,6 +55,10 @@ for (t in 1:n_t) {
   }
 }
 
+# Validity check for transitions (each cycle must sum to n.sims):
+apply(m_M_ad_1, 1, sum)
+apply(m_M_ad_2, 1, sum)
+
 # ==========================================================================================
 # Visualisation of Markov Models ------------------------------------------
 # ==========================================================================================
@@ -203,17 +207,15 @@ ggplot() +
 barplot(apply(m_M_ad_1, c(2, 1), mean), space = 1,
         ylab = "Proportion of patients in each state",
         main = "Status Quo Treatment", col = cols, cex.names = 1, cex.main = 1.5)
-legend("topright", legend = c("Well", "Infection"), 
-       fill = c("Well" = "#BD1B00",     "Infection" = "#FA7700"), 
-       cex = .5, box.lwd = 2,
-       horiz = FALSE)
+legend("bottomright", legend = c("Well", "Infection", "Death"),
+       fill = c("Well" = "#BD1B00", "Infection" = "#FA7700", "Death" = "#B3BABA"),
+       cex = .65, box.lwd = 1.85, x = 146.5, y = 1.02)
 # Visualisation of cohort proportions for Markov Model 2:
 barplot(apply(m_M_ad_2, c(2, 1), mean), space = 1,
         ylab = "Proportion of patients in each state",
         main = "Vaccine Treatment", col = cols, cex.names = 1, cex.main = 1.5)
-legend("topright", legend = c("Well", "Infection"), 
-       fill = c("Well" = "#BD1B00",     "Infection" = "#FA7700"), 
-       cex = .5, box.lwd = 2,
-       horiz = FALSE)
+legend("bottomright", legend = c("Well", "Infection", "Death"),
+       fill = c("Well" = "#BD1B00", "Infection" = "#FA7700", "Death" = "#B3BABA"),
+       cex = .65, box.lwd = 1.85, x = 146.5, y = 1.02)
 
 # End file ----------------------------------------------------------------

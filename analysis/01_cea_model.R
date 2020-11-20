@@ -83,14 +83,15 @@ m_u_SQ <- m_u_NT <- matrix(c("Well" = u_Well,
                            n_states, n_t + 1, dimnames = list(v_n, 0:(n_t)))
 
 # Health costs from a societal perspective --------------------------------
-# All costs in $US.
+## All costs in $US.
 c_Vaccine <- 570 # once off cost of vaccine from age 12.
 c_Screening <- 75 + 309 + 93 # cost of screening using HPV DNA, VIA, and cancer cytology tests.
 c_LSIL <- 61 # cost of LSIL treatment*.
 c_HSIL <- 764 # cost of HSIL treatment*.
-# *HPV 16 & 18 assumed to be asymptomatic and therefore not treated, i.e. no costs for LSIL or HSIL.
+# *HPV 16 & 18 assumed to be asymptomatic and therefore not treated, i.e. no costs are included 
+# for LSIL or HSIL.
 
-# Cost for treating all cancer stages:
+## Cost for treatment at each cancer stage:
 c_StageI <- 4615 # cost of treatment of Stage I Cancer for one cycle.
 c_StageII <- 6307 # cost of treatment of Stage II Cancer for one cycle.
 c_StageIII <- 6307 # cost of treatment of Stage III Cancer for one cycle.
@@ -129,11 +130,11 @@ m_c_SQ <- matrix(c("Well" = 0,
             "Death" = 0), 
             n_states, n_t + 1, dimnames = list(v_n, 0:(n_t)))
 
-# Add screening costs for ages 30, 40, and 50:
+# Screening costs for ages 30, 40, and 50:
 m_c_SQ["Well", c(31, 41, 51)] <-(m_c_SQ["Well", c(31, 41, 51)] + c_Screening)
 # Matrix of state costs based on time interval t under New Treatment:
 m_c_NT <- m_c_SQ
-# Add vaccine cost at age 12:
+# Vaccine cost at age 12:
 m_c_NT["Well", c(13)] <-(m_c_NT["Well", c(13)] + c_Vaccine)
 # Create cost and effects matrices:
 m_utilities_NT <- m_costs_NT <- m_utilities_SQ <- m_costs_SQ <- matrix(0, n.sims, n_t + 1, 
@@ -225,8 +226,9 @@ riskev <- CEriskav(he = df_cea, r = c(
 # The more risk averse the decision-maker, the greater the value of EVPI:
 BCEA::plot.CEriskav(riskev)
 # At an expected standard deviation of 0.0001, the the EVPI is virtually null and thus the 
-# decision-maker is theoretically willing to take on the expected variance in the investment 
-# return, given current information.
+# decision-maker should be theoretically willing to take on the expected variance in the 
+# investment return, given current information. Of course, this is only *theoretical* and it
+# depends on the decision-maker's preferences and value judgement's.
 
 ## Expected Costs and Utility for both treatments across all simulations:
 E_c <- apply(Costs, 2, mean)
@@ -243,4 +245,5 @@ cea_summary
 end_time <- Sys.time()
 # Total run time:
 end_time - start_time
+
 # End file ----------------------------------------------------------------
