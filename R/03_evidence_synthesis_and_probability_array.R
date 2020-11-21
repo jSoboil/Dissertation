@@ -257,7 +257,12 @@ n.thin <- floor((n.iter - n.burnin) / 250)
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
                  model.file = "data/jags_model.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
-mod_JAGS
+
+# One can automate convergence. However, the improvement is negligible given the increased run 
+# time of the model, from < 60secs to > 2 mins. However, if desired, uncomment the line of code 
+# below to add auto convergence.
+# mod_JAGS <- autojags(mod_JAGS, Rhat = 1.01)
+
 # Attach JAGS model to envir.
 attach.jags(mod_JAGS)
 

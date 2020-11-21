@@ -1,7 +1,7 @@
         ################################################################################
         ## BEFORE RUNNING THE MODEL, PLEASE ENSURE THAT YOUR WORKING DIRECTORY IS SET ##
-        ## TO THE DIRECTORY OF THE Rproj FOLDER IS SAVED ON YOUR COMPUTER. IN RSTUDIO ##
-        ## THE EASIEST WAY TO DO THIS IS BY PRESSING Ctrl + Shift + H.                ##
+        ## TO THE DIRECTORY OF THE Rproj FOLDER ON YOUR COMPUTER. IN RSTUDIO THE      ##
+        ## EASIEST WAY TO DO THIS IS BY PRESSING Ctrl + Shift + H.                    ##
         ################################################################################
 
 # Load libraries:
