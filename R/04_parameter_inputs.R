@@ -16,7 +16,7 @@ mort_data <- read_excel("data-raw/mortality tables.xls", sheet = "final tables",
 v_p_mort_lessHPV <- as.matrix(mort_data[1])
 
 # Like the original study, the replication study is hugely sensitive to the HIV caused mortality 
-# in South Africa at that time. This mortality below excludes HIV/AIDS related mortality for the 
+# in South Africa in 2009. This mortality below excludes HIV/AIDS related mortality for the 
 # interested reader. Uncomment the code below and comment the code above in order to observe this
 # trend.
 # mort_data <- read_excel("data-raw/mortality tables.xls", sheet = "final tables", range = "F1:F87")

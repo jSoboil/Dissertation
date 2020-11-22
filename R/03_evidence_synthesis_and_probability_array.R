@@ -6,12 +6,12 @@
 
 source("R/04_parameter_inputs.R")
 
-# Many of the distributions have to be truncated at an upper bound of 1 - (max mortality Pr). We
-# found that the mortality rate when it included HIV/AIDS related mortality was extremely high 
-# given the context of South Africa in 2009. In order to account for this, there would have been a 
-# need to incorporate another parameter which provides an annual risk of dying from HIV/AIDS. 
-# However, as this was purely a replication exercise, we did not find it necessary and focused on
-# the outcomes of the comparative models.
+# Many of the distributions have to be truncated at an upper bound of 1 - (max mortality prob). 
+# We found that the mortality rate when it included HIV/AIDS related mortality was extremely high 
+# given the context of South Africa in 2009. In order to account for this, it would have be 
+# desirable to incorporate another parameter to provide a conditional annual risk of dying 
+# from HIV/AIDS. However, because this was purely a replication exercise, we did not 
+# find it necessary and focused on the outcomes of the comparative models.
 
 # ==========================================================================================
 # Evidence Synthesis Model ------------------------------------------------
@@ -27,19 +27,20 @@ model {
   for (i in 1:86) {
     # Monte Carlo:
     # No vaccine:
-     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])T(0, )
+     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
     
-    # Note in use of pow() function, using -2 is a shorthand inverse
-    # method equivalent to 1 / x^2.
+    # Note in use of pow() function, using -2 is a shorthand inverse method equivalent 
+    # to 1 / x^2:
      log(prec.age[i]) <- pow(sigma.age[i], -2)
+     
     # Prior on variance for each age group. Note use of half Student-t to draw
     # variance away from 0. See Prior distribution for variance parameters in 
     # hierarchical models (Gelman, 2006):
      sigma.age[i] ~ dt(0, eta.age, 1)T(0, )
   }
   
-   # Wide hyper-prior on prior variance parameter on SUB-MODEL 1:
-    eta.age ~ dunif(0, 10000)
+   # Wide hyper-prior on prior variance parameter for SUB-MODEL 1:
+    eta.age ~ dunif(0, 1000)
  
 ### END OF SUB-MODEL 1.
 
@@ -60,15 +61,14 @@ model {
     # Prior for sub-model 2 (Random. pop. effect):
      delta.vac[i] ~ dnorm(psi.vac, prec.vac)
     
-     ## Posterior predictive checks for SUB-MODEL 2:
+     ## Mixed predictive check for SUB-MODEL 2:
        # Predictive likelihood:
         rA.mxd[i] ~ dbin(pA.new[i], nA.vac[i])
         
-       # Predicted logit link function:
+       # Predictive logit link function:
         logit(pA.new[i]) <- mu.vac[i] + delta.new
                
-       # Mixed predictve 
-       # p-value:
+       # Mixed predictve p-value:
         pA.mxd[i] <- step(rA.mxd[i] - rA.vac[i]) - 0.5 * equals(rA.mxd[i], rA.vac[i])
 
   }
@@ -104,29 +104,29 @@ model {
     StageIV.Detected ~ dbeta(alpha.StageIV, beta.StageIV)T(0, 0.88)
     
    # Stage I Cervical Cancer detected 5-year Survival:
-    surv.StageI_year1 ~ dbeta(alpha.StageI_YearI, beta.StageI_YearI)T(0, 0.97)
-    surv.StageI_year2 ~ dbeta(alpha.StageI_YearII, beta.StageI_YearII)T(0, 0.9525)
-    surv.StageI_year3 ~ dbeta(alpha.StageI_YearIII, beta.StageI_YearIII)T(0, 0.955)
-    surv.StageI_year4 ~ dbeta(alpha.StageI_YearIV, beta.StageI_YearIV)T(0, 0.975)
-    surv.StageI_year5 ~ dbeta(alpha.StageI_YearV, beta.StageI_YearV)T(0, 0.98)
+    surv.StageI_year1 ~ dbeta(alpha.StageI_YearI, beta.StageI_YearI)
+    surv.StageI_year2 ~ dbeta(alpha.StageI_YearII, beta.StageI_YearII)
+    surv.StageI_year3 ~ dbeta(alpha.StageI_YearIII, beta.StageI_YearIII)
+    surv.StageI_year4 ~ dbeta(alpha.StageI_YearIV, beta.StageI_YearIV)
+    surv.StageI_year5 ~ dbeta(alpha.StageI_YearV, beta.StageI_YearV)
    # Stage II Cervical Cancer detected 5-year Survival:
-    surv.StageII_year1 ~ dbeta(alpha.StageII_YearI, beta.StageII_YearI)T(0, 0.91)
-    surv.StageII_year2 ~ dbeta(alpha.StageII_YearII, beta.StageII_YearII)T(0, 0.875)
-    surv.StageII_year3 ~ dbeta(alpha.StageII_YearIII, beta.StageII_YearIII)T(0, 0.925)
-    surv.StageII_year4 ~ dbeta(alpha.StageII_YearIV, beta.StageII_YearIV)T(0, 0.935)
-    surv.StageII_year5 ~ dbeta(alpha.StageII_YearV, beta.StageII_YearV)T(0, 0.96)
+    surv.StageII_year1 ~ dbeta(alpha.StageII_YearI, beta.StageII_YearI)
+    surv.StageII_year2 ~ dbeta(alpha.StageII_YearII, beta.StageII_YearII)
+    surv.StageII_year3 ~ dbeta(alpha.StageII_YearIII, beta.StageII_YearIII)
+    surv.StageII_year4 ~ dbeta(alpha.StageII_YearIV, beta.StageII_YearIV)
+    surv.StageII_year5 ~ dbeta(alpha.StageII_YearV, beta.StageII_YearV)
    # Stage III Cervical Cancer detected 5-year Survival:
-    surv.StageIII_year1 ~ dbeta(alpha.StageIII_YearI, beta.StageIII_YearI)T(0, 0.715)
-    surv.StageIII_year2 ~ dbeta(alpha.StageIII_YearII, beta.StageIII_YearII)T(0, 0.745)
-    surv.StageIII_year3 ~ dbeta(alpha.StageIII_YearIII, beta.StageIII_YearIII)T(0, 0.865)
-    surv.StageIII_year4 ~ dbeta(alpha.StageIII_YearIV, beta.StageIII_YearIV)T(0, 0.925)
-    surv.StageIII_year5 ~ dbeta(alpha.StageIII_YearV, beta.StageIII_YearV)T(0, 0.915)
+    surv.StageIII_year1 ~ dbeta(alpha.StageIII_YearI, beta.StageIII_YearI)
+    surv.StageIII_year2 ~ dbeta(alpha.StageIII_YearII, beta.StageIII_YearII)
+    surv.StageIII_year3 ~ dbeta(alpha.StageIII_YearIII, beta.StageIII_YearIII)
+    surv.StageIII_year4 ~ dbeta(alpha.StageIII_YearIV, beta.StageIII_YearIV)
+    surv.StageIII_year5 ~ dbeta(alpha.StageIII_YearV, beta.StageIII_YearV)
    # Stage IV Cervical Cancer detected 5-year Survival:
-    surv.StageIV_year1 ~ dbeta(alpha.StageIV_YearI, beta.StageIV_YearI)T(0, 0.40)
-    surv.StageIV_year2 ~ dbeta(alpha.StageIV_YearII, beta.StageIV_YearII)T(0, 0.50)
-    surv.StageIV_year3 ~ dbeta(alpha.StageIV_YearIII, beta.StageIV_YearIII)T(0, 0.765)
-    surv.StageIV_year4 ~ dbeta(alpha.StageIV_YearIV, beta.StageIV_YearIV)T(0, 0.865)
-    surv.StageIV_year5 ~ dbeta(alpha.StageIV_YearV, beta.StageIV_YearV)T(0, 0.86)
+    surv.StageIV_year1 ~ dbeta(alpha.StageIV_YearI, beta.StageIV_YearI)
+    surv.StageIV_year2 ~ dbeta(alpha.StageIV_YearII, beta.StageIV_YearII)
+    surv.StageIV_year3 ~ dbeta(alpha.StageIV_YearIII, beta.StageIV_YearIII)
+    surv.StageIV_year4 ~ dbeta(alpha.StageIV_YearIV, beta.StageIV_YearIV)
+    surv.StageIV_year5 ~ dbeta(alpha.StageIV_YearV, beta.StageIV_YearV)
    
 ### END OF SUB-MODEL 3.
 
@@ -140,9 +140,9 @@ model {
    # Note: because all other states except Death are assumed to be dependent and disjoint for
    # regression to normal from state of HPV/Infection, one can calculate all other relevant 
    # states from the complement of the transitions that are obtained from the model below:
-    HPV_Well_15to24 ~ dbeta(alpha.HPVtoNormal_15to24, beta.HPVtoNormal_15to24)T(0, 0.65)
-    HPV_Well_25to29 ~ dbeta(alpha.HPVtoNormal_25to29, beta.HPVtoNormal_25to29)T(0, 0.53)
-    HPV_Well_30toEnd ~ dbeta(alpha.HPVtoNormal_30toPlus, beta.HPVtoNormal_30toPlus)T(0, 0.30)
+    HPV_Well_15to24 ~ dbeta(alpha.HPVtoNormal_15to24, beta.HPVtoNormal_15to24)
+    HPV_Well_25to29 ~ dbeta(alpha.HPVtoNormal_25to29, beta.HPVtoNormal_25to29)
+    HPV_Well_30toEnd ~ dbeta(alpha.HPVtoNormal_30toPlus, beta.HPVtoNormal_30toPlus)
 
 ### END OF SUB-MODEL 4.
 
@@ -243,13 +243,13 @@ params <- c(
   "surv.StageIV_year1", "surv.StageIV_year2", "surv.StageIV_year3",
   "surv.StageIV_year4", "surv.StageIV_year5",
   
-  # Poster predictive check. Provides a conservative cross-validation p-value measure
-  # for inconsistency of evidence across studies:
+  # Mixed predictive check. Provides a conservative p-value measure for 
+  # inconsistency of evidence across each study comparative to the rest:
   "pA.mxd"
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 40000
+n.iter <- 50000
 n.burnin <- 10000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
@@ -257,10 +257,10 @@ n.thin <- floor((n.iter - n.burnin) / 250)
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
                  model.file = "data/jags_model.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
-
-# One can automate convergence. However, the improvement is negligible given the increased run 
-# time of the model, from < 60secs to > 2 mins. However, if desired, uncomment the line of code 
-# below to add auto convergence.
+mod_JAGS
+# One can automate convergence. However, the improvement is negligible, and it increased the run
+# time of the model from < 60secs to > 2 mins. However, if desired, uncomment the line of code 
+# below to add auto chain convergence:
 # mod_JAGS <- autojags(mod_JAGS, Rhat = 1.01)
 
 # Attach JAGS model to envir.
@@ -297,8 +297,7 @@ a_P_2 <- array(0, dim = c(n_states, n_states, n_t + 1, n.sims),
 
 # Note: all progression probabilities are assumed dependent on the probability of regression. Moreover, 
 # due to the natural structure of the transition array, there is no need to fill in probabilities = 0, 
-# such as the transitions from Infection to LSIL for ages ≤ 14. However, the exception is for infection 
-# transitions in order to make the coding of the transition from Well to Death easier.
+# such as the transitions from Infection to LSIL for ages ≤ 14.
 
 # ==========================================================================================
 # Status-Quo  ----------------------------------------------------------

@@ -21,7 +21,7 @@ start_time <- Sys.time()
 # size of the model and run time, which is consistently < 60secs on a relatively 
 # low-powered Macbook pro 2018 13".
 
-# Note that the source code for this section sits on top of the code for the Markov Models of 
+# Note that the source code for this section sits on top of the code for the Markov Models for 
 # either treatment found in the R folder (R/02_markov_model.R):
 source("R/02_markov_model.R")
 
@@ -228,7 +228,7 @@ BCEA::plot.CEriskav(riskev)
 # At an expected standard deviation of 0.0001, the the EVPI is virtually null and thus the 
 # decision-maker should be theoretically willing to take on the expected variance in the 
 # investment return, given current information. Of course, this is only *theoretical* and it
-# depends on the decision-maker's preferences and value judgement's.
+# ultimately depends on the decision-maker's preferences and value judgement's.
 
 ## Expected Costs and Utility for both treatments across all simulations:
 E_c <- apply(Costs, 2, mean)
