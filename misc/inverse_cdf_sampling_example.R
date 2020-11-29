@@ -33,3 +33,13 @@ ggplot() +
  ylab(label = "Probability Density") +
  xlab(label = "Parameter values") +
  theme_minimal(base_family = "Times New Roman", base_size = 12)
+
+# Just to show how this is equivalent to using the rnorm function built into R:
+x <- runif(n = 10000)
+x <- qnorm(p = x, mean = 0.8, sd = 1)
+plot(density(x))
+plot(ecdf(x))
+
+y <- rnorm(n = 10000, mean = 0.8, sd = 1)
+plot(ecdf(y))
+

@@ -8,11 +8,10 @@ model {
 # variance to account for a greater uncertainty in each age-population.
   for (i in 1:86) {
     # Monte Carlo:
-    # No vaccine:
      omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
     
-    # Note in use of pow() function, using -2 is a shorthand inverse method equivalent 
-    # to 1 / x^2:
+    # Note use of pow() function, using -2 is a shorthand inverse method equivalent 
+    # to (1 / x^2):
      log(prec.age[i]) <- pow(sigma.age[i], -2)
      
     # Prior on variance for each age group. Note use of half Student-t to draw
@@ -28,7 +27,7 @@ model {
 
 ### SUB-MODEL 2: POP. LEVEL VACCINE-EFFICACY. 
 # Note: this is a fully integrated Bayesian model, as it combines evidence directly via the 
-# likelihood and combines it with a prior. Model parameters abbreviated by .vac.
+# likelihood and a prior. Model parameters abbreviated by .vac.
   for (i in 1:Nstud.vac) {
     # Likelihood:
      rA.vac[i] ~ dbin(pA.vac[i], nA.vac[i])
