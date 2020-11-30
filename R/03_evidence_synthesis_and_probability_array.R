@@ -32,15 +32,10 @@ model {
     # to (1 / x^2):
      log(prec.age[i]) <- pow(sigma.age[i], -2)
      
-    # Prior on variance for each age group. Note use of half Student-t to draw
-    # variance away from 0. See Prior distribution for variance parameters in 
-    # hierarchical models (Gelman, 2006):
-     sigma.age[i] ~ dt(0, eta.age, 1)T(0, )
+    # Relatively wide prior on variance for each age group.
+     sigma.age[i] ~ dunif(0, 10)
   }
-  
-   # Wide hyper-prior on prior variance parameter for SUB-MODEL 1:
-    eta.age ~ dunif(0, 1000)
- 
+
 ### END OF SUB-MODEL 1.
 
 ### SUB-MODEL 2: POP. LEVEL VACCINE-EFFICACY. 
@@ -58,9 +53,9 @@ model {
     # Average effect prior for SUB-MODEL 2:
      mu.vac[i] ~ dnorm(0, 1e-6)
     # Prior for sub-model 2 (Random. pop. effect):
-     delta.vac[i] ~ dt(psi.vac, prec.vac, 2) # if desired can be ~ dnorm(psi.vac, prec.vac)
+     delta.vac[i] ~ dt(psi.vac, prec.vac, 1) # if desired can be ~ dnorm(psi.vac, prec.vac)
     
-     ## Mixed predictive check for SUB-MODEL 2:
+     ### Mixed predictive check for SUB-MODEL 2:
        # Predictive likelihood:
         rA.mxd[i] ~ dbin(pA.new[i], nA.vac[i])
         
@@ -73,9 +68,9 @@ model {
   }
   
    # Hyperpriors for SUB-MODEL 2:
-    psi.vac ~ dnorm(0, 1.0e-4)
+    psi.vac ~ dnorm(0, 1.0e-6)
     prec.vac <- pow(tau.vac, -2)
-    tau.vac ~  dunif(0, 1000)
+    tau.vac ~  dunif(0, 10)
   
   # Transformations for SUB-MODEL 2:
    # Convert LOR to OR
@@ -92,7 +87,7 @@ model {
 ### SUB-MODEL 3: CANCER PROGRESSION AND 5-YEAR SURVIVAL STAGES I-IV.
 # Model parameters abbreviated by .canc. Note: this is equivalent to a standard 
 # Monte Carlo PSA, as it is technically sampling directly from a prior and it is
-# *not* propogated into a posterior using a likelihood model. I have had to truncate these 
+# *not* propogated into a posterior using a likelihood model. We have had to truncate these 
 # distributions in order for the ASSA mortality data to be properly combined and the state
 # transition probabilities to be proper.
 
@@ -220,7 +215,7 @@ data_JAGS <- list(
 # Parameters to monitor:
 params <- c(
   # Vaccine efficacy parameters:
-  "OR.vac", "pEfficacy.vac",
+  "OR.vac", "pEfficacy.vac", "delta.vac", "psi.vac",
   # Well to infection prevalence:
   "omega.age",
   # HPV Progression:
@@ -248,7 +243,7 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 50000
+n.iter <- 45000
 n.burnin <- 10000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
@@ -261,6 +256,17 @@ mod_JAGS
 # time of the model from < 60secs to > 2 mins. However, if desired, uncomment the line of code 
 # below to add auto chain convergence:
 # mod_JAGS <- autojags(mod_JAGS, Rhat = 1.01)
+
+# Posterior inspection:
+# posterior <- as.array(mod_JAGS$BUGSoutput$sims.array)
+# dimnames(x = posterior)
+
+# color_scheme_set("mix-gray-brightblue")
+# mcmc_combo(posterior, pars = c("pEfficacy.vac", "LSIL_15_34", "HSIL_n", "Stage.III.canc"))
+
+# mcmc_dens_chains_data(posterior, pars = c("pA.mxd[1]", "pA.mxd[2]", "pA.mxd[3]", "pA.mxd[4]",
+#                                "pA.mxd[5]", "pA.mxd[6]", "pA.mxd[7]", "pA.mxd[8]",
+#                                "pA.mxd[9]", "pA.mxd[10]", "pA.mxd[11]"))
 
 # Attach JAGS model to envir.
 attach.jags(mod_JAGS)
