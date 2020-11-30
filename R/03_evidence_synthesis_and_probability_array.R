@@ -58,7 +58,7 @@ model {
     # Average effect prior for SUB-MODEL 2:
      mu.vac[i] ~ dnorm(0, 1e-6)
     # Prior for sub-model 2 (Random. pop. effect):
-     delta.vac[i] ~ dnorm(psi.vac, prec.vac)
+     delta.vac[i] ~ dt(psi.vac, prec.vac, 2) # if desired can be ~ dnorm(psi.vac, prec.vac)
     
      ## Mixed predictive check for SUB-MODEL 2:
        # Predictive likelihood:
@@ -73,9 +73,9 @@ model {
   }
   
    # Hyperpriors for SUB-MODEL 2:
-    psi.vac ~ dnorm(0, 1.0e-6)
+    psi.vac ~ dnorm(0, 1.0e-4)
     prec.vac <- pow(tau.vac, -2)
-    tau.vac ~  dunif(0, 10000)
+    tau.vac ~  dunif(0, 1000)
   
   # Transformations for SUB-MODEL 2:
    # Convert LOR to OR

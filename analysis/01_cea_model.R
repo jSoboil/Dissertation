@@ -213,7 +213,7 @@ Effects[, 2] <- apply(m_utilities_NTdisc, 1, sum)
 v_names_str <- c("Status Quo: screening only", "New Treatment: screening & vaccine")
 
 ## BCEA package summary:
-df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str, Kmax = 2500, plot = TRUE)
+df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str, Kmax = 2000, plot = TRUE)
 summary.bcea(df_cea)
 BCEA::contour2(df_cea, graph = "ggplot2")
 BCEA::ib.plot(df_cea, graph = "ggplot2")
