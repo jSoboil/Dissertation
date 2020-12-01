@@ -8,6 +8,8 @@
 # Africa." Most parameters are simulated using an empirical Bayes' approach, bar vaccine
 # efficacy.
 
+# Note: across all empirical bayes estimates, we assume a 5% standard error.
+
 # ==========================================================================================
 # Probability Dying less HPV for all States -------------------------------
 # ==========================================================================================
@@ -70,14 +72,14 @@ HPV_Normal_30plus <- (1 - exp(-.15 * 1.5))
 # all other parameters using one input distribution.
 
 # Parameters for this regression:
-alpha.HPVtoNormal_15to24 <- beta_params(mean = HPV_Normal_15, sigma = 0.025)$alpha
-beta.HPVtoNormal_15to24 <- beta_params(mean = HPV_Normal_15, sigma = 0.025)$beta
+alpha.HPVtoNormal_15to24 <- beta_params(mean = HPV_Normal_15, sigma = 0.05)$alpha
+beta.HPVtoNormal_15to24 <- beta_params(mean = HPV_Normal_15, sigma = 0.05)$beta
 
-alpha.HPVtoNormal_25to29 <- beta_params(mean = HPV_Normal_25, sigma = 0.025)$alpha
-beta.HPVtoNormal_25to29 <- beta_params(mean = HPV_Normal_25, sigma = 0.025)$beta
+alpha.HPVtoNormal_25to29 <- beta_params(mean = HPV_Normal_25, sigma = 0.05)$alpha
+beta.HPVtoNormal_25to29 <- beta_params(mean = HPV_Normal_25, sigma = 0.05)$beta
 
-alpha.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.025)$alpha
-beta.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.025)$beta
+alpha.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.05)$alpha
+beta.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.05)$beta
 
 # ====================================================================================
 # Sub-Model for progressions from LSIL --------------------
@@ -114,8 +116,8 @@ beta.HSIL <- beta_params(mean = HSIL, sigma = 0.05)$beta
 StageI.mu <- (1 - exp(-0.9 * 4))
 
 # Distribution parameters
-alpha.StageI <- beta_params(mean = StageI.mu, sigma = 0.025)$alpha
-beta.StageI <- beta_params(mean = StageI.mu, sigma = 0.025)$beta
+alpha.StageI <- beta_params(mean = StageI.mu, sigma = 0.05)$alpha
+beta.StageI <- beta_params(mean = StageI.mu, sigma = 0.05)$beta
 
 # Annual probability of symptoms from Stage I to Treatment:
 StageI.Detect.mu <- 0.15
@@ -125,8 +127,8 @@ StageI.Detect.mu <- 0.15
 StageII.mu <- (1 - exp(-0.9 * 3))
 
 # Distribution parameters
-alpha.StageII <- beta_params(mean = StageII.mu, sigma = 0.025)$alpha
-beta.StageII <- beta_params(mean = StageII.mu, sigma = 0.025)$beta
+alpha.StageII <- beta_params(mean = StageII.mu, sigma = 0.05)$alpha
+beta.StageII <- beta_params(mean = StageII.mu, sigma = 0.05)$beta
 
 # Annual probability of symptoms from Stage II to Treatment:
 StageII.Detect.mu <- 0.225
@@ -136,8 +138,8 @@ StageII.Detect.mu <- 0.225
 StageIII.mu <- 1 - exp(-0.9 * 2)
 
 # Distribution parameters
-alpha.StageIII <- beta_params(mean = StageIII.mu, sigma = 0.025)$alpha
-beta.StageIII <- beta_params(mean = StageIII.mu, sigma = 0.025)$beta
+alpha.StageIII <- beta_params(mean = StageIII.mu, sigma = 0.05)$alpha
+beta.StageIII <- beta_params(mean = StageIII.mu, sigma = 0.05)$beta
 
 # Annual probability of symptoms from Stage III to Treatment:
 StageIII.Detect.mu <- 0.6
@@ -147,8 +149,8 @@ StageIII.Detect.mu <- 0.6
 StageIV.Detect.mu <- 0.9
 
 # Distribution parameters
-alpha.StageIV <- beta_params(mean = StageIV.Detect.mu, sigma = 0.025)$alpha
-beta.StageIV <- beta_params(mean = StageIV.Detect.mu, sigma = 0.025)$beta
+alpha.StageIV <- beta_params(mean = StageIV.Detect.mu, sigma = 0.05)$alpha
+beta.StageIV <- beta_params(mean = StageIV.Detect.mu, sigma = 0.05)$beta
 
 # ===========================================================================================
 # Stage I 5-year Survival -------------------------------------------------
@@ -156,32 +158,32 @@ beta.StageIV <- beta_params(mean = StageIV.Detect.mu, sigma = 0.025)$beta
 # Year 1:
 # Survive = 0.9688
 # Die = 1 - (0.9688 + mortality_lessHPV).. etc.
-alpha.StageI_YearI <- beta_params(mean = 0.9688, sigma = 0.025)$alpha
-beta.StageI_YearI <- beta_params(mean = 0.9688, sigma = 0.025)$beta
+alpha.StageI_YearI <- beta_params(mean = 0.9688, sigma = 0.05)$alpha
+beta.StageI_YearI <- beta_params(mean = 0.9688, sigma = 0.05)$beta
 
 # Year 2
 # Survive = 0.9525
 # Die = 1 - (0.9525+ mortality_lessHPV)
-alpha.StageI_YearII <- beta_params(mean = 0.9525, sigma = 0.025)$alpha
-beta.StageI_YearII <- beta_params(mean = 0.9525, sigma = 0.025)$beta
+alpha.StageI_YearII <- beta_params(mean = 0.9525, sigma = 0.05)$alpha
+beta.StageI_YearII <- beta_params(mean = 0.9525, sigma = 0.05)$beta
 
 # Year 3
 # Survive = 0.9544
 # Die = 1 - (0.9544 + mortality_lessHPV)
-alpha.StageI_YearIII <- beta_params(mean = 0.9544, sigma = 0.025)$alpha
-beta.StageI_YearIII <- beta_params(mean = 0.9544, sigma = 0.025)$beta
+alpha.StageI_YearIII <- beta_params(mean = 0.9544, sigma = 0.05)$alpha
+beta.StageI_YearIII <- beta_params(mean = 0.9544, sigma = 0.05)$beta
 
 # Year 4
 # Survive = 0.9760
 # Die = 1 - 0.9760
-alpha.StageI_YearIV <- beta_params(mean = 0.9760, sigma = 0.025)$alpha
-beta.StageI_YearIV <- beta_params(mean = 0.9760, sigma = 0.025)$beta
+alpha.StageI_YearIV <- beta_params(mean = 0.9760, sigma = 0.05)$alpha
+beta.StageI_YearIV <- beta_params(mean = 0.9760, sigma = 0.05)$beta
 
 # Year 5
 # Survive = 0.9761
 # Die = 1 - 0.9761
-alpha.StageI_YearV <- beta_params(mean = 0.9761, sigma = 0.025)$alpha
-beta.StageI_YearV <- beta_params(mean = 0.9761, sigma = 0.025)$beta
+alpha.StageI_YearV <- beta_params(mean = 0.9761, sigma = 0.05)$alpha
+beta.StageI_YearV <- beta_params(mean = 0.9761, sigma = 0.05)$beta
 
 # 5 year survival:
 ((0.9688) * (0.9525) * (0.9544) * (0.9760) * (0.9761))
@@ -192,32 +194,32 @@ beta.StageI_YearV <- beta_params(mean = 0.9761, sigma = 0.025)$beta
 # Year 1:
 # Survive = 0.9066
 # Die = 1 - 0.9066
-alpha.StageII_YearI <- beta_params(mean = 0.9066, sigma = 0.025)$alpha
-beta.StageII_YearI <- beta_params(mean = 0.9066, sigma = 0.025)$beta
+alpha.StageII_YearI <- beta_params(mean = 0.9066, sigma = 0.05)$alpha
+beta.StageII_YearI <- beta_params(mean = 0.9066, sigma = 0.05)$beta
 
 # Year 2
 # Survive = 0.8760
 # Die = 1 - 0.8760
-alpha.StageII_YearII <- beta_params(mean = 0.8760, sigma = 0.025)$alpha
-beta.StageII_YearII <- beta_params(mean = 0.8760, sigma = 0.025)$beta
+alpha.StageII_YearII <- beta_params(mean = 0.8760, sigma = 0.05)$alpha
+beta.StageII_YearII <- beta_params(mean = 0.8760, sigma = 0.05)$beta
 
 # Year 3
 # Survive = 0.9225
 # Die = 1 - 0.9225
-alpha.StageII_YearIII <- beta_params(mean = 0.9225, sigma = 0.025)$alpha
-beta.StageII_YearIII <- beta_params(mean = 0.9225, sigma = 0.025)$beta
+alpha.StageII_YearIII <- beta_params(mean = 0.9225, sigma = 0.05)$alpha
+beta.StageII_YearIII <- beta_params(mean = 0.9225, sigma = 0.05)$beta
 
 # Year 4
 # Survive = 0.9332
 # Die = 1 - 0.9332
-alpha.StageII_YearIV <- beta_params(mean = 0.9332, sigma = 0.025)$alpha
-beta.StageII_YearIV <- beta_params(mean = 0.9332, sigma = 0.025)$beta
+alpha.StageII_YearIV <- beta_params(mean = 0.9332, sigma = 0.05)$alpha
+beta.StageII_YearIV <- beta_params(mean = 0.9332, sigma = 0.05)$beta
 
 # Year 5
 # Survive = 0.9604
 # Die = 1 - 0.9604
-alpha.StageII_YearV <- beta_params(mean = 0.9604, sigma = 0.025)$alpha
-beta.StageII_YearV <- beta_params(mean = 0.9604, sigma = 0.025)$beta
+alpha.StageII_YearV <- beta_params(mean = 0.9604, sigma = 0.05)$alpha
+beta.StageII_YearV <- beta_params(mean = 0.9604, sigma = 0.05)$beta
 
 # 5 year survival:
 ((0.9066) * (0.8760) * (0.9225) * (0.9332) * (0.9604))
@@ -228,32 +230,32 @@ beta.StageII_YearV <- beta_params(mean = 0.9604, sigma = 0.025)$beta
 # Year 1:
 # Survive = 0.7064
 # Die = 1 - 0.7064
-alpha.StageIII_YearI <- beta_params(mean = 0.7064, sigma = 0.025)$alpha
-beta.StageIII_YearI <- beta_params(mean = 0.7064, sigma = 0.025)$beta
+alpha.StageIII_YearI <- beta_params(mean = 0.7064, sigma = 0.05)$alpha
+beta.StageIII_YearI <- beta_params(mean = 0.7064, sigma = 0.05)$beta
 
 # Year 2
 # Survive = 0.7378
 # Die = 1 - 0.7378
-alpha.StageIII_YearII <- beta_params(mean = 0.7378, sigma = 0.025)$alpha
-beta.StageIII_YearII <- beta_params(mean = 0.7378, sigma = 0.025)$beta
+alpha.StageIII_YearII <- beta_params(mean = 0.7378, sigma = 0.05)$alpha
+beta.StageIII_YearII <- beta_params(mean = 0.7378, sigma = 0.05)$beta
 
 # Year 3
 # Survive = 0.8610
 # Die = 1 - 0.8610
-alpha.StageIII_YearIII <- beta_params(mean = 0.8610, sigma = 0.025)$alpha
-beta.StageIII_YearIII <- beta_params(mean = 0.8610, sigma = 0.025)$beta
+alpha.StageIII_YearIII <- beta_params(mean = 0.8610, sigma = 0.05)$alpha
+beta.StageIII_YearIII <- beta_params(mean = 0.8610, sigma = 0.05)$beta
 
 # Year 4
 # Survive = 0.9231
 # Die = 1 - 0.9231
-alpha.StageIII_YearIV <- beta_params(mean = 0.9231, sigma = 0.025)$alpha
-beta.StageIII_YearIV <- beta_params(mean = 0.9231, sigma = 0.025)$beta
+alpha.StageIII_YearIV <- beta_params(mean = 0.9231, sigma = 0.05)$alpha
+beta.StageIII_YearIV <- beta_params(mean = 0.9231, sigma = 0.05)$beta
 
 # Year 5
 # Survive = 0.9142
 # Die = 1 - 0.9142
-alpha.StageIII_YearV <- beta_params(mean = 0.9142, sigma = 0.025)$alpha
-beta.StageIII_YearV <- beta_params(mean = 0.9142, sigma = 0.025)$beta
+alpha.StageIII_YearV <- beta_params(mean = 0.9142, sigma = 0.05)$alpha
+beta.StageIII_YearV <- beta_params(mean = 0.9142, sigma = 0.05)$beta
 
 # 5 year survival:
 ((0.7064) * (0.7378) * (0.8610) * (0.9231) * (0.9142))
@@ -264,32 +266,32 @@ beta.StageIII_YearV <- beta_params(mean = 0.9142, sigma = 0.025)$beta
 # Year 1:
 # Survive = 0.3986
 # Die = 1 - 0.3986
-alpha.StageIV_YearI <- beta_params(mean = 0.3986, sigma = 0.025)$alpha
-beta.StageIV_YearI <- beta_params(mean = 0.3986, sigma = 0.025)$beta
+alpha.StageIV_YearI <- beta_params(mean = 0.3986, sigma = 0.05)$alpha
+beta.StageIV_YearI <- beta_params(mean = 0.3986, sigma = 0.05)$beta
 
 # Year 2
 # Survive = 0.4982
 # Die = 1 - 0.4982
-alpha.StageIV_YearII <- beta_params(mean = 0.4982, sigma = 0.025)$alpha
-beta.StageIV_YearII <- beta_params(mean = 0.4982, sigma = 0.025)$beta
+alpha.StageIV_YearII <- beta_params(mean = 0.4982, sigma = 0.05)$alpha
+beta.StageIV_YearII <- beta_params(mean = 0.4982, sigma = 0.05)$beta
 
 # Year 3
 # Survive = 0.7638
 # Die = 1 - 0.7638
-alpha.StageIV_YearIII <- beta_params(mean = 0.7638, sigma = 0.025)$alpha
-beta.StageIV_YearIII <- beta_params(mean = 0.7638, sigma = 0.025)$beta
+alpha.StageIV_YearIII <- beta_params(mean = 0.7638, sigma = 0.05)$alpha
+beta.StageIV_YearIII <- beta_params(mean = 0.7638, sigma = 0.05)$beta
 
 # Year 4
 # Survive = 0.8652
 # Die = 1 - 0.8652
-alpha.StageIV_YearIV <- beta_params(mean = 0.8652, sigma = 0.025)$alpha
-beta.StageIV_YearIV <- beta_params(mean = 0.8652, sigma = 0.025)$beta
+alpha.StageIV_YearIV <- beta_params(mean = 0.8652, sigma = 0.05)$alpha
+beta.StageIV_YearIV <- beta_params(mean = 0.8652, sigma = 0.05)$beta
 
 # Year 5
 # Survive = 0.8592
 # Die = 1 - 0.8592
-alpha.StageIV_YearV <- beta_params(mean = 0.8592, sigma = 0.025)$alpha
-beta.StageIV_YearV <- beta_params(mean = 0.8592, sigma = 0.025)$beta
+alpha.StageIV_YearV <- beta_params(mean = 0.8592, sigma = 0.05)$alpha
+beta.StageIV_YearV <- beta_params(mean = 0.8592, sigma = 0.05)$beta
 
 # 5 year survival:
 ((0.3986) * (0.4982) * (0.7638) * (0.8652) * (0.8592))

@@ -32,9 +32,9 @@ model {
     # to (1 / x^2):
      log(prec.age[i]) <- pow(sigma.age[i], -2)
      
-    # Relatively wide prior on variance for each age group. See (Gelman, 2006) on use of
+    # Relatively wide prior on variance for each age group. See (Gelman, 2006) on
     # half-t for variance parameters in hierarchical models.
-     sigma.age[i] ~ dt(0, 1, 2)T(0, )
+     sigma.age[i] ~ dt(0, 1, 1)T(0, )
   }
 
 ### END OF SUB-MODEL 1.
@@ -52,7 +52,7 @@ model {
      logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
     # Average effect prior for SUB-MODEL 2:
-     mu.vac[i] ~ dnorm(0, 1e-6)
+     mu.vac[i] ~ dnorm(0, 1e-4)
     # Prior for sub-model 2 (Random. pop. effect):
      delta.vac[i] ~ dt(psi.vac, prec.vac, 1) # if desired can be ~ dnorm(psi.vac, prec.vac)
     
@@ -69,7 +69,7 @@ model {
   }
   
    # Hyperpriors for SUB-MODEL 2:
-    psi.vac ~ dnorm(0, 1.0e-6)
+    psi.vac ~ dnorm(0, 1.0e-4)
     prec.vac <- pow(tau.vac, -2)
     tau.vac ~  dt(0, 1, 1)T(0, )
   
