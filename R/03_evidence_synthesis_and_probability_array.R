@@ -11,7 +11,8 @@ source("R/04_parameter_inputs.R")
 # given the context of South Africa in 2009. In order to account for this, it would have be 
 # desirable to incorporate another parameter to provide a conditional annual risk of dying 
 # from HIV/AIDS. However, because this was purely a replication exercise, we did not 
-# find it necessary and focused on the outcomes of the comparative models.
+# find it necessary and focused on the outcomes of the comparative models. The original model
+# ran the time horizon from 0-76 when HIV/AIDs mortality was included.
 
 # ==========================================================================================
 # Evidence Synthesis Model ------------------------------------------------
@@ -25,15 +26,15 @@ model {
 # posterior using a likelihood model. However, a hyperprior is used for the population 
 # variance to account for a greater uncertainty in each age-population.
   for (i in 1:86) {
-    # Monte Carlo:
      omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
     
     # Note use of pow() function, using -2 is a shorthand inverse method equivalent 
     # to (1 / x^2):
      log(prec.age[i]) <- pow(sigma.age[i], -2)
      
-    # Relatively wide prior on variance for each age group.
-     sigma.age[i] ~ dunif(0, 10)
+    # Relatively wide prior on variance for each age group. See (Gelman, 2006) on use of
+    # half-t for variance parameters in hierarchical models.
+     sigma.age[i] ~ dt(0, 1, 2)T(0, )
   }
 
 ### END OF SUB-MODEL 1.
@@ -70,7 +71,7 @@ model {
    # Hyperpriors for SUB-MODEL 2:
     psi.vac ~ dnorm(0, 1.0e-6)
     prec.vac <- pow(tau.vac, -2)
-    tau.vac ~  dunif(0, 10)
+    tau.vac ~  dt(0, 1, 1)T(0, )
   
   # Transformations for SUB-MODEL 2:
    # Convert LOR to OR
@@ -87,9 +88,9 @@ model {
 ### SUB-MODEL 3: CANCER PROGRESSION AND 5-YEAR SURVIVAL STAGES I-IV.
 # Model parameters abbreviated by .canc. Note: this is equivalent to a standard 
 # Monte Carlo PSA, as it is technically sampling directly from a prior and it is
-# *not* propogated into a posterior using a likelihood model. We have had to truncate these 
-# distributions in order for the ASSA mortality data to be properly combined and the state
-# transition probabilities to be proper.
+# *not* propogated into a posterior using a likelihood model. We have had to truncate  
+# some of these distributions in order for the ASSA mortality data to be properly combined
+# and the state transition probabilities to be proper.
 
    # Distribution according to Stage:
     Stage.I.canc ~ dbeta(alpha.StageI, beta.StageI)T(0, 0.88)
@@ -128,12 +129,11 @@ model {
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
 # directly from a prior and it is *not* propogated into a posterior using a likelihood 
 # model. 
-   
-   # Monte Carlo:
+
    # From HPV to Normal across age groups:
    # Note: because all other states except Death are assumed to be dependent and disjoint for
    # regression to normal from state of HPV/Infection, one can calculate all other relevant 
-   # states from the complement of the transitions that are obtained from the model below:
+   # states from the complement of the transitions that are obtained from the below:
     HPV_Well_15to24 ~ dbeta(alpha.HPVtoNormal_15to24, beta.HPVtoNormal_15to24)
     HPV_Well_25to29 ~ dbeta(alpha.HPVtoNormal_25to29, beta.HPVtoNormal_25to29)
     HPV_Well_30toEnd ~ dbeta(alpha.HPVtoNormal_30toPlus, beta.HPVtoNormal_30toPlus)
@@ -143,11 +143,16 @@ model {
 ### SUB-MODEL 5: LSIL & HSIL PROGRESSION:
 # Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
 # directly from a prior and it is *not* propogated into a posterior using a likelihood 
-# model. I have had to truncate these distributions in order for the ASSA mortality data 
+# model. We have had to truncate these distributions in order for the ASSA mortality data 
 # to be properly combined and for the state transition probabilities to be proper.
-   LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, 0.88)
-   LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.88)
-   HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.88)
+
+   # From LSIL & HSIL to Normal or Infection across age groups:
+   # Note: because all other states except Death are assumed to be dependent and disjoint for
+   # regression to normal or Infection from state of LSIL & HSIL, one can calculate all other 
+   # relevant states from the complement of the transitions that are obtained from the below:
+    LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, 0.88)
+    LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.88)
+    HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.88)
 
 ### END OF SUB-MODEL 5.
 
@@ -243,14 +248,15 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 45000
-n.burnin <- 10000
+n.iter <- 35000
+n.burnin <- 5000
 n.thin <- floor((n.iter - n.burnin) / 250)
 
 # Run MCMC model:
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
                  model.file = "data/jags_model.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+options(max.print = 1500)
 mod_JAGS
 # One can automate convergence. However, the improvement is negligible, and it increased the run
 # time of the model from < 60secs to > 2 mins. However, if desired, uncomment the line of code 
