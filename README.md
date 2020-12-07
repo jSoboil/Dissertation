@@ -3,10 +3,7 @@ title: A Selection Framework for Incorporating a Fully Integrated Bayesian Appro
 css: [misc/css/styles.css]
 ---
 
-<br/>
-
 <img src="misc/logo.jpg" width="260" align="right" />
-
 <br/>
 
 ![CEAbadge](https://img.shields.io/github/issues/jSoboil/Dissertation)
@@ -15,23 +12,20 @@ css: [misc/css/styles.css]
 ![CEAbadge](https://img.shields.io/badge/R-v4.0.0+-blue)
 ![CEAbadge](https://img.shields.io/badge/JAGS-v4.3.0-blue)
 
-<br/>
 
 ## Authors
 1. [Joshua Soboil](https://www.linkedin.com/in/joshua-soboil-067351172/)<sup>a,b</sup>
 2. [Lucy Cunnama](https://scholar.google.co.za/citations?hl=en&user=eG7OJ7EAAAAJ)<sup>b</sup>
 3. [Tommy Wilkinson](https://twitter.com/Tommy_HealthSA)<sup>b</sup>
 
-<sup>a. Corresponding author ([email](mailto:soboil.joshua@gmail.com)) \
-b. Health Economics Unit, School of Public Health and Family Medicine, University of Cape Town.<sup>
-
+<sup>a. Corresponding author ([email](mailto:soboil.joshua@gmail.com)) <br/>
+b. Health Economics Unit, School of Public Health and Family Medicine, University of Cape Town<sup>
 <br/>
 
 ## Brief
 <p>This repository stores a Cost-Effectiveness Analysis model coded in the R language. The model is is a replication of an original model developed by [Sinanovic E. et al.](https://doi.org/10.1016/j.vaccine.2009.08.004), titled:
 
 >The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical cancer screening programme in South Africa.
-
 
 ## Background
 <p>Due to the scarcity of resources faced by MICs, it is imperative that economic evaluation methods within such contexts are selected judiciously. Accordingly, the article associated with this repository proposes a selection framework intended to streamline and improve the choice of sensitivity analysis methods for health economic evaluations conducted in MICs.<p>
@@ -44,8 +38,6 @@ b. Health Economics Unit, School of Public Health and Family Medicine, Universit
 <br/>
 
 <img src="figs/Pugh_matrix.png" width="490" style="float: centre" />
-
-<br/>
 <br/>
 
 <details>
