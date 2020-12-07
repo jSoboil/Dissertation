@@ -33,6 +33,7 @@ b. Health Economics Unit, School of Public Health and Family Medicine, Universit
 
 >The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
+<p>
 <br/>
 
 ## Background
@@ -46,9 +47,7 @@ b. Health Economics Unit, School of Public Health and Family Medicine, Universit
 <p>The result of the replication study suggests that the technical benefits of more complex methods do not always translate into practical benefits. Moreover, because social values play a fundamental role in informing health care resource allocation decisions, it is imperative that the analyst always consider the perspective of the decision-maker. Health economic decision-models are not solely predictive tools, but also communication tools that help decision-makers to weigh both the social and economic consequences of their resource allocation decisions. As such, the authors propose a selection framework using the Pugh-matrix concept selection method. Several categories associated with decision-maker preferences, available resources, as well as the type of evidence and software available are defined as essential to consider when choosing the appropriate sensitivity analysis method within MIC contexts. However, because of its concrete and qualitative nature, the authors anticipate that the selection framework will additionally serve as a beneficial instrument for better knowledge translation between an analyst and decision-maker. See a rough version of the selection matrix below<p>
 
 <br/>
-
-<img src="figs/Pugh_matrix.png" width="400" style="float:middle" />
-
+ <img src="figs/Pugh_matrix.png" width="400" style="float:middle" />
 <br/>
 
 ### Technical Note
@@ -60,4 +59,3 @@ b. Health Economics Unit, School of Public Health and Family Medicine, Universit
 >A Need for Change! A Coding Framework for Improving Transparency in Decision Modeling. 
 
 Access the article [here](https://doi.org/10.1007/s40273-019-00837-x)<p>
-
