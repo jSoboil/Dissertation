@@ -6,25 +6,19 @@ output::
 
 <img src="misc/logo.jpg" width="300" align="right" />
 
-
 ![CEAbadge](https://img.shields.io/github/issues/jSoboil/Dissertation)
 ![CEAbadge](https://img.shields.io/github/last-commit/jSoboil/Dissertation)
 ![CEAbadge](https://img.shields.io/github/license/jSoboil/Dissertation?label=license)
 ![CEAbadge](https://img.shields.io/badge/R-v4.0.0+-blue)
 ![CEAbadge](https://img.shields.io/badge/JAGS-v4.3.0-blue)
 
-
 ## Authors
-1. [Joshua Soboil](https://www.linkedin.com/in/joshua-soboil-067351172/)<sup>a, b</sup>
+1. [Joshua Soboil](https://www.linkedin.com/in/joshua-soboil-067351172/)<sup>a,b</sup>
 2. [Lucy Cunnama](https://scholar.google.co.za/citations?hl=en&user=eG7OJ7EAAAAJ)<sup>b</sup>
 3. [Tommy Wilkinson](https://twitter.com/Tommy_HealthSA)<sup>b</sup>
 
-<sup>
-a. Corresponding author ([email](mailto:soboil.joshua@gmail.com))
-<br/>
-b. Health Economics Unit, School of Public Health and Family Medicine, University of Cape Town.
-<sup>
-<br/>
+<sup>a. Corresponding author ([email](mailto:soboil.joshua@gmail.com)) \
+b. Health Economics Unit, School of Public Health and Family Medicine, University of Cape Town.<sup>
 
 ## Brief
 <p>This repository stores a Cost-Effectiveness Analysis model coded in the R language. This model is is a replication of an original model developed by [Sinanovic E. et al. (2009)](https://www.sciencedirect.com/science/article/pii/S0264410X09011670?via%3Dihub) titled
@@ -45,7 +39,7 @@ b. Health Economics Unit, School of Public Health and Family Medicine, Universit
 
 <br/>
 
-
+<img src="figs/Pugh_matrix.png" width="300" style="float:middle" />
 
 <br/>
 
