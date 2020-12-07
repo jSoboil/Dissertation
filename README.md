@@ -1,10 +1,8 @@
 ---
 title: A Selection Framework for Incorporating a Fully Integrated Bayesian Approach to Cost-Effectiveness Evaluation in Middle Income Country Contexts
-output:
-  html_document:
-    css: "misc/css/styles.css"
-section-titles: true
+css: "misc/css/styles.css"
 ---
+\
 \
 \
 \
