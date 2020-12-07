@@ -45,7 +45,7 @@ b. Health Economics Unit, School of Public Health and Family Medicine, Universit
 
 <br/>
 
-<img src="figs/Pugh_matrix.png" width="300" style="float:middle" />
+
 
 <br/>
 
