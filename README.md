@@ -12,9 +12,9 @@
 
 
 ## Authors
-1. [Joshua Soboil](https://www.linkedin.com/in/joshua-soboil-067351172/)<sup>a,b</sup>
-2. [Lucy Cunnama](https://scholar.google.co.za/citations?hl=en&user=eG7OJ7EAAAAJ)<sup>b</sup>
-3. [Tommy Wilkinson](https://twitter.com/Tommy_HealthSA)<sup>b</sup>
+1. [Joshua Soboil](https://orcid.org/0000-0003-1362-8465)<sup>a,b</sup>
+2. [Lucy Cunnama](https://orcid.org/0000-0003-2134-4905)<sup>b</sup>
+3. [Tommy Wilkinson](https://orcid.org/0000-0003-0806-2196)<sup>b</sup>
 
 <sup>a. Corresponding author's [email](mailto:soboil.joshua@gmail.com) <br/>
 b. Health Economics Unit, School of Public Health and Family Medicine, University of Cape Town<sup>
