@@ -5,12 +5,17 @@ output::
 ---
 
 <img src="misc/logo.jpg" width="300" align="right" />
-
+\
+\
 ![CEAbadge](https://img.shields.io/github/issues/jSoboil/Dissertation)
 ![CEAbadge](https://img.shields.io/github/last-commit/jSoboil/Dissertation)
 ![CEAbadge](https://img.shields.io/github/license/jSoboil/Dissertation?label=license)
 ![CEAbadge](https://img.shields.io/badge/R-v4.0.0+-blue)
 ![CEAbadge](https://img.shields.io/badge/JAGS-v4.3.0-blue)
+\
+\
+\
+\
 
 ## Authors
 1. [Joshua Soboil](https://www.linkedin.com/in/joshua-soboil-067351172/)<sup>a,b</sup>
@@ -21,7 +26,7 @@ output::
 b. Health Economics Unit, School of Public Health and Family Medicine, University of Cape Town.<sup>
 
 ## Brief
-<p>This repository stores a Cost-Effectiveness Analysis model coded in the R language. This model is is a replication of an original model developed by [Sinanovic E. et al. (2009)](https://www.sciencedirect.com/science/article/pii/S0264410X09011670?via%3Dihub) titled
+<p>This repository stores a Cost-Effectiveness Analysis model coded in the R language. This model is is a replication of an original model developed by [Sinanovic E., et al.](https://www.sciencedirect.com/science/article/pii/S0264410X09011670?via%3Dihub), titled
 
 >The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
