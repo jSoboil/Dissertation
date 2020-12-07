@@ -1,11 +1,12 @@
 ---
 title: A Selection Framework for Incorporating a Fully Integrated Bayesian Approach to Cost-Effectiveness Evaluation in Middle Income Country Contexts
 css: misc/css/styles.css
-
 ---
+
 <br/>
 
 <img src="misc/logo.jpg" width="260" align="right" />
+
 <br/>
 
 ![CEAbadge](https://img.shields.io/github/issues/jSoboil/Dissertation)
