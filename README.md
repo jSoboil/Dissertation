@@ -46,7 +46,7 @@ The result of the replication study suggests that the technical benefits of more
 
 <br/>
 
- <img src="figs/Pugh_matrix.png" width="400" style="float:middle" />
+ <img src="figs/Pugh_matrix.png" width="100" style="float:middle" />
  
 <br/>
 
