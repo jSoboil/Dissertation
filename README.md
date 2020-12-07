@@ -3,8 +3,6 @@ title: A Selection Framework for Incorporating a Fully Integrated Bayesian Appro
 output::
  css:misc/css/styles.css
 ---
-<br/>
-<br/>
 
 <img src="misc/logo.jpg" width="300" align="right" />
 
