@@ -37,6 +37,8 @@ This repository stores a Cost-Effectiveness Analysis model coded in the R langua
 
 <img src="figs/Pugh_matrix.png" width="490" style="float: centre" />
 <br/>
+<br/>
+<br/>
 
 <details>
 <summary>Technical note</summary>
