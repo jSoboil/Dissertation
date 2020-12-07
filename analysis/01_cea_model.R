@@ -217,9 +217,10 @@ v_names_str <- c("Status Quo: screening only", "New Treatment: screening & vacci
 
 ## BCEA package summary:
 df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str, Kmax = 2000, plot = TRUE)
-summary.bcea(df_cea)
-BCEA::contour2(df_cea, graph = "ggplot2")
-BCEA::ib.plot(df_cea, graph = "ggplot2")
+BCEA::summary.bcea(df_cea, graph = "ggplot2", wtp = 1000)
+BCEA::ceef.plot(df_cea)
+ce <- BCEA::multi.ce(he = df_cea)
+BCEA::ceaf.plot(ce, graph = "ggplot2")
 # In the plot below, r represents the risk aversion parameter which is the square root of the 
 # variance for the expected return on investment. Hence, simply speaking, the more averse, 
 # the more sure a decision-maker is wanting to be of the investment's return.
@@ -229,9 +230,9 @@ riskev <- CEriskav(he = df_cea, r = c(
 # The more risk averse the decision-maker, the greater the value of EVPI:
 BCEA::plot.CEriskav(riskev)
 # At an expected standard deviation of 0.0001, the the EVPI is virtually null and thus the 
-# decision-maker should be theoretically willing to take on the expected variance in the 
-# investment return, given current information. Of course, this is only *theoretical* and it
-# ultimately depends on the decision-maker's preferences and value judgement's.
+# decision-maker should be theoretically willing to take on the expected variance (volatility) 
+# in the investment returns, given current information. Of course, this is only *theoretical* and
+# it ultimately depends on the decision-maker's preferences and value judgement's.
 
 ## Expected Costs and Utility for both treatments across all simulations:
 E_c <- apply(Costs, 2, mean)

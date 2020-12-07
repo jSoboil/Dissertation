@@ -39,7 +39,7 @@ x <- runif(n = 10000)
 x <- qnorm(p = x, mean = 0.8, sd = 1)
 plot(density(x))
 plot(ecdf(x))
-
+# ... now using the random distribution function in R...
 y <- rnorm(n = 10000, mean = 0.8, sd = 1)
 plot(ecdf(y))
 
