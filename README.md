@@ -1,7 +1,3 @@
----
-css: misc/css/styles.css
----
-
 # A Selection Framework for Incorporating a Fully Integrated Bayesian Approach to Cost-Effectiveness Evaluation in Middle Income Country Contexts
 
 
