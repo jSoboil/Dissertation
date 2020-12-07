@@ -3,19 +3,22 @@ title: A Selection Framework for Incorporating a Fully Integrated Bayesian Appro
 output::
  css:misc/css/styles.css
 ---
+<br/>
+<br/>
 
 <img src="misc/logo.jpg" width="300" align="right" />
-\
-\
+
+<br/>
+<br/>
+
 ![CEAbadge](https://img.shields.io/github/issues/jSoboil/Dissertation)
 ![CEAbadge](https://img.shields.io/github/last-commit/jSoboil/Dissertation)
 ![CEAbadge](https://img.shields.io/github/license/jSoboil/Dissertation?label=license)
 ![CEAbadge](https://img.shields.io/badge/R-v4.0.0+-blue)
 ![CEAbadge](https://img.shields.io/badge/JAGS-v4.3.0-blue)
-\
-\
-\
-\
+
+<br/>
+<br/>
 
 ## Authors
 1. [Joshua Soboil](https://www.linkedin.com/in/joshua-soboil-067351172/)<sup>a,b</sup>
@@ -25,11 +28,14 @@ output::
 <sup>a. Corresponding author ([email](mailto:soboil.joshua@gmail.com)) \
 b. Health Economics Unit, School of Public Health and Family Medicine, University of Cape Town.<sup>
 
+<br/>
+
 ## Brief
 <p>This repository stores a Cost-Effectiveness Analysis model coded in the R language. This model is is a replication of an original model developed by [Sinanovic E., et al](https://doi.org/10.1016/j.vaccine.2009.08.004), titled
 
 >The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
+<br/>
 <br/>
 
 ## Background
@@ -50,6 +56,9 @@ b. Health Economics Unit, School of Public Health and Family Medicine, Universit
 
 ### Technical Note
 <p>Before running the model, ensure that the local working directory is set to the location of the .Rproj folder saved on your computer. In RStudio, the easiest way to select the local directory path is by pressing Ctrl + Shift + H.<p>
+
+<br/>
+
 <details>
 <summary>Coding style</summary>
 <p>The coding styled used throughout the model follows the coding framework proposed by Alarid-Escudero et al. (2019) titled:
