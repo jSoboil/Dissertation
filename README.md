@@ -21,7 +21,7 @@ b. Health Economics Unit, School of Public Health and Family Medicine, Universit
 <br/>
 
 ## Brief
-This repository stores a Cost-Effectiveness Analysis model coded in the R language. The model is is a replication of an original model developed by [Sinanovic E. et al.](https://doi.org/10.1016/j.vaccine.2009.08.004), titled:
+This repository stores a Cost-Effectiveness Analysis model coded in the R language. It is a replication of a model originally developed by [Sinanovic E. et al.](https://doi.org/10.1016/j.vaccine.2009.08.004), titled:
 
 >The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
@@ -36,7 +36,6 @@ This repository stores a Cost-Effectiveness Analysis model coded in the R langua
 <br/>
 
 <img src="figs/Pugh_matrix.png" width="490" style="float: centre" />
-<br/>
 <br/>
 <br/>
 
