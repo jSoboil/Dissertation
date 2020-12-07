@@ -1,8 +1,9 @@
 ---
 title: A Selection Framework for Incorporating a Fully Integrated Bayesian Approach to Cost-Effectiveness Evaluation in Middle Income Country Contexts
+output:
+  md_document: 
 css: "misc/css/styles.css"
 ---
-\
 \
 \
 \
@@ -19,7 +20,7 @@ css: "misc/css/styles.css"
 \
 \
 
-## Purpose
+## Background
 <p>This repository stores the replicated Cost-Effectiveness Analysis code used to explore the strengths of a fully integrated Bayesian Posterior simulation approach to Cost-Effectiveness Analysis in a middle-income country context. The [original study](https://www.sciencedirect.com/science/article/pii/S0264410X09011670?via%3Dihub) used Deterministic Sensitivity Analysis (DSA) and was developed by Sinanovic E., et al. (2009) titled: 
 
 >The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical cancer screening programme in South Africa.
