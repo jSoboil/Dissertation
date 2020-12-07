@@ -35,7 +35,6 @@ The framework was established by comparing a MIC cost-effectiveness analysis mod
 The result of the replication study suggests that the *technical* benefits of more complex methods do not always translate into *practical* benefits. Moreover, because social values play a fundamental role in informing health care resource allocation decisions, it is imperative that the analyst always consider the perspective of the decision-maker. Health economic decision-models are not solely predictive tools, but also communication tools that help the decision-maker in weighing both social and economic consequences of their resource allocation decisions. The authors therefore propose a selection framework using the Pugh-matrix concept selection method. Several categories associated with decision-maker preferences, available resources, as well as the type of evidence and software available are defined as essential to consider when choosing the appropriate sensitivity analysis method within MIC contexts. However, because of its concrete and qualitative nature, the authors anticipate that the selection framework will additionally serve as a beneficial instrument for better knowledge translation between an analyst and decision-maker. See a rough version of the selection matrix below:
 <br/>
 <br/>
-<br/>
 <img src="figs/Pugh_matrix.png" width="555" style="float: centre" />
 <br/>
 <br/>
