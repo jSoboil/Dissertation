@@ -160,7 +160,7 @@ model {
 "
 writeLines(text = model_String, con = "data/jags_model.txt")
 
-# Transform data into list format so that can be read by JAGS:
+# Transform data into list so that it can be parsed by JAGS:
 data_JAGS <- list(
  # Vaccine efficacy data:
   Nstud.vac = Nstud.vac, 
