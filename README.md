@@ -21,7 +21,7 @@ b. Health Economics Unit, School of Public Health and Family Medicine, Universit
 <br/>
 
 ## Brief
-<p>This repository stores a Cost-Effectiveness Analysis model coded in the R language. The model is is a replication of an original model developed by [Sinanovic E. et al.](https://doi.org/10.1016/j.vaccine.2009.08.004), titled:
+<p>This repository stores a Cost-Effectiveness Analysis model coded in the R language. The model is is a replication of an original model developed by [Sinanovic E. et al.](https://doi.org/10.1016/j.vaccine.2009.08.004), titled:<p>
 
 >The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical cancer screening programme in South Africa.
 
@@ -42,7 +42,7 @@ b. Health Economics Unit, School of Public Health and Family Medicine, Universit
 <summary>Technical note</summary>
 <p>Before running the model, ensure that the local working directory is set to the location of the .Rproj folder saved on your computer. In RStudio, the easiest way to select the local directory path is by pressing Ctrl + Shift + H.<p>
 
-<p>The coding style throughout the model follows the framework proposed by [Alarid-Escudero F. et al.](https://doi.org/10.1007/s40273-019-00837-x) titled:
+<p>The coding style throughout the model follows the framework proposed by [Alarid-Escudero F. et al.](https://doi.org/10.1007/s40273-019-00837-x) titled:<p>
 
 >A Need for Change! A Coding Framework for Improving Transparency in Decision Modeling. 
 
