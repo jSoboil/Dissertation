@@ -17,8 +17,8 @@ library(tidyverse)
 # Initialise start time counter:
 start_time <- Sys.time()
 
-# We have judged the advantages of using parallel processing to be negligible given the
-# size of the model and run time, which is consistently < 60secs on a relatively 
+# We have judged the advantages of usin^g parallel processing to be negligible given the
+# size of the model and run time, which is consistently < 60 secs on a relatively 
 # low-powered Macbook pro 2018 13".
 
 # Note that the source code for this section sits on top of the code for the Markov Models for 
@@ -221,6 +221,7 @@ BCEA::summary.bcea(df_cea, graph = "ggplot2", wtp = 1000)
 BCEA::ceef.plot(df_cea)
 ce <- BCEA::multi.ce(he = df_cea)
 BCEA::ceaf.plot(ce, graph = "ggplot2")
+BCEA::ceac.plot(df_cea, graph = "ggplot2")
 # In the plot below, r represents the risk aversion parameter which is the square root of the 
 # variance for the expected return on investment. Hence, simply speaking, the more averse, 
 # the more sure a decision-maker is wanting to be of the investment's return.

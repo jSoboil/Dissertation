@@ -8,8 +8,8 @@ source("R/04_parameter_inputs.R")
 
 # Several distributions have had to be truncated at an upper bound of 1 - (max mortality prob). 
 # We found that the mortality rate when it included HIV/AIDS related mortality was extremely high 
-# given the context of South Africa in 2009. In order to account for this, it would have be 
-# desirable to incorporate another parameter to provide a conditional annual risk of dying 
+# given the context of South Africa in 2009. In order to account for this, it would be 
+# desirable to incorporate a parameter which accounts for the conditional annual risk of dying 
 # from HIV/AIDS. However, because this was purely a replication exercise, we did not 
 # find it necessary and focused on the outcomes of the comparative models. The original model
 # ran the time horizon from 0-76 when HIV/AIDs mortality was included.
