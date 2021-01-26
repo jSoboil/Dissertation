@@ -232,7 +232,7 @@ riskev <- CEriskav(he = df_cea, r = c(
 BCEA::plot.CEriskav(riskev)
 # At an expected standard deviation of 0.0001, the the EVPI is virtually null and thus the 
 # decision-maker should be theoretically willing to take on the expected variance (volatility) 
-# in the investment returns, given current information. Of course, this is only *theoretical* and
+# for the return on investment, given current information. Of course, this is only *theoretical* and
 # it ultimately depends on the decision-maker's preferences and value judgement's.
 
 ## Expected Costs and Utility for both treatments across all simulations:
