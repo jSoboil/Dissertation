@@ -140,7 +140,9 @@ m_c_NT <- m_c_SQ
 m_c_NT["Well", c(13)] <-(m_c_NT["Well", c(13)] + c_Vaccine)
 # Create cost and effects matrices:
 m_utilities_NT <- m_costs_NT <- m_utilities_SQ <- m_costs_SQ <- matrix(0, n.sims, n_t + 1, 
-                                                                       dimnames = list(1:n.sims, 0:(n_t)))
+                                                                       dimnames = list(
+                                                                        1:n.sims, 0:(n_t))
+                                                                       )
 
 # Loop costs over time interval t and n.sims i:
 for (i in 1:n.sims) {
@@ -181,8 +183,11 @@ v_dwc <- 1 / ((1 + d_c) ^ (0:(n_t)))
 v_dwe <- 1 / ((1 + d_e) ^ (0:(n_t)))
 
 # Discounted costs and utilities matrices:
-m_utilities_NTdisc <- m_costs_NTdisc <- m_utilities_SQdisc <- m_costs_SQdisc <- matrix(0, n.sims, n_t + 1, 
-                                                                       dimnames = list(1:n.sims, 0:n_t))
+m_utilities_NTdisc <- m_costs_NTdisc <- m_utilities_SQdisc <- m_costs_SQdisc <- matrix(0, n.sims, 
+                                                                                       n_t + 1, 
+                                                                       dimnames = list(
+                                                                        1:n.sims, 0:n_t)
+                                                                       )
 
 for (i in 1:n.sims) {
  for (t in 0:n_t) {
