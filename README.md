@@ -5,7 +5,7 @@
 
 ![CEAbadge](https://img.shields.io/github/issues/jSoboil/Dissertation)
 ![CEAbadge](https://img.shields.io/github/last-commit/jSoboil/Dissertation)
-![CEAbadge](https://img.shields.io/github/license/jSoboil/Dissertation?label=license)
+![CEAbadge](https://img.shields.io/github/license/jSoboil/Dissertation)
 ![CEAbadge](https://img.shields.io/badge/R-v4.0.0+-blue)
 ![CEAbadge](https://img.shields.io/badge/JAGS-v4.3.0-blue)
 
