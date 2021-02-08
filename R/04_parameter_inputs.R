@@ -14,16 +14,14 @@
 # Probability Dying less HPV for all States -------------------------------
 # ==========================================================================================
 # Import ASSA mortality table:
-# mort_data <- read_excel("data-raw/mortality tables.xls", sheet = "final tables", range = "D1:D87")
-# v_p_mort_lessHPV <- as.matrix(mort_data[1])
+mort_data <- read_excel("data-raw/mortality tables.xls", sheet = "final tables", range = "D1:D87")
+v_p_mort_lessHPV <- as.matrix(mort_data[1])
 
 # Like the original study, the replication study is hugely sensitive to the HIV caused mortality 
 # in South Africa in 2009. The mortality table below excludes HIV/AIDS related mortality.  
-# Uncomment the code above and comment the code below to include HIV/AIDS related mortality.
-# However, as in the original model, we chose to exclude HIV-related mortality in order to be 
-# able to run the model for the full time-horizon.
- mort_data <- read_excel("data-raw/mortality tables.xls", sheet = "final tables", range = "F1:F87")
- v_p_mort_lessHPV <- as.matrix(mort_data[1])
+# Uncomment the code below and comment the code above to exclude HIV/AIDS related mortality.
+ # mort_data <- read_excel("data-raw/mortality tables.xls", sheet = "final tables", range = "F1:F87")
+ # v_p_mort_lessHPV <- as.matrix(mort_data[1])
  
 # ==========================================================================================
 # Normal/Well State Progression -------------------------------------------
