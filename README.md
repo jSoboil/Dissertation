@@ -15,8 +15,8 @@
 3. [Tommy Wilkinson](https://orcid.org/0000-0003-0806-2196)<sup>c</sup>
 
 <sup>a. Corresponding author's [email](mailto:soboil.joshua@gmail.com) <br/>
-b. Health Economics Unit, School of Public Health and Family Medicine, University of Cape Town
-c. World Bank Group, 1818 H Street Washington, DC
+b. Health Economics Unit, School of Public Health and Family Medicine, University of Cape Town <br/>
+c. World Bank Group, 1818 H Street Washington, DC <br/>
 <sup>
 <br/>
 
