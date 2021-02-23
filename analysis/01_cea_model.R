@@ -45,8 +45,8 @@ u_HSIL <- 0.87 # utility of being in HSIL for one cycle
 u_StageI <- 0.65 # utility of being in Stage I Cancer for one cycle
 u_StageII <- 0.56 # utility of being in Stage II Cancer for one cycle
 u_StageIII <- 0.56 # utility of being in Stage III Cancer for one cycle
-u_StageIV <- 0.48 # utility of being in Stage IV Cancer for one cycle
-u_CancerSurvivor <- 0.84 # utility of being in Stage II Cancer for one cycle
+u_StageIV <- 0.48 # utility of being in state Stage IV Cancer for one cycle
+u_CancerSurvivor <- 0.84 # utility of being in state Cancer Survivor for one cycle
 u_Death <- 0 # utility of being in state of Death for one cycle
 
 # Vector of state utilities for both treatments:
@@ -82,14 +82,14 @@ m_u_SQ <- m_u_NT <- matrix(c("Well" = u_Well,
                              "Death" = u_Death), 
                            n_states, n_t + 1, dimnames = list(v_n, 0:(n_t)))
 
-# Health costs from a societal perspective --------------------------------
+# Health costs from a health care perspective --------------------------------
 ## All costs in $US.
 c_Vaccine <- 570 # once off cost of vaccine from age 12.
 c_Screening <- 93 + 309 + 75 # cost of screening using HPV DNA, VIA, and cancer cytology tests.
-c_LSIL <- 61 # cost of LSIL treatment.
+c_LSIL <- 61 # cost of LSIL treatment*.
 c_HSIL <- 764 # cost of HSIL treatment*.
-# *HPV 16 & 18 assumed to be asymptomatic and therefore not treated, i.e. no costs are included 
-# for HSIL.
+# Note: HPV 16/18 assumed asymptomatic in original mode and therefore not
+# treated.
 
 ## Cost for treatment at each cancer stage:
 c_StageI <- 4615 # cost of treatment of Stage I Cancer for one cycle.
@@ -133,7 +133,9 @@ m_c_SQ <- matrix(c("Well" = 0,
 # Screening costs for ages 30, 40, and 50:
 m_c_SQ["Well", c(31, 41, 51)] <-(m_c_SQ["Well", c(31, 41, 51)] + c_Screening)
 # LSIL costs for ages 30, 40, and 50:
-m_c_SQ["LSIL", c(31, 41, 51)] <-(m_c_SQ["LSIL", c(31, 41, 51)] + c_LSIL)
+# m_c_SQ["LSIL", c(31, 41, 51)] <-(m_c_SQ["LSIL", c(31, 41, 51)] + c_LSIL)
+# HSIL costs for ages 30, 40, and 50:
+# m_c_SQ["HSIL", c(31, 41, 51)] <-(m_c_SQ["HSIL", c(31, 41, 51)] + c_HSIL)
 # Matrix of state costs based on time interval t under New Treatment:
 m_c_NT <- m_c_SQ
 # Vaccine cost at age 12:

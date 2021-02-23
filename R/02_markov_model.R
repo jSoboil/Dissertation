@@ -55,7 +55,7 @@ for (t in 1:n_t) {
   }
 }
 
-# Check for transition leakage (each cycle must sum to n.sims, otherwise there is somehting 
+# Check for transition leakage (each cycle must sum to n.sims, otherwise there is something 
 # wrong with the transitions probabilities):
 apply(m_M_ad_1, 1, sum)
 apply(m_M_ad_2, 1, sum)

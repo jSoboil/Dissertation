@@ -21,9 +21,9 @@ c. World Bank Group, 1818 H Street Washington, DC <br/>
 <br/>
 
 ## Brief
-This repository stores the code to run a hypothetical case study assessing the practical value of a comprehensive approach to health economic decision-modelling in Middle-Income Country contexts. The model is coded in the R language and is a recreated model originally developed by [Sinanovic E. et al.](https://doi.org/10.1016/j.vaccine.2009.08.004), titled:
+This repository stores the code to run a hypothetical case study assessing the practical value of a comprehensive approach to health economic decision-modelling in Middle-Income Country contexts. The model is coded in the R language and is based on an original model developed by [Sinanovic E. et al.](https://doi.org/10.1016/j.vaccine.2009.08.004), titled:
 
->The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical cancer screening programme in South Africa.
+>The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical cancer screening programme in South Africa`
 
 <br/>
 

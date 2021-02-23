@@ -19,9 +19,10 @@ v_p_mort_lessHPV <- as.matrix(mort_data[1])
 
 # Like the original study, the replication study is hugely sensitive to the HIV caused mortality 
 # in South Africa in 2009. The mortality table below excludes HIV/AIDS related mortality.  
-# Uncomment the code below and comment the code above to exclude HIV/AIDS related mortality.
- # mort_data <- read_excel("data-raw/mortality tables.xls", sheet = "final tables", range = "F1:F87")
- # v_p_mort_lessHPV <- as.matrix(mort_data[1])
+# Uncomment the two lines of code below and comment the code above to exclude HIV/AIDS related 
+# mortality.
+# mort_data <- read_excel("data-raw/mortality tables.xls", sheet = "final tables", range = "F1:F87")
+# v_p_mort_lessHPV <- as.matrix(mort_data[1])
  
 # ==========================================================================================
 # Normal/Well State Progression -------------------------------------------
@@ -47,14 +48,14 @@ mu.a.log <- log(Prevalence)
 # ==========================================================================================
 # PLACEBO (A) AND VACCINE(B).
 # Number of studies:
-Nstud.vac <- 11
+Nstud.vac <- 10
 # Positive participants in Control group:
-rA.vac <- c(435, 41, 28, 38, 219, 15, 10, 21, 56, 20, 17)
+rA.vac <- c(435, 41, 28, 219, 15, 10, 21, 56, 20, 17)
 # Total number of participants in control group:
-nA.vac <- c(5375, 355, 277, 2239, 2924, 392, 175, 7838, 7312, 372, 2502)
+nA.vac <- c(5375, 355, 277, 2924, 392, 175, 7838, 7312, 372, 2502)
 # Positive participants in Trial group:
-rB.vac <- c(32, 12, 1, 3, 61, 0, 0, 2, 4, 0, 1)
-nB.vac <- c(5406, 366, 310, 2190, 2910, 387, 193, 7788, 7344, 401, 2497)
+rB.vac <- c(32, 12, 1, 61, 0, 0, 2, 4, 0, 1)
+nB.vac <- c(5406, 366, 310, 2910, 387, 193, 7788, 7344, 401, 2497)
 
 # ==========================================================================================
 # HPV/Infection State Progression -----------------------------------------
