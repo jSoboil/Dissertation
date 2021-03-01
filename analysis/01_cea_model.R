@@ -17,7 +17,7 @@ library(tidyverse)
 # Initialise start time counter:
 start_time <- Sys.time()
 
-# We have judged the advantages of usin^g parallel processing to be negligible given the
+# We have judged the advantages of using parallel processing to be negligible given the
 # size of the model and run time, which is consistently < 60 secs on a relatively 
 # low-powered Macbook pro 2018 13".
 
