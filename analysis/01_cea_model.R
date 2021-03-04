@@ -224,7 +224,7 @@ v_names_str <- c("Status Quo: screening only", "New Treatment: screening & vacci
 
 ## BCEA package summary:
 df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str, Kmax = 2000, plot = TRUE)
-BCEA::summary.bcea(df_cea, graph = "ggplot2", wtp = 1000)
+BCEA::summary.bcea(df_cea, graph = "ggplot2", wtp = 5724)
 BCEA::ceef.plot(df_cea)
 ce <- BCEA::multi.ce(he = df_cea)
 BCEA::ceaf.plot(ce, graph = "ggplot2")
