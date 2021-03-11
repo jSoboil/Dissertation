@@ -26,15 +26,20 @@ This repository stores the code to run a hypothetical case study assessing the p
 >The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical cancer screening programme in South Africa`
 
 <br/>
+Before running the model, ensure that the local working directory is set to the location of the .Rproj folder saved on your computer. In RStudio, the easiest way to select the local directory path is by pressing Ctrl + Shift + H. In addition, for iOS users, please download JAGS language [here](https://sourceforge.net/projects/mcmc-jags/files/JAGS/4.x/Mac%20OS%20X). 
+<br/>
+The coding style throughout the model follows the framework proposed by [Alarid-Escudero F. et al.](https://doi.org/10.1007/s40273-019-00837-x) titled:
+
+>A Need for Change! A Coding Framework for Improving Transparency in Decision Modeling. 
+
+
+<br/>
 
 ## Abstract
 When constructing a health economic decision model, it is critical to select a sensitivity analysis approach appropriate for the decision context. This point is particularly salient to Middle-Income Countries (MICs), where there is relatively heightened resource scarcity and increased opportunity-cost. MICs face acute shortages of accessible as well as high-quality evidence, resulting in a frequent imputing into decision models of data obtained from external jurisdictions. Conversely, there is shortages in skills and research capacity, which creates a strong complementary need to consider the contextual feasibility of applying resource demanding sensitivity analysis methodologies. Given the above, it is critical to establish whether and when the technical benefits of complex and resource demanding methods result in real-world value. We apply a comparative case study using a comprehensive approach to decision-modelling, implemented in the R and JAGS languages. Specifically, the case study replicates a deterministic model originally used to inform the cost-effectiveness of adding a bivalent Human Papilloma Virus (HPV) vaccine to South Africa’s public health care cervical cancer screening programme. Crucially, the case study provides critical insight into the pros and cons of implementing more complex sensitivity analysis techniques within MIC climates. Our findings indicate that the benefits of more advanced sensitivity analysis methods are nuanced; are therefore beneficial on an ad-hoc basis; and, moreover, that choosing a sensitivity analysis method ought to be guided by a conceptual ‘fruitfulness’ (i.e. a bang-for-buck), more than a mere desire to reduce model complexity. To aid analysts in this process, we provide a framework centred on several fundamental decision-making categories intended to encourage a more judicious selection of sensitivity analysis methods; help reduce the methodological variation apparent in MIC settings; and simultaneously provide decision-makers with greater methodological transparency.
 
 <details>
 <summary>Technical note</summary>
-Before running the model, ensure that the local working directory is set to the location of the .Rproj folder saved on your computer. In RStudio, the easiest way to select the local directory path is by pressing Ctrl + Shift + H. In addition, for iOS users, please download JAGS language [here](https://sourceforge.net/projects/mcmc-jags/files/JAGS/4.x/Mac%20OS%20X). The coding style throughout the model follows the framework proposed by [Alarid-Escudero F. et al.](https://doi.org/10.1007/s40273-019-00837-x) titled:
-
->A Need for Change! A Coding Framework for Improving Transparency in Decision Modeling. 
 
 
 <br/>
