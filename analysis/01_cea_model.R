@@ -133,13 +133,13 @@ m_c_SQ <- matrix(c("Well" = 0,
 # Screening costs for ages 30, 40, and 50:
 m_c_SQ["Well", c(31, 41, 51)] <-(m_c_SQ["Well", c(31, 41, 51)] + c_Screening)
 # LSIL costs for ages 30, 40, and 50:
-# m_c_SQ["LSIL", c(31, 41, 51)] <-(m_c_SQ["LSIL", c(31, 41, 51)] + c_LSIL)
+m_c_SQ["LSIL", c(31, 41, 51)] <-(m_c_SQ["LSIL", c(31, 41, 51)] + c_LSIL)
 # HSIL costs for ages 30, 40, and 50:
-# m_c_SQ["HSIL", c(31, 41, 51)] <-(m_c_SQ["HSIL", c(31, 41, 51)] + c_HSIL)
+m_c_SQ["HSIL", c(31, 41, 51)] <-(m_c_SQ["HSIL", c(31, 41, 51)] + c_HSIL)
 # Matrix of state costs based on time interval t under New Treatment:
 m_c_NT <- m_c_SQ
 # Vaccine cost at age 12:
-m_c_NT["Well", c(13)] <-(m_c_NT["Well", c(13)] + c_Vaccine)
+m_c_NT["Well", c(13)] <-(m_c_NT["Well", c(13)] + (c_Vaccine * 0.8)) # Note: assumed 80% vaccine coverage
 # Create cost and effects matrices:
 m_utilities_NT <- m_costs_NT <- m_utilities_SQ <- m_costs_SQ <- matrix(0, n.sims, n_t + 1, 
                                                                        dimnames = list(
@@ -151,12 +151,12 @@ for (i in 1:n.sims) {
  for (t in 0:n_t) {
   ### For Status-Quo (screening only)
   ## Costs
-  m_costs_SQ[i, t]  <- (m_M_ad_1[t, , i] * 0.5) %*% m_c_SQ[, t] # Note: half of cohort assumed screened
+  m_costs_SQ[i, t]  <- (m_M_ad_1[t, , i] * 0.5) %*% m_c_SQ[, t] # Note: 50% of cohort assumed screened
   ## QALYs
   m_utilities_SQ[i, t]  <- m_M_ad_1[t, , i] %*% m_u_SQ[, t]
   ### For New Treatment (screening and vaccine):
   ## Costs
-  m_costs_NT[i, t] <- (m_M_ad_2[t, , i] * 0.5) %*% m_c_NT[, t] # Note: half of cohort assumed screened
+  m_costs_NT[i, t] <- (m_M_ad_2[t, , i] * 0.5) %*% m_c_NT[, t] # Note: 50% of cohort assumed screened
   ## QALYs
   m_utilities_NT[i, t] <- m_M_ad_2[t, , i] %*% m_u_NT[, t]
  }
