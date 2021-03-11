@@ -1,4 +1,4 @@
-# A Sensitivity Analysis Framework for Health Economic Evaluation in Middle Income Countries: Appropriately Incorporating a Comprehensive Approach
+A Sensitivity Analysis Framework for Health Economic Evaluation in Middle Income Countries: Appropriately Incorporating a Comprehensive Approach
 
 <img src="misc/logo.jpg" width="260" align="right" />
 <br/>
@@ -20,7 +20,7 @@ c. World Bank Group <br/>
 <sup>
 <br/>
 
-## Brief
+## Technical Brief
 This repository stores the code to run a hypothetical case study assessing the practical value of a comprehensive approach to health economic decision-modelling in Middle-Income Country contexts. The model is coded in the R language and is based on an original model developed by [Sinanovic E. et al.](https://doi.org/10.1016/j.vaccine.2009.08.004), titled:
 
 >The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical cancer screening programme in South Africa`
