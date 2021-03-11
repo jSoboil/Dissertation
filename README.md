@@ -27,7 +27,7 @@ This repository stores the code to run a hypothetical case study assessing the p
 
 <br/>
 
-Before running the model, ensure that the local working directory is set to the location of the .Rproj folder saved on your computer. In RStudio, the easiest way to select the local directory path is by pressing Ctrl + Shift + H. Please download JAGS [here](). The coding style throughout the model follows the framework proposed by [Alarid-Escudero F. et al.](https://doi.org/10.1007/s40273-019-00837-x) titled:
+Before running the model, ensure that the local working directory is set to the location of the .Rproj folder saved on your computer. In RStudio, the easiest way to select the local directory path is by pressing Ctrl + Shift + H. Please download JAGS [here](https://sourceforge.net/projects/mcmc-jags/files/JAGS/4.x/). The coding style throughout the model follows the framework proposed by [Alarid-Escudero F. et al.](https://doi.org/10.1007/s40273-019-00837-x) titled:
 
 >A Need for Change! A Coding Framework for Improving Transparency in Decision Modeling. 
 
