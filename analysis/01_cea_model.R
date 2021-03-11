@@ -223,8 +223,9 @@ Effects[, 2] <- apply(m_utilities_NTdisc, 1, sum)
 v_names_str <- c("Status Quo: screening only", "New Treatment: screening & vaccine")
 
 ## BCEA package summary:
-df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str, Kmax = 2000, plot = TRUE)
-BCEA::summary.bcea(df_cea, graph = "ggplot2", wtp = 5724)
+df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str, Kmax = 5724, plot = TRUE)
+BCEA::summary.bcea(df_cea, graph = "ggplot2")
+BCEA::ceplane.plot(df_cea, wtp = 5724)
 BCEA::ceef.plot(df_cea)
 ce <- BCEA::multi.ce(he = df_cea)
 BCEA::ceaf.plot(ce, graph = "ggplot2")
@@ -236,7 +237,7 @@ riskev <- CEriskav(he = df_cea, r = c(
  0.00000001, 0.0000001, 0.000001, 0.00001, 0.0001)
  )
 # The more risk averse the decision-maker, the greater the value of EVPI:
-BCEA::plot.CEriskav(riskev)
+BCEA::plot.CEriskav(riskev, pos = "bottomright")
 # At an expected standard deviation of 0.0001, the the EVPI is virtually null and thus the 
 # decision-maker should be theoretically willing to take on the expected variance (volatility) 
 # for the return on investment, given current information. Of course, this is only *theoretical* and

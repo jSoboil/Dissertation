@@ -22,7 +22,7 @@ rateConv.consR <- function(r, t) {
 # Age-specific all cause mortality --------------------------------------------------
 # ==========================================================================================
 # Import ASSA mortality table:
-mort_data <- read_excel("mortality tables.xls", 
+mort_data <- read_excel("data-raw/mortality tables.xls", 
                         sheet = "ASSA data", range = "A3:H94")
 mort_data
 # Total Pop. divided by total deaths:
@@ -522,6 +522,9 @@ beta_params(mean = 0.8775436, sigma = .05)
 # ==========================================================================================
 # Risk Increase (HIV+) ------------------------------------------------------
 # ==========================================================================================
+# Note: although desireble, we did not add a risk parameter to the final model and chose to 
+# follow the core assumptions of the original model.
+
 # Study: Mbulawa Z., et al. 2015 ------------------------------------------
 # Human papillomavirus prevalence in South African women and men according to age and human 
 # immunodeficiency virus status.
