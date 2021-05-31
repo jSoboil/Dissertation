@@ -15,7 +15,7 @@ set.seed(1000)
 
 Random samples are drawn from uniform distribution, i.e. $x\sim  U(0, 1)$. For instance
 ```{r sample from uniform distribution, echo = TRUE}
-x <- runif(n = 20000)
+x <- runif(n = 10000)
 ```
 
 ```{r plot samples, echo = FALSE}
@@ -27,26 +27,57 @@ ggplot() +
 ```
 For example, from here, it is then possible to transform these samples into the inverse cdf (quantile function) of the exponential distribution and normal distribution 
 ```{r quantile function, echo = TRUE, warning = FALSE}
-inv_cdf_exp <- qexp(p = x, rate = 0.4)
-inv_cdf_norm <- qnorm(p = x, mean = 0.65, sd = sqrt(0.7744))
+inv_cdf_norm <- qnorm(p = x, mean = 1000, sd = 1)
 ```
 The result of this can  be used to inform the probability for a range of parameter values occurring.
 ```{r plot pdfs, echo = FALSE, warning = FALSE}
-x_cum <- ecdf(x = x)
 ggplot() + 
  geom_density(aes(x = inv_cdf_norm), fill = "skyblue", alpha = 0.65) +
  stat_ecdf(aes(inv_cdf_norm), colour = "skyblue", alpha = 0.85, lwd = 0.95) + 
- geom_density(aes(x = inv_cdf_exp), fill = "darkred", alpha = 0.45) + 
- stat_ecdf(aes(inv_cdf_exp), colour = "red", alpha = 0.85, lwd = 0.95) +
- annotate("segment", x = 5, xend = 3.65, y = 0.5, yend = 0.77, colour = "black", 
-          size = .4, alpha = 0.75, arrow = arrow()) + 
- annotate("segment", x = 5, xend = 1.6, y = 0.5, yend = 0.85, colour = "black", 
+ annotate("segment", x = 2, xend = 1.5, y = 0.56, yend = 0.9, colour = "black", 
           size = .4, alpha = 0.75, arrow = arrow()) +
- annotate("text", x = 5.5, y = .43, label = "CDFs of the exponential \n and normal distributions", 
-          size = 4.25, family = "Times New Roman") +
+ annotate("text", x = 2, y = .5, label = "CDF of the normal distribution transformed \n obtained using the Inverse Transform sampling method",
+          size = 3.5, family = "Times New Roman") +
  ylab(label = "Probability Density") +
  xlab(label = "Parameter values") +
- theme_linedraw(base_family = "Times New Roman", base_size = 12) + 
- xlim(c(-1.95, 11)) + 
- ylim(c(0, 1))
+ theme_linedraw(base_family = "Times New Roman", base_size = 12)
+```
+
+
+#  Box Muller Method
+Random samples are drawn from a uniform distribution, i.e. $x\sim  U(0, 1)$. For instance
+```{r sample from uniform distribution for box-muller, echo = TRUE}
+x_costs <- runif(n = 10000)
+x_effects <- runif(n = 10000)
+```
+
+From here, it is  possible to transform these cost and effects samples to be normally distributed using the Box-Muller method, $Z_0=\sqrt{-2\ln{U_{costs}}\times cos(2\pi U_{effects})}$
+```{r box-muller transformation, echo = TRUE, warning = FALSE}
+boxMuller_norm <- sqrt(-2 * log(x_costs)) * cos(2 * pi * x_effects) * sqrt(300) + 1000
+```
+The result of this can  be used to inform the probability for a range of parameter values occurring.
+```{r plot pdfs box-muller and inverse method, echo = FALSE, warning = FALSE}
+# Box-Muller plot:
+ggplot() + 
+ geom_density(aes(x = boxMuller_norm), fill = "skyblue", alpha = 0.9) +
+ # stat_ecdf(aes(boxMuller_norm), colour = "skyblue", alpha = 0.85, lwd = 0.95) +
+ # annotate("segment", x = 2, xend = 1.5, y = 0.56, yend = 0.9, colour = "black", 
+ #         size = .4, alpha = 0.75, arrow = arrow()) +
+ # annotate("text", x = 2, y = .5, label = "CDF of the normal distribution transformed \n obtained using the Box-Muller method",
+#          size = 3.5, family = "Times New Roman") +
+ ylab(label = "Probability Density") +
+ xlab(label = "Parameter values") +
+ theme_linedraw(base_family = "Times New Roman", base_size = 12)
+
+# Box-Muller cdf plot:
+ggplot() + 
+ stat_ecdf(aes(boxMuller_norm), colour = "skyblue", alpha = 0.85, lwd = 0.95) +
+#  annotate("segment", x = 2, xend = 1.5, y = 0.56, yend = 0.9, colour = "black",
+#           size = .4, alpha = 0.75, arrow = arrow()) +
+#  annotate("text", x = 2, y = .5, label = "CDF of the normal distribution transformed \n
+#           obtained using the Box-Muller method",
+#          size = 3.5, family = "Times New Roman") +
+ ylab(label = "Probability Density") +
+ xlab(label = "Parameter values") +
+ theme_linedraw(base_family = "Times New Roman", base_size = 12)
 ```
