@@ -21,13 +21,13 @@ c. World Bank Group <br/>
 <br/>
 
 ## Technical Brief
-This repository stores the code to run a hypothetical case study assessing the practical value of a comprehensive approach to health economic decision-modelling in Middle-Income Country contexts. The model is coded in the R language and is based on an original model developed by [Sinanovic E. et al.](https://doi.org/10.1016/j.vaccine.2009.08.004), titled:
+This repository stores the code to run a hypothetical model which is used to assess the practical value of a comprehensive approach to health economic decision-modelling in Middle-Income Country contexts. The replicated model is primarily coded in the R language, but it is supplemented with JAGS. Note that the replicated model is based on an original model developed by [Sinanovic E. et al.](https://doi.org/10.1016/j.vaccine.2009.08.004), titled:
 
 >The potential cost-effectiveness of adding a human papillomavirus vaccine to the cervical cancer screening programme in South Africa`
 
 <br/>
 
-Before running the model, ensure that the local working directory is set to the location of the .Rproj folder saved on your computer. In RStudio, the easiest way to select the local directory path is by pressing Ctrl + Shift + H. Please download JAGS [here](https://sourceforge.net/projects/mcmc-jags/files/JAGS/4.x/). The coding style throughout the model follows the framework proposed by [Alarid-Escudero F. et al.](https://doi.org/10.1007/s40273-019-00837-x) titled:
+Before running the replicated model, please ensure that the local working directory is set to the location of the .Rproj folder on your computer. In RStudio, the easiest way to select the local directory path is by pressing Ctrl + Shift + H. You can also download JAGS [here](https://sourceforge.net/projects/mcmc-jags/files/JAGS/4.x/) if necessary. The coding style throughout follows the framework proposed by [Alarid-Escudero F. et al.](https://doi.org/10.1007/s40273-019-00837-x) titled:
 
 >A Need for Change! A Coding Framework for Improving Transparency in Decision Modeling. 
 
