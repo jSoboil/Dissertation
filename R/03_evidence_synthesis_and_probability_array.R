@@ -21,10 +21,10 @@ model_String <- "
 model {
 
 ### SUB-MODEL 1: AGE-SPECIFIC PREVALENCE
-# Model parameters abbreviated by .age. Note: this is equivalent to Monte Carlo PSA, 
-# as it is technically sampling directly from a prior and is not propogated into a 
-# posterior using a likelihood model. However, a hyperprior is used for the population 
-# variance to account for a greater uncertainty in each age-population.
+# Model parameters abbreviated by .age. Note: this is equivalent to likelihood-based 
+# PSA, as it is technically sampling directly from an integrated pdf and is not 
+# propogated into a posterior. A hyperprior is used to model population variance 
+# due to no available data for each age-population.
   for (i in 1:86) {
      omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
     
@@ -40,8 +40,8 @@ model {
 ### END OF SUB-MODEL 1.
 
 ### SUB-MODEL 2: POP. LEVEL VACCINE-EFFICACY. 
-# Note: this is a fully integrated Bayesian model, as it combines evidence directly via the 
-# likelihood and a prior. Model parameters abbreviated by .vac.
+# Note: this is a Bayesian Posterior model, as it combines evidence directly via the 
+# likelihood and prior. Model parameters are abbreviated by .vac.
   for (i in 1:Nstud.vac) {
     # Likelihood:
      rA.vac[i] ~ dbin(pA.vac[i], nA.vac[i])
@@ -54,7 +54,8 @@ model {
     # Average effect prior for SUB-MODEL 2:
      mu.vac[i] ~ dnorm(0, 1e-4)
     # Prior for sub-model 2 (Random. pop. effect):
-     delta.vac[i] ~ dt(psi.vac, prec.vac, 1) # if desired can be ~ dnorm(psi.vac, prec.vac)
+     delta.vac[i] ~ dt(psi.vac, prec.vac, 1) 
+     # if desired can be ~ dnorm(psi.vac, prec.vac)
     
      ### Mixed predictive check for SUB-MODEL 2:
        # Predictive likelihood:
@@ -86,17 +87,15 @@ model {
 ### END OF SUB-MODEL 2.
 
 ### SUB-MODEL 3: CANCER PROGRESSION AND 5-YEAR SURVIVAL STAGES I-IV.
-# Model parameters abbreviated by .canc. Note: this is equivalent to a standard 
-# Monte Carlo PSA, as it is technically sampling directly from a prior and it is
-# *not* propogated into a posterior using a likelihood model. We have had to truncate  
-# some of these distributions in order for the ASSA mortality data to be properly combined
-# and the state transition probabilities to be proper.
+# Model parameters abbreviated by .canc. Note: this is equivalent to likelihood-based
+# PSA, as it is technically sampling directly from an integrated pdf and is not 
+# propogated into a posterior.
 
    # Distribution according to Stage:
-    Stage.I.canc ~ dbeta(alpha.StageI, beta.StageI)T(0, 0.88)
-    Stage.II.canc ~ dbeta(alpha.StageII, beta.StageII)T(0, 0.88)
-    Stage.III.canc ~ dbeta(alpha.StageIII, beta.StageIII)T(0, 0.88)
-    StageIV.Detected ~ dbeta(alpha.StageIV, beta.StageIV)T(0, 0.88)
+    Stage.I.canc ~ dbeta(alpha.StageI, beta.StageI)
+    Stage.II.canc ~ dbeta(alpha.StageII, beta.StageII)
+    Stage.III.canc ~ dbeta(alpha.StageIII, beta.StageIII)
+    StageIV.Detected ~ dbeta(alpha.StageIV, beta.StageIV)
     
    # Stage I Cervical Cancer detected 5-year Survival:
     surv.StageI_year1 ~ dbeta(alpha.StageI_YearI, beta.StageI_YearI)
@@ -126,14 +125,13 @@ model {
 ### END OF SUB-MODEL 3.
 
 ### SUB-MODEL 4: INFECTION PROGRESSION:
-# Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
-# directly from a prior and it is *not* propogated into a posterior using a likelihood 
-# model. 
+# Note: this is equivalent to likelihood-based PSA, as it is technically sampling directly
+# from an integrated pdf and is not propogated into a posterior.
 
    # From HPV to Normal across age groups:
-   # Note: because all other states except Death are assumed to be dependent and disjoint for
-   # regression to normal from state of HPV/Infection, one can calculate all other relevant 
-   # states from the complement of the transitions that are obtained from the below:
+   # Note: because all other states except Death are assumed to be dependent and disjoint 
+   # for regression to states normal or Infection from states LSIL & HSIL, one may calculate 
+   # all other relevant states from the complement of the transitions:
     HPV_Well_15to24 ~ dbeta(alpha.HPVtoNormal_15to24, beta.HPVtoNormal_15to24)
     HPV_Well_25to29 ~ dbeta(alpha.HPVtoNormal_25to29, beta.HPVtoNormal_25to29)
     HPV_Well_30toEnd ~ dbeta(alpha.HPVtoNormal_30toPlus, beta.HPVtoNormal_30toPlus)
@@ -141,18 +139,16 @@ model {
 ### END OF SUB-MODEL 4.
 
 ### SUB-MODEL 5: LSIL & HSIL PROGRESSION:
-# Note: this is equivalent to a standard Monte Carlo PSA, as it is technically sampling
-# directly from a prior and it is *not* propogated into a posterior using a likelihood 
-# model. We have had to truncate these distributions in order for the ASSA mortality data 
-# to be properly combined and for the state transition probabilities to be proper.
+# Note: this is equivalent to likelihood-based PSA, as it is technically sampling directly
+# from an integrated pdf and is not propogated into a posterior.
 
    # From LSIL & HSIL to Normal or Infection across age groups:
-   # Note: because all other states except Death are assumed to be dependent and disjoint for
-   # regression to normal or Infection from state of LSIL & HSIL, one can calculate all other 
-   # relevant states from the complement of the transitions that are obtained from the below:
-    LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)T(0, 0.88)
-    LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)T(0, 0.88)
-    HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)T(0, 0.88)
+   # Note: because all other states except Death are assumed to be dependent and disjoint 
+   # for regression to states normal or Infection from states LSIL & HSIL, one may calculate 
+   # all other relevant states from the complement of the transitions:
+    LSIL_15_34 ~ dbeta(alpha.LSIL_15to34, beta.LSIL_15to34)
+    LSIL_35_85 ~ dbeta(alpha.LSIL_35to85, beta.LSIL_35to85)
+    HSIL_n ~ dbeta(alpha.HSIL, beta.HSIL)
 
 ### END OF SUB-MODEL 5.
 

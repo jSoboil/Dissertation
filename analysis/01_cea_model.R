@@ -1,18 +1,13 @@
-        ################################################################################
-        ## BEFORE RUNNING THE MODEL, PLEASE ENSURE THAT YOUR WORKING DIRECTORY IS SET ##
-        ## TO THE DIRECTORY OF THE Rproj FOLDER SAVED ON YOUR COMPUTER. IN RSTUDIO    ##
-        ## THE EASIEST WAY TO DO THIS IS BY PRESSING Ctrl + Shift + H.                ##
-        ################################################################################
+################################################################################
+## BEFORE RUNNING THE MODEL, PLEASE ENSURE THAT YOUR WORKING DIRECTORY IS SET ##
+## TO THE DIRECTORY OF THE Rproj FOLDER SAVED ON YOUR COMPUTER. IN RSTUDIO    ##
+## THE EASIEST WAY TO DO THIS IS BY PRESSING Ctrl + Shift + H.                ##
+################################################################################
 
 # Load libraries:
-library(bayesplot)
-library(BCEA)
-library(dampack)
-library(readxl)
-library(reshape2)
-library(rjags)
-library(R2jags)
-library(tidyverse)
+pkgs <- c("bayesplot", "BCEA", "dampack", "readxl", 
+          "reshape2", "R2jags", "tidyverse")
+sapply(pkgs, require, character.only = TRUE)
 
 # Initialise start time counter:
 start_time <- Sys.time()
@@ -223,7 +218,7 @@ Effects[, 2] <- apply(m_utilities_NTdisc, 1, sum)
 v_names_str <- c("Status Quo: screening only", "New Treatment: screening & vaccine")
 
 ## BCEA package summary:
-df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str, Kmax = 5724, plot = TRUE)
+df_cea <- bcea(Effects, Costs, ref = 1, interventions = v_names_str, Kmax = 5724, plot = TRUE)
 BCEA::summary.bcea(df_cea, graph = "ggplot2")
 BCEA::ceplane.plot(df_cea, wtp = 5724)
 BCEA::ceef.plot(df_cea)
@@ -234,14 +229,16 @@ BCEA::ceac.plot(df_cea, graph = "ggplot2")
 # variance for the expected return on investment. Hence, simply speaking, the more averse, 
 # the more sure a decision-maker is wanting to be of the investment's return.
 riskev <- CEriskav(he = df_cea, r = c(
- 0.00000001, 0.0000001, 0.000001, 0.00001, 0.0001)
+ 0.0000001, 0.000001, 0.00001)
  )
 # The more risk averse the decision-maker, the greater the value of EVPI:
-BCEA::plot.CEriskav(riskev, pos = "bottomright")
-# At an expected standard deviation of 0.0001, the the EVPI is virtually null and thus the 
-# decision-maker should be theoretically willing to take on the expected variance (volatility) 
-# for the return on investment, given current information. Of course, this is only *theoretical* and
-# it ultimately depends on the decision-maker's preferences and value judgement's.
+BCEA::plot.CEriskav(riskev, pos = "topright", graph = "ggplot")
+# At an expected standard deviation of 0.0001, the the EVPI is virtually null (i.e. the
+# value of information has become lower) and thus the decision-maker should be 
+# theoretically prefer the expected variance (volatility) for the current return on 
+# investment, given current information. However, if the decision-maker has some 
+# risk-aversion, the value of information increases up until the break-even point 
+# of ≈ $2200 and then decreases.
 
 ## Expected Costs and Utility for both treatments across all simulations:
 E_c <- apply(Costs, 2, mean)
