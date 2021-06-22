@@ -1,14 +1,13 @@
 # ==========================================================================================
 # Markov Model ------------------------------------------------------------
 # ==========================================================================================
-# The following code runs a Markov Model script for the HPV model developed by Sinanovic, E., 
-# et al. 2009): "The potential cost-effectiveness of adding a human papillomavirus vaccine to 
-# the cervical cancer screening programme in South Africa." 
-
-# Note that this code sits on top of the source code for the evidence synthesis model as well as 
-# the probability matrix (03_evidence_synthesis_and_probability_array.R). 
-
+# Note that this code sits on top of the source code for the evidence synthesis model and
+# probability matrix (03_evidence_synthesis_and_probability_array.R). 
 source("R/03_evidence_synthesis_and_probability_array.R")
+
+# The following code runs a Markov Model script for the HPV model developed by Sinanovic, E., 
+# et al. 2009): "The potential cost-effectiveness of adding a human papillomavirus vaccine 
+# to the cervical cancer screening programme in South Africa." 
 
 # m_M_ad_1 is the Status Quo treatment model; m_M_ad_2 is the vaccine treatment model.
 
@@ -178,7 +177,8 @@ v_prev_Infection_1 <- apply(v_prev_Infection_1, 2, mean) / v_S_ad_1
 v_prev_Infection_2 <- apply(m_M_ad_2[, "Infection", ], c(2, 1), mean)
 v_prev_Infection_2 <- apply(v_prev_Infection_2, 2, mean) / v_S_ad_2
 ggplot() +
- geom_line(aes(x = 0:n_t, y = v_prev_Infection_1), size = 1.3, colour = "skyblue", na.rm = TRUE) +
+ geom_line(aes(x = 0:n_t, y = v_prev_Infection_1), size = 1.3, colour = "skyblue", 
+           na.rm = TRUE) +
  geom_line(aes(x = 0:n_t, y = v_prev_Infection_2), size = 1.3, colour = "darkred", 
            alpha = 0.65, na.rm = TRUE) + 
  scale_y_continuous(labels = scales::percent) +
@@ -193,8 +193,8 @@ v_D_ad_1 <- rowSums(apply(m_M_ad_1[ , "Death", ], c(1, 2), mean))
 # Mortality in Model 1:
 v_D_ad_2 <- rowSums(apply(m_M_ad_2[ , "Death", ], c(1, 2), mean))
 ggplot() +
- geom_line(aes(x = 0:n_t, y = v_D_ad_1), size = 2, colour = "navyblue", na.rm = TRUE, 
-            alpha = 1) +
+ geom_line(aes(x = 0:n_t, y = v_D_ad_1), size = 2, colour = "navyblue", 
+           na.rm = TRUE, alpha = 1) +
  geom_point(aes(x = 0:n_t, y = v_D_ad_2), size = 1.5, colour = "red", 
            alpha = 0.95, na.rm = TRUE) + 
  scale_y_continuous(labels = scales::percent) +

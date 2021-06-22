@@ -4,7 +4,7 @@
 ## THE EASIEST WAY TO DO THIS IS BY PRESSING Ctrl + Shift + H.                ##
 ################################################################################
 
-# Load libraries:
+# Libraries and Misc ------------------------------------------------------
 pkgs <- c("bayesplot", "BCEA", "dampack", "readxl", 
           "reshape2", "R2jags", "tidyverse")
 sapply(pkgs, require, character.only = TRUE)
@@ -12,20 +12,19 @@ sapply(pkgs, require, character.only = TRUE)
 # Initialise start time counter:
 start_time <- Sys.time()
 
-# We have judged the advantages of using parallel processing to be negligible given the
-# size of the model and run time, which is consistently < 60 secs on a relatively 
-# low-powered Macbook pro 2018 13".
-
-# Note that the source code for this section sits on top of the code for the Markov Models for 
-# either treatment found in the R folder (R/02_markov_model.R):
+# Note that the source code for this section sits on top of the code for the Markov Models
+# found in the R folder (R/02_markov_model.R):
 source("R/02_markov_model.R")
+
+# The advantages of using parallel processing for this model are negligible, which runs 
+# consistently < 60 secs on a relatively low-powered Macbook pro 2018 13".
 
 # ==========================================================================================
 # Cost-Effectiveness Analysis ---------------------------------------------
 # ==========================================================================================
 # This is the code that runs the final Cost-Effectiveness Analysis script for the HPV model 
-# developed by Sinanovic, E., et al. 2009): "The potential cost-effectiveness of adding a human 
-# papillomavirus vaccine to the cervical cancer screening programme in South Africa." 
+# developed by Sinanovic, E., et al. 2009): "The potential cost-effectiveness of adding a 
+# human papillomavirus vaccine to the cervical cancer screening programme in South Africa" 
 
 # m_M_ad_1 is the Status Quo (Screening only) treatment Markov model:
 m_M_ad_1
@@ -80,11 +79,10 @@ m_u_SQ <- m_u_NT <- matrix(c("Well" = u_Well,
 # Health costs from a health care perspective --------------------------------
 ## All costs in $US.
 c_Vaccine <- 570 # once off cost of vaccine from age 12.
-c_Screening <- 93 + 309 + 75 # cost of screening using HPV DNA, VIA, and cancer cytology tests.
+c_Screening <- 93 + 309 + 75 # cost of screening using HPV DNA, VIA, cancer cytology tests.
 c_LSIL <- 61 # cost of LSIL treatment*.
 c_HSIL <- 764 # cost of HSIL treatment*.
-# Note: HPV 16/18 assumed asymptomatic in original mode and therefore not
-# treated.
+ # *Note: HPV 16/18 assumed asymptomatic in original mode and therefore not treated.
 
 ## Cost for treatment at each cancer stage:
 c_StageI <- 4615 # cost of treatment of Stage I Cancer for one cycle.
@@ -136,22 +134,22 @@ m_c_NT <- m_c_SQ
 # Vaccine cost at age 12:
 m_c_NT["Well", c(13)] <-(m_c_NT["Well", c(13)] + (c_Vaccine * 0.8)) # Note: assumed 80% vaccine coverage
 # Create cost and effects matrices:
-m_utilities_NT <- m_costs_NT <- m_utilities_SQ <- m_costs_SQ <- matrix(0, n.sims, n_t + 1, 
-                                                                       dimnames = list(
-                                                                        1:n.sims, 0:(n_t))
-                                                                       )
+m_utilities_NT <- m_costs_NT <- m_utilities_SQ <- m_costs_SQ <- matrix(
+ 0, n.sims, n_t + 1, dimnames = list(
+  1:n.sims, 0:(n_t))
+ )
 
 # Loop costs over time interval t and n.sims i:
 for (i in 1:n.sims) {
  for (t in 0:n_t) {
   ### For Status-Quo (screening only)
   ## Costs
-  m_costs_SQ[i, t]  <- (m_M_ad_1[t, , i] * 0.5) %*% m_c_SQ[, t] # Note: 50% of cohort assumed screened
+  m_costs_SQ[i, t]  <- (m_M_ad_1[t, , i] * 0.5) %*% m_c_SQ[, t] # Note: 50% of cohort screened
   ## QALYs
   m_utilities_SQ[i, t]  <- m_M_ad_1[t, , i] %*% m_u_SQ[, t]
   ### For New Treatment (screening and vaccine):
   ## Costs
-  m_costs_NT[i, t] <- (m_M_ad_2[t, , i] * 0.5) %*% m_c_NT[, t] # Note: 50% of cohort assumed screened
+  m_costs_NT[i, t] <- (m_M_ad_2[t, , i] * 0.5) %*% m_c_NT[, t] # Note: 50% of cohort screened
   ## QALYs
   m_utilities_NT[i, t] <- m_M_ad_2[t, , i] %*% m_u_NT[, t]
  }
@@ -180,11 +178,10 @@ v_dwc <- 1 / ((1 + d_c) ^ (0:(n_t)))
 v_dwe <- 1 / ((1 + d_e) ^ (0:(n_t)))
 
 # Discounted costs and utilities matrices:
-m_utilities_NTdisc <- m_costs_NTdisc <- m_utilities_SQdisc <- m_costs_SQdisc <- matrix(0, n.sims, 
-                                                                                       n_t + 1, 
-                                                                       dimnames = list(
-                                                                        1:n.sims, 0:n_t)
-                                                                       )
+m_utilities_NTdisc <- m_costs_NTdisc <- m_utilities_SQdisc <- m_costs_SQdisc <- matrix(
+ 0, n.sims, n_t + 1, dimnames = list(
+  1:n.sims, 0:n_t)
+ )
 
 for (i in 1:n.sims) {
  for (t in 0:n_t) {
@@ -218,27 +215,29 @@ Effects[, 2] <- apply(m_utilities_NTdisc, 1, sum)
 v_names_str <- c("Status Quo: screening only", "New Treatment: screening & vaccine")
 
 ## BCEA package summary:
-df_cea <- bcea(Effects, Costs, ref = 1, interventions = v_names_str, Kmax = 5724, plot = TRUE)
+df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str, plot = TRUE, 
+               Kmax = 5724)
 BCEA::summary.bcea(df_cea, graph = "ggplot2")
-BCEA::ceplane.plot(df_cea, wtp = 5724)
-BCEA::ceef.plot(df_cea)
-ce <- BCEA::multi.ce(he = df_cea)
-BCEA::ceaf.plot(ce, graph = "ggplot2")
+BCEA::ceplane.plot(df_cea, wtp = 5724, graph = "ggplot")
 BCEA::ceac.plot(df_cea, graph = "ggplot2")
+BCEA::eib.plot(df_cea, graph = "ggplot")
+BCEA::ib.plot(df_cea, wtp = 5724, graph = "ggplot")
 # In the plot below, r represents the risk aversion parameter which is the square root of the 
 # variance for the expected return on investment. Hence, simply speaking, the more averse, 
-# the more sure a decision-maker is wanting to be of the investment's return.
+# the more certainty a decision-maker desires for an  investment's return.
 riskev <- CEriskav(he = df_cea, r = c(
- 0.0000001, 0.000001, 0.00001)
+ 0.0000001, 0.000001, 0.00001, 0.0001)
  )
 # The more risk averse the decision-maker, the greater the value of EVPI:
 BCEA::plot.CEriskav(riskev, pos = "topright", graph = "ggplot")
-# At an expected standard deviation of 0.0001, the the EVPI is virtually null (i.e. the
-# value of information has become lower) and thus the decision-maker should be 
-# theoretically prefer the expected variance (volatility) for the current return on 
-# investment, given current information. However, if the decision-maker has some 
-# risk-aversion, the value of information increases up until the break-even point 
-# of ≈ $2200 and then decreases.
+# At an expected standard deviation of 0.0001, the the EVPI is virtually null (i.e., the
+# value of information has become much lower) implying that the decision-maker should 
+# theoretically prefer the expected variance (volatility) in the IB of the current 
+# treatment, given current information, than the alternative. However, within this scenario, 
+# the less risk-averse the decision-maker, the more valuable information is up until the 
+# WTP break-even point of ≈ $2200. After this point, the VOI decreases as the 
+# cost-effectiveness of the vaccine becomes more certain as the WTP for incremental 
+# benefits increases.
 
 ## Expected Costs and Utility for both treatments across all simulations:
 E_c <- apply(Costs, 2, mean)

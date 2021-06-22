@@ -1,18 +1,16 @@
 # ==========================================================================================
 # Evidence Synthesis and Transition Probability Matrix  ---------------------
 # ==========================================================================================
-# Note: this code below sits on top of the parameter Inputs.R file, which is the source code for 
-# all parameter data (04_parameter_inputs.R).
+# Note: this code below sits on top of the parameter Inputs.R file, which is the source code
+# for all parameter data (04_parameter_inputs.R).
 
 source("R/04_parameter_inputs.R")
 
-# Several distributions have had to be truncated at an upper bound of 1 - (max mortality prob). 
-# We found that the mortality rate when it included HIV/AIDS related mortality was extremely high 
-# given the context of South Africa in 2009. In order to account for this, it would be 
-# desirable to incorporate a parameter which accounts for the conditional annual risk of dying 
-# from HIV/AIDS. However, because this was purely a replication exercise, we did not 
-# find it necessary and focused on the outcomes of the comparative models. The original model
-# ran the time horizon from 0-76 when HIV/AIDs mortality was included.
+# We found that the mortality rate when it included HIV/AIDS related mortality was extremely
+# high given the context of South Africa in 2009. In order to account for this, it would be
+# have been desirable to incorporate a parameter which accounts for the conditional annual 
+# risk of dying from HIV/AIDS. However, because this was purely a replication exercise, we
+# did not and focused rather on the outcomes of the comparative models.
 
 # ==========================================================================================
 # Evidence Synthesis Model ------------------------------------------------
@@ -254,9 +252,9 @@ mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params,
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 options(max.print = 1500)
 mod_JAGS
-# One can automate convergence. However, the improvement is negligible, and it increased the run
-# time of the model from < 60secs to > 2 mins. However, if desired, uncomment the line of code 
-# below to add auto chain convergence:
+# One can automate convergence. However, the improvement is negligible, and it increased the
+# run time of the model from < 60secs to > 2 mins. However, if desired, uncomment the line
+# of code below to add auto chain convergence:
 # mod_JAGS <- autojags(mod_JAGS, Rhat = 1.01)
 
 # Posterior inspection:
@@ -270,14 +268,14 @@ mod_JAGS
 #                                "pA.mxd[5]", "pA.mxd[6]", "pA.mxd[7]", "pA.mxd[8]",
 #                                "pA.mxd[9]", "pA.mxd[10]", "pA.mxd[11]"))
 
-# Attach JAGS model to envir.
+# Attach JAGS model to local envir.
 attach.jags(mod_JAGS)
 
 # ==========================================================================================
 # Probability Matrix --------------------------------------------------
 # ==========================================================================================
- # The following creates a transition array that is then used to simulate the Markov cohort for both
-# treatments, Status Quo and New Treatment.
+ # This section creates a transition array that is then used to simulate the Markov cohort
+# for both treatments (Status Quo and New Treatment).
 
 # The following sets up the structure of the transitions between Health States:
 n_age_init <- 0 # age at baseline
@@ -302,9 +300,9 @@ a_P_1 <- array(0, dim = c(n_states, n_states, n_t + 1, n.sims),
 a_P_2 <- array(0, dim = c(n_states, n_states, n_t + 1, n.sims),
              dimnames = list(v_n, v_n, 0:(n_t), 1:n.sims))
 
-# Note: all progression probabilities are assumed dependent on the probability of regression. Moreover, 
-# due to the natural structure of the transition array, there is no need to fill in probabilities = 0, 
-# such as the transitions from Infection to LSIL for ages ≤ 14.
+# Note: all progression probabilities are assumed dependent on the probability of regression. 
+# Moreover, due to the natural structure of the transition array, there is no need to fill 
+# in probabilities = 0, such as the transitions from Infection to LSIL for ages ≤ 14.
 
 # ==========================================================================================
 # Status-Quo  ----------------------------------------------------------
@@ -312,7 +310,6 @@ a_P_2 <- array(0, dim = c(n_states, n_states, n_t + 1, n.sims),
 # These are for all the state transitions with no vaccine treatment.
 
 # Transitions from Well State ---------------------------------------------
-
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state Well, across the appropriate time horizon i and all probabilistic 
 # simulations j
@@ -327,7 +324,6 @@ for (i in 1:n_t) {
 }
 
 # Transitions from Infection State ----------------------------------------
-
 # The following enters all transition probabilities for ages 15-24 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -344,6 +340,7 @@ for (i in 16:25) {
      a_P_1["Infection", "Infection", i, j] <- 1 - (HPV_Well_15to24[j] + v_p_mort_lessHPV[i] + (((1 - HPV_Well_15to24[j]) * (1 - exp(-.2 * 3))) * 0.9) + (((1 - HPV_Well_15to24[j]) * (1 - exp(-.2 * 3))) * 0.1))
     }
 }
+
 # The following enters all transition probabilities for ages 25-29 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -360,6 +357,7 @@ for (i in 26:30) {
      a_P_1["Infection", "Infection", i, j] <- 1 - (HPV_Well_25to29[j] + v_p_mort_lessHPV[i] + (((1 - HPV_Well_25to29[j]) * (1 - exp(-.2 * 3))) * 0.9) + (((1 - HPV_Well_25to29[j]) * (1 - exp(-.2 * 3))) * 0.1))
     }
 }
+
 # The following enters all transition probabilities for ages 30-85 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -378,7 +376,6 @@ for (i in 31:86) {
 }
 
 # Transitions from LSIL State ---------------------------------------------
-
 # The following enters all transition probabilities for ages 15-34 for each transition from
 # the state LSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -414,7 +411,6 @@ for (i in 36:86) {
 }
 
 # Transitions from HSIL State ---------------------------------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state HSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -433,7 +429,6 @@ for (i in 16:86) {
 }
 
 # Transitions from Stage-I Cervix Cancer State ----------------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-I Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
@@ -450,7 +445,6 @@ for (i in 16:86) {
 }
 
 # Transitions from Stage-II Cervix Cancer State ---------------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-II Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
@@ -467,7 +461,6 @@ for (i in 16:86) {
 }
 
 # Transitions from Stage-III Cervix Cancer State --------------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-III Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
@@ -484,7 +477,6 @@ for (i in 16:86) {
 }
 
 # Transitions from Stage-IV Cervix Cancer State ---------------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-IV Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
@@ -499,7 +491,6 @@ for (i in 16:86) {
 }
 
 # Transitions from All Stage-I Cancer Survivor/Detected States ---------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-I Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
@@ -528,7 +519,6 @@ for (i in 16:86) {
 }
 
 # Transitions from All Stage-II Cancer Survivor/Detected States -----------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-II Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
@@ -557,7 +547,6 @@ for (i in 16:86) {
 }
 
 # Transitions from All Stage-III Cancer Survivor/Detected States ----------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-III Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
@@ -586,7 +575,6 @@ for (i in 16:86) {
 }
 
 # Transitions from All Stage-IV Cancer Survivor/Detected States -----------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-IV Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
@@ -615,7 +603,6 @@ for (i in 16:86) {
 }
 
 # Transitions from Cancer Survivor State ----------------------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state of Cancer Survivor, across the appropriate time horizon i and all 
 # probabilistic simulations j.
@@ -628,7 +615,6 @@ for (i in 16:86) {
 }
 
 # Transitions from Death State --------------------------------------------
-
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state of Death, across the appropriate time horizon i and all 
 # probabilistic simulations j.
@@ -645,7 +631,6 @@ for (i in 0:n_t) {
 # transition array that is then used to simulate the Markov cohort with treatment.
 
 # Transitions from Well State ---------------------------------------------
-
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state Well, across the appropriate time horizon i and all probabilistic 
 # simulations j
@@ -660,7 +645,6 @@ for (i in 0:n_t) {
 }
 
 # Transitions from Infection State ----------------------------------------
-
 # The following enters all transition probabilities for ages 15-24 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -677,6 +661,7 @@ for (i in 16:25) {
      a_P_2["Infection", "Infection", i, j] <- 1 - (HPV_Well_15to24[j] + v_p_mort_lessHPV[i] + (((1 - HPV_Well_15to24[j]) * (1 - exp(-.2 * 3))) * 0.9) + (((1 - HPV_Well_15to24[j]) * (1 - exp(-.2 * 3))) * 0.1))
     }
 }
+
 # The following enters all transition probabilities for ages 25-29 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -693,6 +678,7 @@ for (i in 26:30) {
      a_P_2["Infection", "Infection", i, j] <- 1 - (HPV_Well_25to29[j] + v_p_mort_lessHPV[i] + (((1 - HPV_Well_25to29[j]) * (1 - exp(-.2 * 3))) * 0.9) + (((1 - HPV_Well_25to29[j]) * (1 - exp(-.2 * 3))) * 0.1))
     }
 }
+
 # The following enters all transition probabilities for ages 30-85 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -711,7 +697,6 @@ for (i in 31:86) {
 }
 
 # Transitions from LSIL State ---------------------------------------------
-
 # The following enters all transition probabilities for ages 15-34 for each transition from
 # the state LSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -747,7 +732,6 @@ for (i in 36:86) {
 }
 
 # Transitions from HSIL State ---------------------------------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state HSIL, across the appropriate time horizon i and all probabilistic 
 # simulations j.
@@ -766,7 +750,6 @@ for (i in 16:86) {
 }
 
 # Transitions from Stage-I Cervix Cancer State ----------------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-I Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
@@ -783,7 +766,6 @@ for (i in 16:86) {
 }
 
 # Transitions from Stage-II Cervix Cancer State ---------------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-II Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
@@ -800,7 +782,6 @@ for (i in 16:86) {
 }
 
 # Transitions from Stage-III Cervix Cancer State --------------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-III Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
@@ -817,7 +798,6 @@ for (i in 16:86) {
 }
 
 # Transitions from Stage-IV Cervix Cancer State ---------------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state Stage-IV Cancer, across the appropriate time horizon i and all probabilistic 
 # simulations j. 
@@ -832,7 +812,6 @@ for (i in 16:86) {
 }
 
 # Transitions from All Stage-I Cancer Survivor/Detected States ---------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-I Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
@@ -861,7 +840,6 @@ for (i in 16:86) {
 }
 
 # Transitions from All Stage-II Cancer Survivor/Detected States -----------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-II Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
@@ -890,7 +868,6 @@ for (i in 16:86) {
 }
 
 # Transitions from All Stage-III Cancer Survivor/Detected States ----------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-III Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
@@ -919,7 +896,6 @@ for (i in 16:86) {
 }
 
 # Transitions from All Stage-IV Cancer Survivor/Detected States -----------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # all states of Detected Stage-IV Cancer, across the appropriate time horizon i and all 
 # probabilistic simulations j. 
@@ -948,7 +924,6 @@ for (i in 16:86) {
 }
 
 # Transitions from Cancer Survivor State ----------------------------------
-
 # The following enters all transition probabilities for ages 15-85 for each transition from
 # the state of Cancer Survivor, across the appropriate time horizon i and all 
 # probabilistic simulations j.
@@ -961,7 +936,6 @@ for (i in 16:86) {
 }
 
 # Transitions from Death State --------------------------------------------
-
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state of Death, across the appropriate time horizon i and all 
 # probabilistic simulations j.
