@@ -13,10 +13,9 @@ rateConv.consR <- function(r, t) {
  print(P)
 }
 
-# Each cohort collected from each study's end-point. All data extracted only includes 
-# estimates from per-protocol pop. However, the per protocol analysis strategy may be 
-# subject to bias as the reasons for non-compliance may be related to treatment 
-# (Cochrane.org/glossary).
+# Each cohort collected from each study end-point. All data extracted only includes 
+# estimates from ITT pop. However, the ITT strategy may be subject to bias as the reasons 
+# for non-compliance may be related to treatment (Cochrane.org/glossary).
 
 # ==========================================================================================
 # Age-specific all cause mortality --------------------------------------------------
@@ -40,9 +39,9 @@ v_p_mort_lessHPV <- cbind(mort_data$Age[1:86], v_p_mort_lessHPV)
 colnames(v_p_mort_lessHPV) <- c("Age", "Death_less.HPV")
 v_p_mort_lessHPV
 
-# ===========================================================================================
+# ==========================================================================================
 # Collated studies on vaccine efficacy -------------------------------------------------
-# ===========================================================================================
+# ==========================================================================================
 
 # Study 1: Apter et al. (2015)   ------------------------------------------
 # Efficacy of Human Papillomavirus 16 and 18 (HPV-16/18) AS04- Adjuvanted Vaccine against 
@@ -62,8 +61,8 @@ v_p_mort_lessHPV
 # cases = 32
 
 # Study 2: Harper et al. (2004) -------------------------------------------
-# Efficacy of a bivalent L1 virus-like particle vaccine in prevention of infection with human 
-# papillomavirus types 16 and 18 in young women: a randomised controlled trial.
+# Efficacy of a bivalent L1 virus-like particle vaccine in prevention of infection with 
+# human papillomavirus types 16 and 18 in young women: a randomised controlled trial.
 
 # Data collected from 27 month HPV 16/18 ATP cohort.
 
@@ -104,11 +103,11 @@ v_p_mort_lessHPV
 # cases = 3
 
 # Study 5: Herrero et al. (2013) ------------------------------------------
-# Reduced Prevalence of Oral Human Papillomavirus (HPV) 4 Years after Bivalent HPV Vaccination
-# in a Randomized Clinical Trial in Costa Rica.
+# Reduced Prevalence of Oral Human Papillomavirus (HPV) 4 Years after Bivalent HPV
+# Vaccination in a Randomized Clinical Trial in Costa Rica.
 
-# Data collected from 48 month 16/18 group. Note!: likely need to discount this study study has
-# combined ATP and other cohorts.
+# Data collected from 48 month 16/18 group. Note!: likely need to discount this study study
+# has combined ATP and other cohorts.
 
 # Control (A):
 # n = 2924
@@ -149,8 +148,8 @@ v_p_mort_lessHPV
 
 # Study 8: Paavonen et al. (2007) -----------------------------------------
 # Efficacy of a prophylactic adjuvanted bivalent L1 virus-like-particle vaccine against 
-# infection with human papillomavirus types 16 and 18 in young women: an interim analysis of a
-# phase III double-blind, randomised controlled trial.
+# infection with human papillomavirus types 16 and 18 in young women: an interim analysis 
+# of a phase III double-blind, randomised controlled trial.
 
 # Data collected from primary endpoint CIN2+ HPV 16/18.
 
@@ -178,8 +177,9 @@ v_p_mort_lessHPV
 # cases = 4
 
 # Study 10: Romanowski et al. (2009) --------------------------------------
-# Sustained efficacy and immunogenicity of the human papillomavirus (HPV)-16/18 AS04-adjuvanted
-# vaccine: analysis of a randomised placebo-controlled trial up to 6·4 years.
+# Sustained efficacy and immunogenicity of the human papillomavirus (HPV)-16/18 
+# AS04-adjuvanted vaccine: analysis of a randomised placebo-controlled trial up to 
+# 6·4 years.
 
 # Data collected from 12-month persistent infection HPV 16/18 ATP cohort.
 
@@ -205,9 +205,9 @@ v_p_mort_lessHPV
 # n = 2497
 # cases = 1
 
-# ===========================================================================================
+# ==========================================================================================
 # Vaccine coverage --------------------------------------------------------
-# ===========================================================================================
+# ==========================================================================================
 # Informative prior -------------------------------------------------------
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
@@ -215,9 +215,9 @@ v_p_mort_lessHPV
 beta_params(mean = .8, sigma = .05)
 # Assumes 80% coverage with an se of 5%.
 
-# ===========================================================================================
+# ==========================================================================================
 # Vaccine compliance --------------------------------------------------------
-# ===========================================================================================
+# ==========================================================================================
 # Informative prior -------------------------------------------------------
 # 1. Sinanovic, E., et al. 2009. The potential cost-effectiveness of adding a human 
 # papillomavirus vaccine to the cervical cancer screening programme in South Africa.
@@ -413,8 +413,6 @@ beta_params(mean = 0.8775436, sigma = .05)
 # Yearly probability from Stage IV to Stage IV:
 # 1 - (StageIV_to_Death + StageIV_to_Treatment)
 
-# ==========================================================================
-
 # ===========================================================================================
 # Stage I 5-year Survival -------------------------------------------------
 # ===========================================================================================
@@ -532,8 +530,8 @@ beta_params(mean = 0.8775436, sigma = .05)
 # Then use proportion of HIV+ pop. for how many at risk at time j. See Italian study.
 
 # Participants were 208 HIV-negative women, 278 HIV-positive women, 325 HIV-negative men and
-# 161 HIV-positive men between the ages of 18–66 years. HPV types were determined in cervical
-# and penile cells by Roche Linear Array HPV genotyping assay.
+# 161 HIV-positive men between the ages of 18–66 years. HPV types were determined in 
+# cervical and penile cells by Roche Linear Array HPV genotyping assay.
 
 # HIV+ women positive to HPV: 205/277
 # HIV- women positive to HPV: 76/207

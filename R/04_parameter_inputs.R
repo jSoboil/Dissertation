@@ -14,7 +14,7 @@
 # Probability Dying less HPV for all States -------------------------------
 # ==========================================================================================
 # Import ASSA mortality table:
-mort_data <- read_excel("data-raw/mortality tables.xls", sheet = "final tables", range = "D1:D87")
+mort_data <- read_excel("data-raw/mortality_tables.xls", sheet = "final tables", range = "D1:D87")
 v_p_mort_lessHPV <- as.matrix(mort_data[1])
 
 # Like the original study, the replication study is hugely sensitive to the HIV caused mortality 
