@@ -18,8 +18,8 @@ source("R/04_parameter_inputs.R")
 model_String <- "
 model {
 
-### SUB-MODEL 1: AGE-SPECIFIC PREVALENCE
-# Model parameters abbreviated by .age. Note: this is equivalent to likelihood-based 
+### SUB-MODEL 1: AGE-SPECIFIC PREVALENCEt
+# Model parameters abbreviated by .age. Note: this is equivalent to standard
 # PSA, as it is technically sampling directly from an integrated pdf and is not 
 # propogated into a posterior. A hyperprior is used to model population variance 
 # due to no available data for each age-population.
@@ -85,7 +85,7 @@ model {
 ### END OF SUB-MODEL 2.
 
 ### SUB-MODEL 3: CANCER PROGRESSION AND 5-YEAR SURVIVAL STAGES I-IV.
-# Model parameters abbreviated by .canc. Note: this is equivalent to likelihood-based
+# Model parameters abbreviated by .canc. Note: this is equivalent to standard
 # PSA, as it is technically sampling directly from an integrated pdf and is not 
 # propogated into a posterior.
 
@@ -123,7 +123,7 @@ model {
 ### END OF SUB-MODEL 3.
 
 ### SUB-MODEL 4: INFECTION PROGRESSION:
-# Note: this is equivalent to likelihood-based PSA, as it is technically sampling directly
+# Note: this is equivalent to standard PSA, as it is technically sampling directly
 # from an integrated pdf and is not propogated into a posterior.
 
    # From HPV to Normal across age groups:
@@ -137,7 +137,7 @@ model {
 ### END OF SUB-MODEL 4.
 
 ### SUB-MODEL 5: LSIL & HSIL PROGRESSION:
-# Note: this is equivalent to likelihood-based PSA, as it is technically sampling directly
+# Note: this is equivalent to standard PSA, as it is technically sampling directly
 # from an integrated pdf and is not propogated into a posterior.
 
    # From LSIL & HSIL to Normal or Infection across age groups:

@@ -2,7 +2,7 @@
 title: "Inverse Tranform Sampling Method"
 author: "Josh Soboil"
 date: "21/11/2020"
-output: word_document
+output: powerpoint_presentation
 ---
 
 ```{r setup, include = FALSE}
@@ -18,7 +18,7 @@ Random samples are drawn from uniform distribution, i.e. $x\sim  U(0, 1)$. For i
 x <- runif(n = 10000)
 ```
 
-```{r plot samples, echo = FALSE}
+```{r plot samples, echo = TRUE}
 ggplot() + 
  geom_histogram(aes(x), binwidth = 0.05, colour = "black", fill = "white", alpha = 0.95) + 
  ylab(label = "Sample frequency") +
@@ -27,56 +27,24 @@ ggplot() +
 ```
 For example, from here, it is then possible to transform these samples into the inverse cdf (quantile function) of the exponential distribution and normal distribution 
 ```{r quantile function, echo = TRUE, warning = FALSE}
-inv_cdf_norm <- qnorm(p = x, mean = 1000, sd = sqrt(300))
+inv_cdf_norm <- qnorm(p = x, mean = 10, sd = sqrt(0.5))
 ```
 The result of this can  be used to inform the probability for a range of parameter values occurring.
-```{r plot pdfs, echo = FALSE, warning = FALSE}
+```{r plot pdfs, echo = TRUE, warning = FALSE}
 ggplot() + 
  geom_density(aes(x = inv_cdf_norm), fill = "skyblue", alpha = 0.65) +
  ylab(label = "Probability Density") +
  xlab(label = "Parameter values") +
- theme_linedraw(base_family = "Times New Roman", base_size = 12)
-
-ggplot() +
- stat_ecdf(aes(inv_cdf_norm), colour = "skyblue", alpha = 0.85, lwd = 0.95) +
- theme_linedraw(base_family = "Times New Roman", base_size = 12)
-```
-
-
-#  Box Muller Method
-Random samples are drawn from a uniform distribution, i.e. $x\sim  U(0, 1)$. For instance
-```{r sample from uniform distribution for box-muller, echo = TRUE}
-x_costs <- runif(n = 10000)
-x_effects <- runif(n = 10000)
-```
-
-From here, it is  possible to transform these cost and effects samples to be normally distributed using the Box-Muller method, $Z_0=\sqrt{-2\ln{U_{costs}}\times cos(2\pi U_{effects})}$
-```{r box-muller transformation, echo = TRUE, warning = FALSE}
-boxMuller_norm <- sqrt(-2 * log(x_costs)) * cos(2 * pi * x_effects) * sqrt(300) + 1000
-```
-The result of this can  be used to inform the probability for a range of parameter values occurring.
-```{r plot pdfs box-muller and inverse method, echo = FALSE, warning = FALSE}
-# Box-Muller plot:
-ggplot() + 
- geom_density(aes(x = boxMuller_norm), fill = "red", alpha = 0.65) +
- # stat_ecdf(aes(boxMuller_norm), colour = "skyblue", alpha = 0.85, lwd = 0.95) +
- # annotate("segment", x = 2, xend = 1.5, y = 0.56, yend = 0.9, colour = "black", 
- #         size = .4, alpha = 0.75, arrow = arrow()) +
- # annotate("text", x = 2, y = .5, label = "CDF of the normal distribution transformed \n obtained using the Box-Muller method",
-#          size = 3.5, family = "Times New Roman") +
- ylab(label = "Probability Density") +
- xlab(label = "Parameter values") +
- theme_linedraw(base_family = "Times New Roman", base_size = 12)
-
-# Box-Muller cdf plot:
-ggplot() + 
- stat_ecdf(aes(boxMuller_norm), colour = "red", alpha = 0.65, lwd = 0.95) +
-#  annotate("segment", x = 2, xend = 1.5, y = 0.56, yend = 0.9, colour = "black",
-#           size = .4, alpha = 0.75, arrow = arrow()) +
-#  annotate("text", x = 2, y = .5, label = "CDF of the normal distribution transformed \n
-#           obtained using the Box-Muller method",
-#          size = 3.5, family = "Times New Roman") +
- ylab(label = "Probability Density") +
- xlab(label = "Parameter values") +
- theme_linedraw(base_family = "Times New Roman", base_size = 12)
-```
+ xlim(7, 13) +
+ theme_linedraw(base_family = "Times New Roman", base_size = 12) +
+ stat_ecdf(aes(inv_cdf_norm), colour = "red", alpha = 0.5, lwd = 0.95) +
+ theme_linedraw(base_family = "Times New Roman", base_size = 12) +
+ annotate("segment", x = 8, xend = 9.29, y = 0.5, yend = 0.35, colour = "black", 
+          size = .4, alpha = 0.75, arrow = arrow()) +
+ annotate("text", x = 8, y = .54, label = "pdf", 
+          size = 5, family = "Times New Roman") +
+ annotate("segment", x = 12, xend = 10.4, y = 0.5, yend = 0.7, colour = "black", 
+          size = .4, alpha = 0.75, arrow = arrow()) +
+ annotate("text", x = 12, y = .46, label = "cdf", 
+          size = 5, family = "Times New Roman")
+``` %>% 
