@@ -19,10 +19,10 @@ model_String <- "
 model {
 
 ### SUB-MODEL 1: AGE-SPECIFIC PREVALENCEt
-# Model parameters abbreviated by .age. Note: this is equivalent to standard
-# PSA, as it is technically sampling directly from an integrated pdf and is not 
-# propogated into a posterior. A hyperprior is used to model population variance 
-# due to no available data for each age-population.
+# Model parameters abbreviated by .age. Note: this is equivalent to standard PSA, as it is
+# technically sampling directly from an integrated probability distribution and is not 
+# explicitly propogated into a posterior via Bayes' theorem. A hyperprior is, however, 
+# used to model population variance due to limited data for each age-group.
   for (i in 1:86) {
      omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
     
@@ -85,9 +85,9 @@ model {
 ### END OF SUB-MODEL 2.
 
 ### SUB-MODEL 3: CANCER PROGRESSION AND 5-YEAR SURVIVAL STAGES I-IV.
-# Model parameters abbreviated by .canc. Note: this is equivalent to standard
-# PSA, as it is technically sampling directly from an integrated pdf and is not 
-# propogated into a posterior.
+# Model parameters abbreviated by .canc. Note: this is equivalent to standard PSA, as it 
+# is technically sampling directly from an integrated probability distribution and is 
+# not explicitly propogated into a posterior via Bayes' theorem:
 
    # Distribution according to Stage:
     Stage.I.canc ~ dbeta(alpha.StageI, beta.StageI)
@@ -124,7 +124,8 @@ model {
 
 ### SUB-MODEL 4: INFECTION PROGRESSION:
 # Note: this is equivalent to standard PSA, as it is technically sampling directly
-# from an integrated pdf and is not propogated into a posterior.
+# from an integrated probability distribution and is not explicitly propogated into a 
+# posterior via Bayes' theorem:
 
    # From HPV to Normal across age groups:
    # Note: because all other states except Death are assumed to be dependent and disjoint 
@@ -138,7 +139,8 @@ model {
 
 ### SUB-MODEL 5: LSIL & HSIL PROGRESSION:
 # Note: this is equivalent to standard PSA, as it is technically sampling directly
-# from an integrated pdf and is not propogated into a posterior.
+# from an integrated probability distribution and not explicitly propogated into a 
+# posterior via Bayes' theorem:
 
    # From LSIL & HSIL to Normal or Infection across age groups:
    # Note: because all other states except Death are assumed to be dependent and disjoint 
