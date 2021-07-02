@@ -215,8 +215,9 @@ Effects[, 2] <- apply(m_utilities_NTdisc, 1, sum)
 v_names_str <- c("Status Quo: screening only", "New Treatment: screening & vaccine")
 
 ## BCEA package summary:
-df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str, plot = TRUE, 
-               Kmax = 5724)
+df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str,
+               Kmax = 5724, plot = TRUE)
+
 BCEA::summary.bcea(df_cea, graph = "ggplot2")
 BCEA::ceplane.plot(df_cea, wtp = 5724, graph = "ggplot")
 BCEA::ceac.plot(df_cea, graph = "ggplot2")
@@ -231,13 +232,13 @@ riskev <- CEriskav(he = df_cea, r = c(
 # The more risk averse the decision-maker, the greater the value of EVPI:
 BCEA::plot.CEriskav(riskev, pos = "topright", graph = "ggplot")
 # At an expected standard deviation of 0.0001, the the EVPI is virtually null (i.e., the
-# value of information has become much lower) implying that the decision-maker should 
+# value of information has become much lower) implying that the decision-maker would 
 # theoretically prefer the expected variance (volatility) in the IB of the current 
 # treatment, given current information, than the alternative. However, within this scenario, 
-# the less risk-averse the decision-maker, the more valuable information is up until the 
-# WTP break-even point of ≈ $2200. After this point, the VOI decreases as the 
+# the less risk-averse the decision-maker, the more valuable information (and thus uncertain)
+# it is up until the WTP break-even point of ≈ $2200. After this point, the VOI decreases as the 
 # cost-effectiveness of the vaccine becomes more certain as the WTP for incremental 
-# benefits increases.
+# net benefits increases.
 
 ## Expected Costs and Utility for both treatments across all simulations:
 E_c <- apply(Costs, 2, mean)

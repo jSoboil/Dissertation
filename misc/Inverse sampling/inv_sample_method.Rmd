@@ -47,4 +47,4 @@ ggplot() +
           size = .4, alpha = 0.75, arrow = arrow()) +
  annotate("text", x = 12, y = .46, label = "cdf", 
           size = 5, family = "Times New Roman")
-``` %>% 
+``` 

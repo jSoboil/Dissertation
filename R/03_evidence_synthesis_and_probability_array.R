@@ -265,11 +265,7 @@ mod_JAGS
 
 # color_scheme_set("mix-gray-brightblue")
 # mcmc_combo(posterior, pars = c("pEfficacy.vac", "LSIL_15_34", "HSIL_n", "Stage.III.canc"))
-
-# mcmc_dens_chains_data(posterior, pars = c("pA.mxd[1]", "pA.mxd[2]", "pA.mxd[3]", "pA.mxd[4]",
-#                                "pA.mxd[5]", "pA.mxd[6]", "pA.mxd[7]", "pA.mxd[8]",
-#                                "pA.mxd[9]", "pA.mxd[10]", "pA.mxd[11]"))
-
+# mcmc_dens(posterior, pars = c("pEfficacy.vac", "LSIL_15_34", "HSIL_n", "Stage.III.canc"))
 # Attach JAGS model to local envir.
 attach.jags(mod_JAGS)
 
