@@ -254,20 +254,32 @@ mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params,
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 options(max.print = 1500)
 mod_JAGS
+# Note: mixed predictive checks show that variation in results is largely 
+# consistent between studies.
+
+# Attach JAGS model to local envir.:
+attach.jags(mod_JAGS)
 # One can automate convergence. However, the improvement is negligible, and it increased the
 # run time of the model from < 60secs to > 2 mins. However, if desired, uncomment the line
 # of code below to add auto chain convergence:
 # mod_JAGS <- autojags(mod_JAGS, Rhat = 1.01)
 
-# Posterior inspection:
-# posterior <- as.array(mod_JAGS$BUGSoutput$sims.array)
-# dimnames(x = posterior)
+# Select parameters to inspect:
+vis_Params <- c("OR.vac")
+posterior <- mod_JAGS$BUGSoutput$sims.array
 
-# color_scheme_set("mix-gray-brightblue")
-# mcmc_combo(posterior, pars = c("pEfficacy.vac", "LSIL_15_34", "HSIL_n", "Stage.III.canc"))
-# mcmc_dens(posterior, pars = c("pEfficacy.vac", "LSIL_15_34", "HSIL_n", "Stage.III.canc"))
-# Attach JAGS model to local envir.
-attach.jags(mod_JAGS)
+# Visual posterior inspection:
+color_scheme_set("mix-gray-brightblue")
+mcmc_areas(x = posterior, pars = vis_Params)
+mcmc_dens_chains(x = posterior, pars = vis_Params)
+# Chain 1:
+mcmc_combo(x = posterior[, 1, ], pars = vis_Params)
+# Chain 2:
+mcmc_combo(x = posterior[, 2, ], pars = vis_Params)
+# Chain 3:
+mcmc_combo(x = posterior[, 3, ], pars = vis_Params)
+# Chain 4:
+mcmc_combo(x = posterior[, 4, ], pars = vis_Params)
 
 # ==========================================================================================
 # Probability Matrix --------------------------------------------------
