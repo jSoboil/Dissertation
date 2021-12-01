@@ -1,21 +1,29 @@
 
 model {
-
 ### SUB-MODEL 1: AGE-SPECIFIC PREVALENCEt
 # Model parameters abbreviated by .age. Note: this is equivalent to standard PSA, as it is
 # technically sampling directly from an integrated probability distribution and is not 
 # explicitly propogated into a posterior via Bayes' theorem. A hyperprior is, however, 
 # used to model population variance due to limited data for each age-group.
-  for (i in 1:86) {
-     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
+  for (i in 1:15) {
+    # Assumption of 0 incidence from ages 0-14
+     p.age[i] <- 0
+  
+  }
+  # Incidence for ages 15-85:
+  for (i in 16:86) {
+    # Likelihood for incidence rate:
+     rate_Incidence[i] ~ dexp(lambda.age[i])
     
-    # Note use of pow() function, using -2 is a shorthand inverse method equivalent 
-    # to (1 / x^2):
-     log(prec.age[i]) <- pow(sigma.age[i], -2)
+    # Prior on rate:
+     lambda.age[i] ~ dt(0, 1, 1)T(0, )
      
-    # Relatively wide prior on variance for each age group. See (Gelman, 2006) on
-    # half-t for variance parameters in hierarchical models.
-     sigma.age[i] ~ dt(0, 1, 1)T(0, )
+    # Ave. rate for each age group:
+     mu.age[i] <- 1 / lambda.age[i] # mean time to event
+    
+    # Transformation of ave. rate to probability:
+     p.age[i] <- 1 - exp(-mu.age[i] * 1)
+
   }
 
 ### END OF SUB-MODEL 1.

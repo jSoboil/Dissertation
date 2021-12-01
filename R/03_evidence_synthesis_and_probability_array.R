@@ -17,22 +17,30 @@ source("R/04_parameter_inputs.R")
 # ==========================================================================================
 model_String <- "
 model {
-
 ### SUB-MODEL 1: AGE-SPECIFIC PREVALENCEt
 # Model parameters abbreviated by .age. Note: this is equivalent to standard PSA, as it is
 # technically sampling directly from an integrated probability distribution and is not 
 # explicitly propogated into a posterior via Bayes' theorem. A hyperprior is, however, 
 # used to model population variance due to limited data for each age-group.
-  for (i in 1:86) {
-     omega.age[i] ~ dlnorm(mu.a.log[i], prec.age[i])
+  for (i in 1:15) {
+    # Assumption of 0 incidence from ages 0-14
+     p.age[i] <- 0
+  
+  }
+  # Incidence for ages 15-85:
+  for (i in 16:86) {
+    # Likelihood for incidence rate:
+     rate_Incidence[i] ~ dexp(lambda.age[i])
     
-    # Note use of pow() function, using -2 is a shorthand inverse method equivalent 
-    # to (1 / x^2):
-     log(prec.age[i]) <- pow(sigma.age[i], -2)
+    # Prior on rate:
+     lambda.age[i] ~ dt(0, 1, 1)T(0, )
      
-    # Relatively wide prior on variance for each age group. See (Gelman, 2006) on
-    # half-t for variance parameters in hierarchical models.
-     sigma.age[i] ~ dt(0, 1, 1)T(0, )
+    # Ave. rate for each age group:
+     mu.age[i] <- 1 / lambda.age[i] # mean time to event
+    
+    # Transformation of ave. rate to probability:
+     p.age[i] <- 1 - exp(-mu.age[i] * 1)
+
   }
 
 ### END OF SUB-MODEL 1.
@@ -164,7 +172,7 @@ data_JAGS <- list(
   rB.vac = rB.vac, nB.vac = nB.vac,
   
   # Population prevalence:
-  mu.a.log = mu.a.log,
+  rate_Incidence = rate_Incidence,
   
   # HPV to Normal data:
   alpha.HPVtoNormal_15to24 = alpha.HPVtoNormal_15to24, 
@@ -216,9 +224,9 @@ data_JAGS <- list(
 # Parameters to monitor:
 params <- c(
   # Vaccine efficacy parameters:
-  "OR.vac", "pEfficacy.vac", "delta.vac", "psi.vac",
+  "OR.vac", "pEfficacy.vac", "mu.vac",
   # Well to infection prevalence:
-  "omega.age",
+  "p.age",
   # HPV Progression:
   "HPV_Well_15to24", "HPV_Well_25to29",
   "HPV_Well_30toEnd",
@@ -252,34 +260,35 @@ n.thin <- floor((n.iter - n.burnin) / 250)
 mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params, 
                  model.file = "data/jags_model.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
-options(max.print = 1500)
 mod_JAGS
 # Note: mixed predictive checks show that variation in results is largely 
 # consistent between studies.
 
 # Attach JAGS model to local envir.:
 attach.jags(mod_JAGS)
-# One can automate convergence. However, the improvement is negligible, and it increased the
-# run time of the model from < 60secs to > 2 mins. However, if desired, uncomment the line
-# of code below to add auto chain convergence:
+p.age
+# It is possible automate convergence. However, the improvement is negligible, 
+# and it increased the run time of the model from < 60secs to > 2 mins. However,
+# if desired, uncomment the line of code below to add auto chain convergence:
 # mod_JAGS <- autojags(mod_JAGS, Rhat = 1.01)
 
 # Select parameters to inspect:
-vis_Params <- c("OR.vac")
+vis_Params <- c("OR.vac", "p.age[20]", "HSIL_n")
 posterior <- mod_JAGS$BUGSoutput$sims.array
 
 # Visual posterior inspection:
-color_scheme_set("mix-gray-brightblue")
-mcmc_areas(x = posterior, pars = vis_Params)
 mcmc_dens_chains(x = posterior, pars = vis_Params)
+## Ensuring p.age chains have converged to similar distribution:
+color_scheme_set("mix-gray-brightblue")
+mcmc_areas(x = posterior, pars = "p.age[19]")
 # Chain 1:
-mcmc_combo(x = posterior[, 1, ], pars = vis_Params)
+mcmc_combo(x = posterior[, 1, ], pars = "p.age[20]")
 # Chain 2:
-mcmc_combo(x = posterior[, 2, ], pars = vis_Params)
+mcmc_combo(x = posterior[, 2, ], pars = "p.age[20]")
 # Chain 3:
-mcmc_combo(x = posterior[, 3, ], pars = vis_Params)
+mcmc_combo(x = posterior[, 3, ], pars = "p.age[20]")
 # Chain 4:
-mcmc_combo(x = posterior[, 4, ], pars = vis_Params)
+mcmc_combo(x = posterior[, 4, ], pars = "p.age[20]")
 
 # ==========================================================================================
 # Probability Matrix --------------------------------------------------
@@ -327,9 +336,9 @@ for (i in 1:n_t) {
  for (j in 1:n.sims) {
   a_P_1["Well", "Death", i, j] <-  v_p_mort_lessHPV[i]
   
-  a_P_1["Well", "Infection", i, j] <- omega.age[j, i]
+  a_P_1["Well", "Infection", i, j] <- p.age[j, i]
   
-  a_P_1["Well", "Well", i, j] <- 1 - (v_p_mort_lessHPV[i] + omega.age[j, i])
+  a_P_1["Well", "Well", i, j] <- 1 - (v_p_mort_lessHPV[i] + p.age[j, i])
  }
 }
 
@@ -648,9 +657,9 @@ for (i in 0:n_t) {
  for (j in 1:n.sims) {
   a_P_2["Well", "Death", i, j] <-  v_p_mort_lessHPV[i]
   
-  a_P_2["Well", "Infection", i, j] <- (1 - pEfficacy.vac[j]) * omega.age[j, i]
+  a_P_2["Well", "Infection", i, j] <- (1 - pEfficacy.vac[j]) * p.age[j, i]
   
-  a_P_2["Well", "Well", i, j] <- 1 - (v_p_mort_lessHPV[i] + ((1 - pEfficacy.vac[j]) * omega.age[j, i]))
+  a_P_2["Well", "Well", i, j] <- 1 - (v_p_mort_lessHPV[i] + ((1 - pEfficacy.vac[j]) * p.age[j, i]))
  } 
 }
 
