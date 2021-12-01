@@ -76,13 +76,13 @@ m_u_SQ <- m_u_NT <- matrix(c("Well" = u_Well,
                              "Death" = u_Death), 
                            n_states, n_t + 1, dimnames = list(v_n, 0:(n_t)))
 
-# Health costs from a health care perspective --------------------------------
+# Health costs from a society perspective --------------------------------
 ## All costs in $US.
 c_Vaccine <- 570 # once off cost of vaccine from age 12.
 c_Screening <- 93 + 309 + 75 # cost of screening using HPV DNA, VIA, cancer cytology tests.
 c_LSIL <- 61 # cost of LSIL treatment*.
 c_HSIL <- 764 # cost of HSIL treatment*.
- # *Note: HPV 16/18 assumed asymptomatic in original mode and therefore not treated.
+### *Note: HPV 16/18 assumed asymptomatic in original mode and therefore not treated.
 
 ## Cost for treatment at each cancer stage:
 c_StageI <- 4615 # cost of treatment of Stage I Cancer for one cycle.

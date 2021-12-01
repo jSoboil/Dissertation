@@ -17,31 +17,36 @@ source("R/04_parameter_inputs.R")
 # ==========================================================================================
 model_String <- "
 model {
-### SUB-MODEL 1: AGE-SPECIFIC PREVALENCEt
-# Model parameters abbreviated by .age. Note: this is equivalent to standard PSA, as it is
-# technically sampling directly from an integrated probability distribution and is not 
-# explicitly propogated into a posterior via Bayes' theorem. A hyperprior is, however, 
-# used to model population variance due to limited data for each age-group.
+### SUB-MODEL 1: AGE-SPECIFIC PREVALENCE
+# Model parameters abbreviated by .age.:
+ # Incidence for ages 0-14:
   for (i in 1:15) {
     # Assumption of 0 incidence from ages 0-14
      p.age[i] <- 0
-  
+     
   }
-  # Incidence for ages 15-85:
+ # Incidence for ages 15-85:
   for (i in 16:86) {
     # Likelihood for incidence rate:
      rate_Incidence[i] ~ dexp(lambda.age[i])
-    
+
     # Prior on rate:
-     lambda.age[i] ~ dt(0, 1, 1)T(0, )
+     lambda.age[i] ~ dnorm(0, prec.age)T(0, )
+     # can be lambda.age[i] ~ dt(0, 1, 1)T(0, )
      
     # Ave. rate for each age group:
      mu.age[i] <- 1 / lambda.age[i] # mean time to event
-    
+
     # Transformation of ave. rate to probability:
      p.age[i] <- 1 - exp(-mu.age[i] * 1)
-
+  
   }
+  
+    # Hyperprior for SUB-MODEL 1:
+     # Transform: 1 / tau ^ 2:
+     prec.age <- pow(tau.age, -2)
+     # sd hyperior on rate prior:
+     tau.age ~  dt(0, 1, 3)T(0, )
 
 ### END OF SUB-MODEL 1.
 
@@ -75,10 +80,10 @@ model {
 
   }
   
-   # Hyperpriors for SUB-MODEL 2:
-    psi.vac ~ dnorm(0, 1.0e-4)
-    prec.vac <- pow(tau.vac, -2)
-    tau.vac ~  dt(0, 1, 1)T(0, )
+  # Hyperpriors for SUB-MODEL 2:
+     psi.vac ~ dnorm(0, 1.0e-4)
+     prec.vac <- pow(tau.vac, -2)
+     tau.vac ~  dt(0, 1, 1)T(0, )
   
   # Transformations for SUB-MODEL 2:
    # Convert LOR to OR
@@ -86,8 +91,7 @@ model {
    # Convert OR to probability for vaccine efficacy
     pEfficacy.vac <- 1 / (1 + OR.vac)
    
-     # Predicted average 
-     # treatment effect:
+     # Predicted average treatment effect:
       delta.new ~ dnorm(psi.vac, prec.vac)
 
 ### END OF SUB-MODEL 2.
@@ -224,7 +228,7 @@ data_JAGS <- list(
 # Parameters to monitor:
 params <- c(
   # Vaccine efficacy parameters:
-  "OR.vac", "pEfficacy.vac", "mu.vac",
+  "OR.vac", "pEfficacy.vac",
   # Well to infection prevalence:
   "p.age",
   # HPV Progression:
@@ -261,34 +265,31 @@ mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params,
                  model.file = "data/jags_model.txt", n.chains = 4, 
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 mod_JAGS
-# Note: mixed predictive checks show that variation in results is largely 
+# Note: mixed predictive checks show that variation in data is largely 
 # consistent between studies.
 
 # Attach JAGS model to local envir.:
 attach.jags(mod_JAGS)
-p.age
 # It is possible automate convergence. However, the improvement is negligible, 
 # and it increased the run time of the model from < 60secs to > 2 mins. However,
 # if desired, uncomment the line of code below to add auto chain convergence:
 # mod_JAGS <- autojags(mod_JAGS, Rhat = 1.01)
 
-# Select parameters to inspect:
-vis_Params <- c("OR.vac", "p.age[20]", "HSIL_n")
-posterior <- mod_JAGS$BUGSoutput$sims.array
-
 # Visual posterior inspection:
-mcmc_dens_chains(x = posterior, pars = vis_Params)
+posterior <- mod_JAGS$BUGSoutput$sims.array
+mcmc_dens_chains(x = posterior, pars = c("pEfficacy.vac"))
 ## Ensuring p.age chains have converged to similar distribution:
 color_scheme_set("mix-gray-brightblue")
-mcmc_areas(x = posterior, pars = "p.age[19]")
-# Chain 1:
-mcmc_combo(x = posterior[, 1, ], pars = "p.age[20]")
-# Chain 2:
-mcmc_combo(x = posterior[, 2, ], pars = "p.age[20]")
-# Chain 3:
-mcmc_combo(x = posterior[, 3, ], pars = "p.age[20]")
-# Chain 4:
-mcmc_combo(x = posterior[, 4, ], pars = "p.age[20]")
+# Trace and density:
+mcmc_combo(x = posterior, pars = "p.age[18]")
+# Trace and density:
+mcmc_combo(x = posterior, pars = "p.age[21]")
+# Trace and density:
+mcmc_combo(x = posterior, pars = "p.age[25]")
+# Trace and density:
+mcmc_combo(x = posterior, pars = "p.age[50]")
+# Trace and density:
+mcmc_combo(x = posterior, pars = "p.age[80]")
 
 # ==========================================================================================
 # Probability Matrix --------------------------------------------------
