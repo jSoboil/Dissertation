@@ -256,7 +256,7 @@ params <- c(
   )
 
 # Set no. of iterations, burn-in period and thinned samples:
-n.iter <- 35000
+n.iter <- 20000
 n.burnin <- 5000
 n.thin <- floor((n.iter - n.burnin) / 250)
 

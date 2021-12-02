@@ -12,6 +12,9 @@ sapply(pkgs, require, character.only = TRUE)
 # Initialise start time counter:
 start_time <- Sys.time()
 
+# Set seed for replication:
+set.seed(100)
+
 # Note that the source code for this section sits on top of the code for the Markov Models
 # found in the R folder (R/02_markov_model.R):
 source("R/02_markov_model.R")
