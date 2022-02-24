@@ -9,7 +9,7 @@ pkgs <- c("bayesplot", "BCEA", "dampack", "readxl",
           "reshape2", "R2jags", "tidyverse")
 sapply(pkgs, require, character.only = TRUE)
 
-# Detech cores:
+# Detect cores:
 options(mc.cores = parallel::detectCores())
 
 # Initialise start time counter:
