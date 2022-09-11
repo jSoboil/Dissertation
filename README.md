@@ -14,7 +14,7 @@
 2. [Lucy Cunnama](https://orcid.org/0000-0003-2134-4905)<sup>b</sup>
 3. [Tommy Wilkinson](https://orcid.org/0000-0003-0806-2196)<sup>c</sup>
 
-<sup>a. Corresponding author's [email](mailto:soboil.joshua@gmail.com) <br/>
+<sup>a. Corresponding author's [email](mailto:joshua@soboils.com?subject=[GitHub]%20Dissertaion%20Enquiry) <br/>
 b. Health Economics Unit, School of Public Health and Family Medicine, University of Cape Town <br/>
 c. World Bank Group <br/>
 <sup>

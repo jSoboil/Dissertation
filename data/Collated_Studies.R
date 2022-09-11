@@ -48,8 +48,6 @@ v_p_mort_lessHPV
 # Cervical Infection and Pre-cancer in Young Women: Final Event-Driven Analysis of the 
 # Randomized, Double- Blind PATRICIA Trial.
 
-# Continent: 
-
 # Data collected from 6-month HPV 16/18 ATP cohort.
 
 # Control (A):
@@ -58,7 +56,7 @@ v_p_mort_lessHPV
 
 # Vaccine (B):
 # n = 5406
-# cases = 32
+# cases = 32 
 
 # Study 2: Harper et al. (2004) -------------------------------------------
 # Efficacy of a bivalent L1 virus-like particle vaccine in prevention of infection with 
@@ -140,7 +138,7 @@ v_p_mort_lessHPV
 
 # Control (A):
 # n = 175
-# cases = 10
+# cases = 10 
 
 # Vaccine (B):
 # n = 193
