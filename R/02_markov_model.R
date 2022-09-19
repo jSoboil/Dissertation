@@ -41,18 +41,19 @@ m_M_ad_2[1, , ] <- v_s_init
 
 # Iterative solution of age-dependent cSTM model 1:
 for (t in 1:n_t) {
- for(i in 1:n.sims) {
+ for(k in 1:n.sims) {
   # Fill in cohort trace
-  m_M_ad_1[t + 1, , i] <- m_M_ad_1[t, , i] %*% a_P_1[ , , t, i]
+  m_M_ad_1[t + 1, , k] <- m_M_ad_1[t, , k] %*% a_P_1[ , , t, k]
   }
 }
 # Iterative solution of age-dependent cSTM model 2:
 for (t in 1:n_t) {
  for(i in 1:n.sims) {
   # Fill in cohort trace
-  m_M_ad_2[t + 1, , i] <- m_M_ad_2[t, , i] %*% a_P_2[ , , t, i]
+  m_M_ad_2[t + 1, , k] <- m_M_ad_2[t, , k] %*% a_P_2[ , , t, k]
   }
 }
+
 
 # Check for transition leakage (each cycle must sum to n.sims, otherwise there is something 
 # wrong with the transitions probabilities):

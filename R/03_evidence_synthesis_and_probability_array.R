@@ -28,6 +28,7 @@ model {
  # Incidence for ages 15-85:
   for (i in 16:86) {
     # Likelihood for incidence rate:
+    # Note: change to log-normal
      rate_Incidence[i] ~ dexp(lambda.age[i])
 
     # Prior on rate:
@@ -315,10 +316,10 @@ v_n <- c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer
 n_states <- length(v_n) # number of health states 
 
 # Transition array for each alternative:
-a_P_1 <- array(0, dim = c(n_states, n_states, n_t + 1, n.sims),
-             dimnames = list(v_n, v_n, 0:(n_t), 1:n.sims))
-a_P_2 <- array(0, dim = c(n_states, n_states, n_t + 1, n.sims),
-             dimnames = list(v_n, v_n, 0:(n_t), 1:n.sims))
+a_P_1 <- array(0, dim = c(n_states, n_states, (n_t + 1), n.sims),
+             dimnames = list(v_n, v_n, 0:n_t, 1:n.sims))
+a_P_2 <- array(0, dim = c(n_states, n_states, (n_t + 1), n.sims),
+             dimnames = list(v_n, v_n, 0:n_t, 1:n.sims))
 
 # Note: all progression probabilities are assumed dependent on the probability of regression. 
 # Moreover, due to the natural structure of the transition array, there is no need to fill 

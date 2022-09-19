@@ -6,7 +6,7 @@
 
 # Libraries and Misc ------------------------------------------------------
 pkgs <- c("bayesplot", "BCEA", "dampack", "readxl", 
-          "reshape2", "R2jags", "tidyverse")
+          "reshape2", "R2jags", "tidyverse", "rjags")
 sapply(pkgs, require, character.only = TRUE)
 
 # Detect cores:
