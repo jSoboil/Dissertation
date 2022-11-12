@@ -8,3 +8,4 @@ misc/.DS_Store
 .Rhistory 2
 .gitignore 2
 .DS_Store
+data-raw/mortality_tables.xls
