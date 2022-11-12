@@ -31,29 +31,25 @@ v_s_init <- c("Well" = 1,     "Infection" = 0, "LSIL" = 0, "HSIL" = 0,
 m_M_ad_1 <- array(matrix(0, nrow = n_t + 1, ncol = n_states),
                 dim = c(c(n_t + 1, n_states), n.sims), 
                 dimnames = list(0:n_t, v_n, 1:n.sims))
-m_M_ad_2 <- array(matrix(0, nrow = n_t + 1, ncol = n_states),
-                dim = c(c(n_t + 1, n_states), n.sims), 
-                dimnames = list(0:n_t, v_n, 1:n.sims))
-
+m_M_ad_2 <- m_M_ad_1
 # Store the initial state vector in the first row of the cohort trace
 m_M_ad_1[1, , ] <- v_s_init
 m_M_ad_2[1, , ] <- v_s_init
 
 # Iterative solution of age-dependent cSTM model 1:
 for (t in 1:n_t) {
- for(k in 1:n.sims) {
+ for(i in 1:n.sims) {
   # Fill in cohort trace
-  m_M_ad_1[t + 1, , k] <- m_M_ad_1[t, , k] %*% a_P_1[ , , t, k]
+  m_M_ad_1[t + 1, , i] <- m_M_ad_1[t, , i] %*% a_P_1[ , , t, i]
   }
 }
 # Iterative solution of age-dependent cSTM model 2:
 for (t in 1:n_t) {
  for(i in 1:n.sims) {
   # Fill in cohort trace
-  m_M_ad_2[t + 1, , k] <- m_M_ad_2[t, , k] %*% a_P_2[ , , t, k]
+  m_M_ad_2[t + 1, , i] <- m_M_ad_2[t, , i] %*% a_P_2[ , , t, i]
   }
 }
-
 
 # Check for transition leakage (each cycle must sum to n.sims, otherwise there is something 
 # wrong with the transitions probabilities):

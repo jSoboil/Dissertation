@@ -11,16 +11,17 @@ model {
  # Incidence for ages 15-85:
   for (i in 16:86) {
     # Likelihood for incidence rate:
+    # Note: change to log-normal
      rate_Incidence[i] ~ dexp(lambda.age[i])
 
     # Prior on rate:
-     lambda.age[i] ~ dnorm(0, prec.age)T(0, )
+     lambda.age[i] ~ dnorm(0.5, prec.age)T(0, )
      # can be lambda.age[i] ~ dt(0, 1, 1)T(0, )
      
     # Ave. rate for each age group:
      mu.age[i] <- 1 / lambda.age[i] # mean time to event
 
-    # Transformation of ave. rate to probability:
+    # Transformation of ave. rate to 1-year probability:
      p.age[i] <- 1 - exp(-mu.age[i] * 1)
   
   }

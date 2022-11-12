@@ -14,11 +14,11 @@
 # Probability Dying less HPV for all States -------------------------------
 # ==========================================================================================
 # Import ASSA mortality table:
-mort_data <- read_excel("data-raw/mortality_tables.xls", sheet = "final tables", range = "D1:D87")
+mort_data <- read_excel("data-raw/mortality_tables.xls", sheet = "final tables", range = "D1:F87")
 v_p_mort_lessHPV <- as.matrix(mort_data[1])
 
-# Like the original study, the replication study is hugely sensitive to the HIV caused mortality 
-# in South Africa in 2009. The mortality table below excludes HIV/AIDS related mortality.  
+# Like the original study, the replication study is sensitive to the HIV caused mortality in South Africa. 
+# The mortality table below excludes HIV/AIDS related mortality.  
 # Uncomment the two lines of code below and comment the code above to exclude HIV/AIDS related 
 # mortality.
 # mort_data <- read_excel("data-raw/mortality tables.xls", sheet = "final tables", range = "F1:F87")
@@ -85,8 +85,6 @@ beta.HPVtoNormal_30toPlus <- beta_params(mean = HPV_Normal_30plus, sigma = 0.05)
 # To Infection or Normal ----------------------------------------
 # Simulation distribution parameter values Ages 15-34:
 
-# It is important to place an upper bound on this distribution in order to make the probabilities
-# sensible due to the South African mortality context.
 LSIL_15to34 <- (1 - exp(-0.65 * 6))
 
 alpha.LSIL_15to34 <- beta_params(mean = LSIL_15to34, sigma = 0.05)$alpha

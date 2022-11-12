@@ -5,8 +5,8 @@
 ################################################################################
 
 # Libraries and Misc ------------------------------------------------------
-pkgs <- c("bayesplot", "BCEA", "dampack", "readxl", 
-          "reshape2", "R2jags", "tidyverse", "rjags")
+pkgs <- c("bayesplot", "BCEA", "dampack", "readxl",  "reshape2", "R2jags", 
+          "tidyverse", "rjags", "darthtools")
 sapply(pkgs, require, character.only = TRUE)
 
 # Detect cores:
@@ -184,10 +184,9 @@ v_dwc <- 1 / ((1 + d_c) ^ (0:(n_t)))
 v_dwe <- 1 / ((1 + d_e) ^ (0:(n_t)))
 
 # Discounted costs and utilities matrices:
-m_utilities_NTdisc <- m_costs_NTdisc <- m_utilities_SQdisc <- m_costs_SQdisc <- matrix(
- 0, n.sims, n_t + 1, dimnames = list(
-  1:n.sims, 0:n_t)
- )
+m_costs_SQdisc <- matrix(0, n.sims, n_t + 1, 
+                         dimnames = list(1:n.sims, 0:n_t))
+m_utilities_NTdisc <- m_costs_NTdisc <- m_utilities_SQdisc <- m_costs_SQdisc
 
 for (i in 1:n.sims) {
  for (t in 0:n_t) {
@@ -228,29 +227,12 @@ BCEA::ceplane.plot(df_cea, wtp = 5724, graph = "ggplot")
 BCEA::ceac.plot(df_cea, graph = "ggplot2")
 BCEA::eib.plot(df_cea, graph = "ggplot")
 BCEA::ib.plot(df_cea, wtp = 5724, graph = "ggplot")
-# In the plot below, r represents the risk aversion parameter which is the square root of the 
-# variance for the expected return on investment. Hence, simply speaking, the more averse, 
-# the more certainty a decision-maker desires for an  investment's return.
-riskev <- CEriskav(he = df_cea, r = c(
- 0.0000001, 0.000001, 0.00001, 0.0001)
- )
-# The more risk averse the decision-maker, the greater the value of EVPI:
-BCEA::plot.CEriskav(riskev, pos = "topright", graph = "ggplot")
-# At an expected standard deviation of 0.0001, the the EVPI is virtually null (i.e., the
-# value of information has become much lower) implying that the decision-maker would 
-# theoretically prefer the expected variance (volatility) in the IB of the current 
-# treatment, given current information, than the alternative. However, within this scenario, 
-# the less risk-averse the decision-maker, the more valuable information (and thus uncertain)
-# it is up until the WTP break-even point of ≈ $2200. After this point, the VOI decreases as the 
-# cost-effectiveness of the vaccine becomes more certain as the WTP for incremental 
-# net benefits increases.
 
 ## Expected Costs and Utility for both treatments across all simulations:
 E_c <- apply(Costs, 2, mean)
 E_u <- apply(Effects, 2, mean)
 # Manual ICER:
 (E_c[2] - E_c[1]) / (E_u[2] - E_u[1])
-
 ## dampack package summary:
 cea_summary <- dampack::calculate_icers(cost = E_c, effect = E_u, strategies = v_names_str)
 cea_summary
