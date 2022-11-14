@@ -53,8 +53,8 @@ for (t in 1:n_t) {
 
 # Check for transition leakage (each cycle must sum to n.sims, otherwise there is something 
 # wrong with the transitions probabilities):
-apply(m_M_ad_1, 1, sum)
-apply(m_M_ad_2, 1, sum)
+round(apply(m_M_ad_1, 1, sum), 1)
+round(apply(m_M_ad_2, 1, sum), 1)
 
 # ==========================================================================================
 # Visualisation of Markov Models ------------------------------------------
@@ -186,9 +186,9 @@ ggplot() +
  theme()
 
 # Mortality in Model 1:
-v_D_ad_1 <- rowSums(apply(m_M_ad_1[ , "Death", ], c(1, 2), mean))
+v_D_ad_1 <- rowSums(apply(m_M_ad_1[ , "Death", ], c(1, 2), mean)) / n.sims
 # Mortality in Model 1:
-v_D_ad_2 <- rowSums(apply(m_M_ad_2[ , "Death", ], c(1, 2), mean))
+v_D_ad_2 <- rowSums(apply(m_M_ad_2[ , "Death", ], c(1, 2), mean)) / n.sims
 ggplot() +
  geom_line(aes(x = 0:n_t, y = v_D_ad_1), size = 2, colour = "navyblue", 
            na.rm = TRUE, alpha = 1) +
@@ -196,7 +196,7 @@ ggplot() +
            alpha = 0.95, na.rm = TRUE) + 
  scale_y_continuous(labels = scales::percent) +
  xlab("Cycle") +
- ylab("Comparative no. Deaths") +
+ ylab("Probability of Death")
  xlim(15, 85) +
  theme_bw(base_size = 14) +
  theme()

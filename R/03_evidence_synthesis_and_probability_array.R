@@ -28,26 +28,29 @@ model {
  # Incidence for ages 15-85:
   for (i in 16:86) {
     # Likelihood for incidence rate:
-    # Note: change to log-normal
      rate_Incidence[i] ~ dexp(lambda.age[i])
 
-    # Prior on rate:
-     lambda.age[i] ~ dnorm(0.5, prec.age)T(0, )
-     # can be lambda.age[i] ~ dt(0, 1, 1)T(0, )
+    # Prior on rate with separate variance within each age-group:
+     lambda.age[i] ~ dlnorm(0.6, prec.age[i]) # the high average pulls likelihood
+                                              # due to uncertainty of US data applied
+                                              # to SA context.
+     # Independent variance to precision within each age-group:
+     prec.age[i] <- pow(tau.age[i], -2)
+     # Stdev for each age-group:
+     tau.age[i] ~  dunif(0, 10) # with uniform prior bounded at U(a = 0, b = 10)
      
     # Ave. rate for each age group:
-     mu.age[i] <- 1 / lambda.age[i] # mean time to event
+     mu.age[i] <- 1 / lambda.age[i] # special case of Weibull for mean time to 
+                                    # event.
 
-    # Transformation of ave. rate to 1-year probability:
+    # Transformation of ave. rate to annual probability:
      p.age[i] <- 1 - exp(-mu.age[i] * 1)
   
   }
-  
+
     # Hyperprior for SUB-MODEL 1:
      # Transform: 1 / tau ^ 2:
-     prec.age <- pow(tau.age, -2)
-     # sd hyperior on rate prior:
-     tau.age ~  dt(0, 1, 3)T(0, )
+     # prec.age <- pow(tau.age, -2) # power transformation
 
 ### END OF SUB-MODEL 1.
 
@@ -55,7 +58,7 @@ model {
 # Note: this is a Bayesian Posterior model, as it combines evidence directly via the 
 # likelihood and prior. Model parameters are abbreviated by .vac.
   for (i in 1:Nstud.vac) {
-    # Likelihood:
+    # Binomial Likelihood:
      rA.vac[i] ~ dbin(pA.vac[i], nA.vac[i])
      rB.vac[i] ~ dbin(pB.vac[i], nB.vac[i])
 
@@ -64,10 +67,10 @@ model {
      logit(pB.vac[i]) <- mu.vac[i] + delta.vac[i]
     
     # Average effect prior for SUB-MODEL 2:
-     mu.vac[i] ~ dnorm(0, 1e-4)
+     mu.vac[i] ~ dnorm(0, 1e-4) # average effect across groups.
     # Prior for sub-model 2 (Random. pop. effect):
-     delta.vac[i] ~ dt(psi.vac, prec.vac, 1) 
-     # if desired can be ~ dnorm(psi.vac, prec.vac)
+     delta.vac[i] ~ dt(psi.vac, prec.vac, 1)  # with separate random effect between 
+                                              # groups.
     
      ### Mixed predictive check for SUB-MODEL 2:
        # Predictive likelihood:
@@ -272,11 +275,11 @@ mod_JAGS
 # Attach JAGS model to local envir.:
 attach.jags(mod_JAGS)
 # It is possible automate convergence. However, the improvement is negligible, 
-# and it increased the run time of the model from < 60secs to > 2 mins. However,
-# if desired, uncomment the line of code below to add auto chain convergence:
+# and it increased the run time from < 60secs to > 2 mins. If desired, uncomment 
+# the line of code below to add auto chain convergence: 
 # mod_JAGS <- autojags(mod_JAGS, Rhat = 1.01)
 
-# Visual posterior inspection:
+# Visual posterior inspection: uncomment to run visual inspection
 # posterior <- mod_JAGS$BUGSoutput$sims.array
 # mcmc_dens_chains(x = posterior, pars = c("pEfficacy.vac"))
 ## Ensuring p.age chains have converged to similar distribution:

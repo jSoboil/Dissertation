@@ -5,11 +5,20 @@
 ################################################################################
 
 # Libraries and Misc ------------------------------------------------------
+## Names of required packages for analysis:
 pkgs <- c("bayesplot", "BCEA", "dampack", "readxl",  "reshape2", "R2jags", 
           "tidyverse", "rjags", "darthtools")
-sapply(pkgs, require, character.only = TRUE)
 
-# Detect cores:
+# Install packages not yet installed:
+installed_packages <- pkgs %in% rownames(installed.packages())
+if (any(installed_packages == FALSE)) {
+ install.packages(pkgs[!installed_packages])
+}
+
+# Load required packages:
+invisible(lapply(pkgs, library, character.only = TRUE))
+
+# Detect and set parallel processing to number of cores:
 options(mc.cores = parallel::detectCores())
 
 # Initialise start time counter:
@@ -138,7 +147,9 @@ m_c_SQ["HSIL", c(31, 41, 51)] <-(m_c_SQ["HSIL", c(31, 41, 51)] + c_HSIL)
 # Matrix of state costs based on time interval t under New Treatment:
 m_c_NT <- m_c_SQ
 # Vaccine cost at age 12:
-m_c_NT["Well", c(13)] <-(m_c_NT["Well", c(13)] + (c_Vaccine * 0.8)) # Note: assumed 80% vaccine coverage
+m_c_NT["Well", c(13)] <-(m_c_NT["Well", c(13)] + (c_Vaccine * 0.8)) # Note: 
+                                                                    # assumption of
+                                                                    # 80% vaccine coverage
 # Create cost and effects matrices:
 m_utilities_NT <- m_costs_NT <- m_utilities_SQ <- m_costs_SQ <- matrix(
  0, n.sims, n_t + 1, dimnames = list(
@@ -150,12 +161,16 @@ for (i in 1:n.sims) {
  for (t in 0:n_t) {
   ### For Status-Quo (screening only)
   ## Costs
-  m_costs_SQ[i, t]  <- (m_M_ad_1[t, , i] * 0.5) %*% m_c_SQ[, t] # Note: 50% of cohort screened
+  m_costs_SQ[i, t]  <- (m_M_ad_1[t, , i] * 0.5) %*% m_c_SQ[, t] # Note: 50% of 
+                                                                # cohort assumed 
+                                                                # screened.
   ## QALYs
   m_utilities_SQ[i, t]  <- m_M_ad_1[t, , i] %*% m_u_SQ[, t]
   ### For New Treatment (screening and vaccine):
   ## Costs
-  m_costs_NT[i, t] <- (m_M_ad_2[t, , i] * 0.5) %*% m_c_NT[, t] # Note: 50% of cohort screened
+  m_costs_NT[i, t] <- (m_M_ad_2[t, , i] * 0.5) %*% m_c_NT[, t] # Note: 50% of 
+                                                                # cohort assumed 
+                                                                # screened.
   ## QALYs
   m_utilities_NT[i, t] <- m_M_ad_2[t, , i] %*% m_u_NT[, t]
  }
@@ -221,7 +236,7 @@ v_names_str <- c("Status Quo: screening only", "New Treatment: screening & vacci
 
 ## BCEA package summary:
 df_cea <- bcea(Effects, Costs, ref = 2, interventions = v_names_str,
-               Kmax = 5724, plot = TRUE)
+               Kmax = 5724, plot = FALSE)
 BCEA::contour(he = df_cea)
 BCEA::ceplane.plot(df_cea, wtp = 5724, graph = "ggplot")
 BCEA::ceac.plot(df_cea, graph = "ggplot2")
