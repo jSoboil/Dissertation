@@ -14,7 +14,7 @@ model {
      rate_Incidence[i] ~ dexp(lambda.age[i])
 
     # Prior on rate with separate variance within each age-group:
-     lambda.age[i] ~ dlnorm(0.6, prec.age[i]) # the high average pulls likelihood
+     lambda.age[i] ~ dlnorm(0, prec.age[i]) # the high average pulls likelihood
                                               # due to uncertainty of US data applied
                                               # to SA context.
      # Independent variance to precision within each age-group:
@@ -22,17 +22,16 @@ model {
      # Stdev for each age-group:
      tau.age[i] ~  dunif(0, 10) # with uniform prior bounded at U(a = 0, b = 10)
      
-    # Ave. rate for each age group:
-     mu.age[i] <- 1 / lambda.age[i] # special case of Weibull for mean time to event.
+    # Expected rate for each age group per cycle:
+     mu.age[i] <- 1 / lambda.age[i] # 1/lambda = E[lambda]
 
-    # Transformation of ave. rate to 1-year cum. probability:
+    # Transformation of mean rate to annual probability:
      p.age[i] <- 1 - exp(-mu.age[i] * 1)
   
   }
 
     # Hyperprior for SUB-MODEL 1:
-     # Transform: 1 / tau ^ 2:
-     # prec.age <- pow(tau.age, -2) # power transformation
+     # prec.age <- pow(tau.age, -2) # inverse power transformation
 
 ### END OF SUB-MODEL 1.
 

@@ -31,26 +31,25 @@ model {
      rate_Incidence[i] ~ dexp(lambda.age[i])
 
     # Prior on rate with separate variance within each age-group:
-     lambda.age[i] ~ dlnorm(0.6, prec.age[i]) # the high average pulls likelihood
-                                              # due to uncertainty of US data applied
-                                              # to SA context.
+     lambda.age[i] ~ dlnorm(0, prec.age[i]) # the uncertain prior  pulls likelihood
+                                              # due to uncertainty of US data
+                                              # applied to SA context.
      # Independent variance to precision within each age-group:
      prec.age[i] <- pow(tau.age[i], -2)
      # Stdev for each age-group:
      tau.age[i] ~  dunif(0, 10) # with uniform prior bounded at U(a = 0, b = 10)
      
-    # Ave. rate for each age group:
-     mu.age[i] <- 1 / lambda.age[i] # special case of Weibull for mean time to 
-                                    # event.
+    # Expected rate for each age group per cycle:
+     mu.age[i] <- 1 / lambda.age[i] # reparametrise as scale parameter, i.e., 
+                                    # 1/lambda = E[lambda]
 
-    # Transformation of ave. rate to annual probability:
+    # Transformation of mean rate to annual probability:
      p.age[i] <- 1 - exp(-mu.age[i] * 1)
   
   }
 
     # Hyperprior for SUB-MODEL 1:
-     # Transform: 1 / tau ^ 2:
-     # prec.age <- pow(tau.age, -2) # power transformation
+     # prec.age <- pow(tau.age, -2) # inverse power transformation
 
 ### END OF SUB-MODEL 1.
 
@@ -335,7 +334,7 @@ a_P_2 <- a_P_1
 # Transitions from Well State ---------------------------------------------
 # The following enters all transition probabilities for ages 0-85 for each transition from
 # the state Well, across the appropriate time horizon i and all probabilistic 
-# simulations j. All transitions are conditional on surviving.
+# simulations j. All transitions, across all states, are conditional on surviving.
 for (i in 1:n_t) {
  for (j in 1:n.sims) {
   a_P_1["Well", "Death", i, j] <-  v_p_mort_lessHPV[i] 
