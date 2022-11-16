@@ -9,7 +9,7 @@ source("R/03_evidence_synthesis_and_probability_array.R")
 # et al. 2009): "The potential cost-effectiveness of adding a human papillomavirus vaccine 
 # to the cervical cancer screening programme in South Africa." 
 
-# m_M_ad_1 is the Status Quo treatment model; m_M_ad_2 is the vaccine treatment model.
+# m_M_SoC is the Status Quo treatment model; m_M_NT is the vaccine treatment model.
 
 # Initial state vector:
 v_s_init <- c("Well" = 1,     "Infection" = 0, "LSIL" = 0, "HSIL" = 0, 
@@ -28,33 +28,33 @@ v_s_init <- c("Well" = 1,     "Infection" = 0, "LSIL" = 0, "HSIL" = 0,
                     "Cancer Survivor" = 0,                     "Death" = 0)
 
 # Initialize cohort trace for age-dependent cSTMs:
-m_M_ad_1 <- array(matrix(0, nrow = n_t + 1, ncol = n_states),
+m_M_SoC <- array(matrix(0, nrow = n_t + 1, ncol = n_states),
                 dim = c(c(n_t + 1, n_states), n.sims), 
                 dimnames = list(0:n_t, v_n, 1:n.sims))
-m_M_ad_2 <- m_M_ad_1
+m_M_NT <- m_M_SoC
 # Store the initial state vector in the first row of the cohort trace
-m_M_ad_1[1, , ] <- v_s_init
-m_M_ad_2[1, , ] <- v_s_init
+m_M_SoC[1, , ] <- v_s_init
+m_M_NT[1, , ] <- v_s_init
 
 # Iterative solution of age-dependent cSTM model 1:
 for (t in 1:n_t) {
  for(i in 1:n.sims) {
   # Fill in cohort trace
-  m_M_ad_1[t + 1, , i] <- m_M_ad_1[t, , i] %*% a_P_1[ , , t, i]
+  m_M_SoC[t + 1, , i] <- m_M_SoC[t, , i] %*% a_P_SoC[ , , t, i]
   }
 }
 # Iterative solution of age-dependent cSTM model 2:
 for (t in 1:n_t) {
  for(i in 1:n.sims) {
   # Fill in cohort trace
-  m_M_ad_2[t + 1, , i] <- m_M_ad_2[t, , i] %*% a_P_2[ , , t, i]
+  m_M_NT[t + 1, , i] <- m_M_NT[t, , i] %*% a_P_NT[ , , t, i]
   }
 }
 
 # Check for transition leakage (each cycle must sum to n.sims, otherwise there is something 
 # wrong with the transitions probabilities):
-round(apply(m_M_ad_1, 1, sum), 1)
-round(apply(m_M_ad_2, 1, sum), 1)
+round(apply(m_M_SoC, 1, sum), 1)
+round(apply(m_M_NT, 1, sum), 1)
 
 # ==========================================================================================
 # Visualisation of Markov Models ------------------------------------------
@@ -109,7 +109,7 @@ lty <-  c("Well" = 1,     "Infection" = 2, "LSIL" = 3,
           "Death" = 1)
 
 # Visualisation of cohort proportions for Markov Model 1:
-ggplot(melt(apply(m_M_ad_1, c(1, 2), mean)), aes(x = Var1, y = value, 
+ggplot(melt(apply(m_M_SoC, c(1, 2), mean)), aes(x = Var1, y = value, 
                       color = Var2, linetype = Var2)) +
  geom_line(size = 0.5) +
  scale_colour_manual(name = "Health state", 
@@ -124,7 +124,7 @@ ggplot(melt(apply(m_M_ad_1, c(1, 2), mean)), aes(x = Var1, y = value,
         legend.background = element_rect(fill = NA),
         text = element_text(size = 15))
 # Survival curve for Markov Model 1:
-v_S_ad_1 <- rowSums(apply(m_M_ad_1[, -30, ], c(1, 2), mean))  # vector with survival curve
+v_S_ad_1 <- rowSums(apply(m_M_SoC[, -30, ], c(1, 2), mean))  # vector with survival curve
 ggplot(data.frame(Cycle = 0:n_t, Survival = v_S_ad_1), 
        aes(x = Cycle, y = Survival)) +
   geom_line(size = 1.3) +
@@ -135,7 +135,7 @@ ggplot(data.frame(Cycle = 0:n_t, Survival = v_S_ad_1),
   theme()
 
 # Visualisation of cohort proportions for Markov Model 2:
-ggplot(melt(apply(m_M_ad_2, c(1, 2), mean)), aes(x = Var1, y = value, 
+ggplot(melt(apply(m_M_NT, c(1, 2), mean)), aes(x = Var1, y = value, 
                       color = Var2, linetype = Var2)) +
  geom_line(size = 0.5) +
  scale_colour_manual(name = "Health state", 
@@ -150,7 +150,7 @@ ggplot(melt(apply(m_M_ad_2, c(1, 2), mean)), aes(x = Var1, y = value,
         legend.background = element_rect(fill = NA),
         text = element_text(size = 15))
 # Survival curve for Markov Model 2:
-v_S_ad_2 <- rowSums(apply(m_M_ad_2[, -30, ], c(1, 2), mean))  # vector with survival curve
+v_S_ad_2 <- rowSums(apply(m_M_NT[, -30, ], c(1, 2), mean))  # vector with survival curve
 ggplot(data.frame(Cycle = 0:n_t, Survival = v_S_ad_2), 
        aes(x = Cycle, y = Survival)) +
   geom_line(size = 1.3) +
@@ -168,10 +168,10 @@ le_ad_2 <- sum(v_S_ad_2)
 le_ad_2
 
 # Prevalence of Infection in Model 1:
-v_prev_Infection_1 <- apply(m_M_ad_1[, "Infection", ], c(2, 1), mean)
+v_prev_Infection_1 <- apply(m_M_SoC[, "Infection", ], c(2, 1), mean)
 v_prev_Infection_1 <- apply(v_prev_Infection_1, 2, mean) / v_S_ad_1
 # Prevalence of Infection in Model 2:
-v_prev_Infection_2 <- apply(m_M_ad_2[, "Infection", ], c(2, 1), mean)
+v_prev_Infection_2 <- apply(m_M_NT[, "Infection", ], c(2, 1), mean)
 v_prev_Infection_2 <- apply(v_prev_Infection_2, 2, mean) / v_S_ad_2
 ggplot() +
  geom_line(aes(x = 0:n_t, y = v_prev_Infection_1), size = 1.3, colour = "skyblue", 
@@ -186,9 +186,9 @@ ggplot() +
  theme()
 
 # Mortality in Model 1:
-v_D_ad_1 <- rowSums(apply(m_M_ad_1[ , "Death", ], c(1, 2), mean)) / n.sims
+v_D_ad_1 <- rowSums(apply(m_M_SoC[ , "Death", ], c(1, 2), mean)) / n.sims
 # Mortality in Model 1:
-v_D_ad_2 <- rowSums(apply(m_M_ad_2[ , "Death", ], c(1, 2), mean)) / n.sims
+v_D_ad_2 <- rowSums(apply(m_M_NT[ , "Death", ], c(1, 2), mean)) / n.sims
 ggplot() +
  geom_line(aes(x = 0:n_t, y = v_D_ad_1), size = 2, colour = "navyblue", 
            na.rm = TRUE, alpha = 1) +
@@ -196,20 +196,20 @@ ggplot() +
            alpha = 0.95, na.rm = TRUE) + 
  scale_y_continuous(labels = scales::percent) +
  xlab("Cycle") +
- ylab("Probability of Death")
+ ylab("Probability of Death") +
  xlim(15, 85) +
  theme_bw(base_size = 14) +
  theme()
 
 # Visualisation of cohort proportions for Markov Model 1:
-barplot(apply(m_M_ad_1, c(2, 1), mean), space = 1,
+barplot(apply(m_M_SoC, c(2, 1), mean), space = 1,
         ylab = "Proportion of patients in each state",
         main = "Status Quo Treatment", col = cols, cex.names = 1, cex.main = 1.5)
 legend("bottomright", legend = c("Well", "Infection", "Death"),
        fill = c("Well" = "#BD1B00", "Infection" = "#FA7700", "Death" = "#B3BABA"),
        cex = .65, box.lwd = 1.85, x = 146.5, y = 1.02)
 # Visualisation of cohort proportions for Markov Model 2:
-barplot(apply(m_M_ad_2, c(2, 1), mean), space = 1,
+barplot(apply(m_M_NT, c(2, 1), mean), space = 1,
         ylab = "Proportion of patients in each state",
         main = "Vaccine Treatment", col = cols, cex.names = 1, cex.main = 1.5)
 legend("bottomright", legend = c("Well", "Infection", "Death"),
