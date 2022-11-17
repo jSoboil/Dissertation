@@ -28,23 +28,23 @@ v_s_init <- c("Well" = 1,     "Infection" = 0, "LSIL" = 0, "HSIL" = 0,
                     "Cancer Survivor" = 0,                     "Death" = 0)
 
 # Initialize cohort trace for age-dependent cSTMs:
-m_M_SoC <- array(matrix(0, nrow = n_t + 1, ncol = n_states),
-                dim = c(c(n_t + 1, n_states), n.sims), 
-                dimnames = list(0:n_t, v_n, 1:n.sims))
+m_M_SoC <- array(matrix(0, nrow = n_cycles + 1, ncol = n_states),
+                dim = c(n_cycles + 1, n_states, n.sims), 
+                dimnames = list(0:n_cycles, v_names_states, 1:n.sims))
 m_M_NT <- m_M_SoC
 # Store the initial state vector in the first row of the cohort trace
 m_M_SoC[1, , ] <- v_s_init
 m_M_NT[1, , ] <- v_s_init
 
 # Iterative solution of age-dependent cSTM model 1:
-for (t in 1:n_t) {
+for (t in 1:n_cycles) {
  for(i in 1:n.sims) {
   # Fill in cohort trace
   m_M_SoC[t + 1, , i] <- m_M_SoC[t, , i] %*% a_P_SoC[ , , t, i]
   }
 }
 # Iterative solution of age-dependent cSTM model 2:
-for (t in 1:n_t) {
+for (t in 1:n_cycles) {
  for(i in 1:n.sims) {
   # Fill in cohort trace
   m_M_NT[t + 1, , i] <- m_M_NT[t, , i] %*% a_P_NT[ , , t, i]
@@ -125,7 +125,7 @@ ggplot(melt(apply(m_M_SoC, c(1, 2), mean)), aes(x = Var1, y = value,
         text = element_text(size = 15))
 # Survival curve for Markov Model 1:
 v_S_ad_1 <- rowSums(apply(m_M_SoC[, -30, ], c(1, 2), mean))  # vector with survival curve
-ggplot(data.frame(Cycle = 0:n_t, Survival = v_S_ad_1), 
+ggplot(data.frame(Cycle = 0:n_cycles, Survival = v_S_ad_1), 
        aes(x = Cycle, y = Survival)) +
   geom_line(size = 1.3) +
   scale_y_continuous(labels = scales::percent) +
@@ -151,7 +151,7 @@ ggplot(melt(apply(m_M_NT, c(1, 2), mean)), aes(x = Var1, y = value,
         text = element_text(size = 15))
 # Survival curve for Markov Model 2:
 v_S_ad_2 <- rowSums(apply(m_M_NT[, -30, ], c(1, 2), mean))  # vector with survival curve
-ggplot(data.frame(Cycle = 0:n_t, Survival = v_S_ad_2), 
+ggplot(data.frame(Cycle = 0:n_cycles, Survival = v_S_ad_2), 
        aes(x = Cycle, y = Survival)) +
   geom_line(size = 1.3) +
   scale_y_continuous(labels = scales::percent) +
@@ -174,9 +174,9 @@ v_prev_Infection_1 <- apply(v_prev_Infection_1, 2, mean) / v_S_ad_1
 v_prev_Infection_2 <- apply(m_M_NT[, "Infection", ], c(2, 1), mean)
 v_prev_Infection_2 <- apply(v_prev_Infection_2, 2, mean) / v_S_ad_2
 ggplot() +
- geom_line(aes(x = 0:n_t, y = v_prev_Infection_1), size = 1.3, colour = "skyblue", 
+ geom_line(aes(x = 0:n_cycles, y = v_prev_Infection_1), size = 1.3, colour = "skyblue", 
            na.rm = TRUE) +
- geom_line(aes(x = 0:n_t, y = v_prev_Infection_2), size = 1.3, colour = "darkred", 
+ geom_line(aes(x = 0:n_cycles, y = v_prev_Infection_2), size = 1.3, colour = "darkred", 
            alpha = 0.65, na.rm = TRUE) + 
  scale_y_continuous(labels = scales::percent) +
  xlab("Cycle") +
@@ -190,9 +190,9 @@ v_D_ad_1 <- rowSums(apply(m_M_SoC[ , "Death", ], c(1, 2), mean)) / n.sims
 # Mortality in Model 1:
 v_D_ad_2 <- rowSums(apply(m_M_NT[ , "Death", ], c(1, 2), mean)) / n.sims
 ggplot() +
- geom_line(aes(x = 0:n_t, y = v_D_ad_1), size = 2, colour = "navyblue", 
+ geom_line(aes(x = 0:n_cycles, y = v_D_ad_1), size = 2, colour = "navyblue", 
            na.rm = TRUE, alpha = 1) +
- geom_point(aes(x = 0:n_t, y = v_D_ad_2), size = 1.5, colour = "red", 
+ geom_point(aes(x = 0:n_cycles, y = v_D_ad_2), size = 1.5, colour = "red", 
            alpha = 0.95, na.rm = TRUE) + 
  scale_y_continuous(labels = scales::percent) +
  xlab("Cycle") +

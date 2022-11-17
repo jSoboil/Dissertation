@@ -41,25 +41,10 @@ source("R/02_markov_model.R")
 # developed by Sinanovic, E., et al. 2009): "The potential cost-effectiveness of adding a 
 # human papillomavirus vaccine to the cervical cancer screening programme in South Africa" 
 
-# vector of state names:
-v_names_states <- c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", 
-                    "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer",
-                    "Detected.Stage-I Year 1", "Detected.Stage-I Year 2",
-                    "Detected.Stage-I Year 3", "Detected.Stage-I Year 4",
-                    "Detected.Stage-I Year 5", "Detected.Stage-II Year 1",
-                    "Detected.Stage-II Year 2", "Detected.Stage-II Year 3",
-                    "Detected.Stage-II Year 4", "Detected.Stage-II Year 5",
-                    "Detected.Stage-III Year 1", "Detected.Stage-III Year 2",
-                    "Detected.Stage-III Year 3", "Detected.Stage-III Year 4",
-                    "Detected.Stage-III Year 5", "Detected.Stage-IV Year 1",
-                    "Detected.Stage-IV Year 2", "Detected.Stage-IV Year 3",
-                    "Detected.Stage-IV Year 4", "Detected.Stage-IV Year 5",
-                    "Cancer Survivor", "Death")
-
 # Initialize transition-dynamics array under SoC and New Treatment
 a_A_SoC <- array(0,
-             dim = c(n_states, n_states, (n_t + 1), n.sims),
-             dimnames = list(v_names_states, v_names_states, 0:n_t))
+             dim = c(n_states, n_states, (n_cycles + 1), n.sims),
+             dimnames = list(v_names_states, v_names_states, 0:n_cycles))
 # New Treatment:
 a_A_NT <- a_A_SoC
 
@@ -71,21 +56,21 @@ for (i in 1:n.sims) {
 
 # Iterative solution to produce the transition-dynamics array under SoC:
 for (i in 1:n.sims) {
- for (t in 1:n_t){
+ for (t in 1:n_cycles){
   a_A_SoC[, , t + 1, i] <- diag(m_M_SoC[t, , i]) %*% a_P_SoC[ , , t, i] # using Markov trace found in 02_markov_model.R script
   }
 }
 # Iterative solution to produce the transition-dynamics array under new Treatment:
 for (i in 1:n.sims) {
- for (t in 1:n_t){
+ for (t in 1:n_cycles){
   a_A_NT[, , t + 1, i] <- diag(m_M_NT[t, , i]) %*% a_P_NT[ , , t, i]
   }
 }
 
 # Health costs from a societal perspective --------------------------------
-## All costs in US dollars $.
+## *** All costs in US dollars $ ***
+### *** Note: HPV 16/18 assumed asymptomatic and not treated ***
 
-### *Note: HPV 16/18 assumed asymptomatic and not treated.
 c_Vaccine <- 570 # once off cost of vaccine from age 12.
 c_Screening <- 93 + 309 + 75 # cost of screening using HPV DNA, VIA, cancer cytology tests.
 c_LSIL <- 61 # cost of LSIL treatment*.
@@ -105,8 +90,8 @@ v_c_SoC <- c(0, 0, 0, 0, 0, 0, 0, 0, c_StageI, c_StageI, c_StageI, c_StageI,
 
 # Array of state costs for Standard of Care:
 a_c_SoC <- array(matrix(v_c_SoC, nrow = n_states, ncol = n_states, byrow = T),
-                  dim = c(n_states, n_states, n_t + 1, n.sims),
-                  dimnames = list(v_names_states, v_names_states, 0:n_t))
+                  dim = c(n_states, n_states, n_cycles + 1, n.sims),
+                  dimnames = list(v_names_states, v_names_states, 0:n_cycles))
 
 # Screening costs for ages 30, 40, and 50:
 a_c_SoC[c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c(30, 40, 50), ] <- a_c_SoC[c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c(30, 40, 50), ] + c_Screening # everyone not dead or with diagnosed cancer
@@ -153,8 +138,8 @@ v_u_SoC <- c(u_Well, u_Infection, u_LSIL, u_HSIL, u_StageI, u_StageII, u_StageII
 
 # Array of state utilities based on time interval t under Status Quo treatment:
 a_u_SoC <- array(matrix(v_u_SoC, nrow = n_states, ncol = n_states, byrow = T),
-                  dim = c(n_states, n_states, n_t + 1, n.sims),
-                  dimnames = list(v_names_states, v_names_states, 0:n_t))
+                  dim = c(n_states, n_states, n_cycles + 1, n.sims),
+                  dimnames = list(v_names_states, v_names_states, 0:n_cycles))
 
 # Array of state utilities based on time interval t under New Treatment:
 a_u_NT <- a_u_SoC
@@ -166,7 +151,7 @@ a_Y_u_SoC <- a_A_SoC * a_u_SoC
 a_Y_u_NT <- a_A_NT * a_u_NT
 
 # Vectors of rewards under each Treatment ---------------------------------
-m_costs_SoC <- matrix(NA, nrow = n_t + 1, ncol = n.sims, byrow = TRUE) # create matrix with n.sims slices
+m_costs_SoC <- matrix(NA, nrow = n_cycles + 1, ncol = n.sims, byrow = TRUE) # create matrix with n.sims slices
 m_qaly_NT <- m_costs_NT <- m_qaly_SoC <- m_costs_SoC
 
 for (i in 1:n.sims) {
@@ -193,9 +178,9 @@ sum(apply(X = m_qaly_NT, 1, mean)) # QALYs
 d_e <- 0.03
 d_c <- 0.03
 # Discount weights for costs
-v_dwc <- 1 / ((1 + d_c) ^ (0:(n_t)))
+v_dwc <- 1 / ((1 + d_c) ^ (0:(n_cycles)))
 # Discount weights for effects
-v_dwe <- 1 / ((1 + d_e) ^ (0:(n_t)))
+v_dwe <- 1 / ((1 + d_e) ^ (0:(n_cycles)))
 
 # Apply discount:
 v_qaly_disc_SoC <- t(m_qaly_SoC) %*% v_dwe # SoC QALYs
@@ -210,7 +195,7 @@ n_comps <- 2 # number of comparators
 # Comparator names:
 v_names_comps <- c("Standard of Care: screening only", "New Treatment: screening & vaccine")
 
-# Create n_t 
+# Create n_cycles 
 m_effects <- m_costs <- matrix(NA, nrow = n.sims, ncol = n_comps, 
                            byrow = TRUE) # create an n.sims x n_comp matrix
 
@@ -223,13 +208,14 @@ m_costs[, 2] <- t(m_costs_NT) %*% v_dwc # Costs
 m_effects[, 2] <- t(m_qaly_NT) %*% v_dwe # QALYs
 
 df_cea <- bcea(eff = m_effects, cost = m_costs, ref = 2, 
-               interventions = v_names_comps)
-BCEA::contour2(he = df_cea, wtp = 5724, graph = "ggplot2")
-BCEA::ceplane.plot(df_cea, wtp = 5724, graph = "ggplot2")
-BCEA::ceac.plot(df_cea, graph = "ggplot2")
-BCEA::eib.plot(df_cea, graph = "ggplot")
-BCEA::ib.plot(df_cea, wtp = 5724, graph = "ggplot")
-BCEA::ce_table(he = df_cea)
+               interventions = v_names_comps, Kmax = 5500) # create bcea object
+BCEA::contour2(he = df_cea, wtp = 5724, graph = "ggplot2") # plot cea plane
+BCEA::ceac.plot(df_cea, graph = "ggplot2") # plot ceac plot
+BCEA::eib.plot(df_cea, graph = "ggplot") # plot eib
+BCEA::ce_table(he = df_cea, wtp = 5724) # create table of summary outputs
+# BCEA::make.report(he = df_cea) # not knitting properly
+BCEA::compute_vi(Ustar = df_cea$Ustar, U = df_cea$U) # compute raw VoI
+BCEA::evi.plot(he = df_cea) # plot the EVI
 
 # Model run time ----------------------------------------------------------
 # End time counter:
