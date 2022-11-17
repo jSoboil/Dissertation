@@ -59,7 +59,7 @@ v_names_states <- c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer",
 # Initialize transition-dynamics array under SoC and New Treatment
 a_A_SoC <- array(0,
              dim = c(n_states, n_states, (n_t + 1), n.sims),
-dimnames = list(v_names_states, v_names_states, 0:n_t)) # Set first slice to the initial state vector in its diagonal diag(a_A_SoC[, , 1]) <- v_m_init
+             dimnames = list(v_names_states, v_names_states, 0:n_t))
 # New Treatment:
 a_A_NT <- a_A_SoC
 
@@ -82,13 +82,14 @@ for (i in 1:n.sims) {
   }
 }
 
-# Health costs from a society perspective --------------------------------
-## All costs in $US.
+# Health costs from a societal perspective --------------------------------
+## All costs in US dollars $.
+
+### *Note: HPV 16/18 assumed asymptomatic and not treated.
 c_Vaccine <- 570 # once off cost of vaccine from age 12.
 c_Screening <- 93 + 309 + 75 # cost of screening using HPV DNA, VIA, cancer cytology tests.
 c_LSIL <- 61 # cost of LSIL treatment*.
 c_HSIL <- 764 # cost of HSIL treatment*.
-### *Note: HPV 16/18 assumed asymptomatic in original mode and therefore not treated.
 
 ## Cost for treatment at each cancer stage:
 c_StageI <- 4615 # cost of treatment of Stage I Cancer for one cycle.
@@ -96,38 +97,38 @@ c_StageII <- 6307 # cost of treatment of Stage II Cancer for one cycle.
 c_StageIII <- 6307 # cost of treatment of Stage III Cancer for one cycle.
 c_StageIV <- 8615 # cost of treatment of Stage IV Cancer for one cycle.
 
-# vector of costs:
+# Vector of costs:
 v_c_SoC <- c(0, 0, 0, 0, 0, 0, 0, 0, c_StageI, c_StageI, c_StageI, c_StageI, 
              c_StageI, c_StageII, c_StageII, c_StageII, c_StageII, c_StageII,
              c_StageIII, c_StageIII, c_StageIII, c_StageIII, c_StageIII, 
              c_StageIV, c_StageIV, c_StageIV, c_StageIV, c_StageIV, 0, 0)
 
-# Array of state costs based on time interval t under Status Quo treatment:
+# Array of state costs for Standard of Care:
 a_c_SoC <- array(matrix(v_c_SoC, nrow = n_states, ncol = n_states, byrow = T),
                   dim = c(n_states, n_states, n_t + 1, n.sims),
                   dimnames = list(v_names_states, v_names_states, 0:n_t))
 
 # Screening costs for ages 30, 40, and 50:
-a_c_SoC[c("Well", "Infection", "LSIL", "HSIL"), c("Well", "Infection", "LSIL", "HSIL"), c(30, 40, 50), ] <- a_c_SoC[c("Well", "Infection", "LSIL", "HSIL"), c("Well", "Infection", "LSIL", "HSIL"), c(30, 40, 50), ] + c_Screening # everyone not dead or with diagnosed cancer
+a_c_SoC[c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c(30, 40, 50), ] <- a_c_SoC[c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c(30, 40, 50), ] + c_Screening # everyone not dead or with diagnosed cancer
 # LSIL costs for ages 30, 40, and 50:
 a_c_SoC["LSIL", c("LSIL", "Well", "Infection", "HSIL"), c(30, 40, 50), ] <- a_c_SoC["LSIL", c("LSIL", "Well", "Infection", "HSIL"), c(30, 40, 50), ] + c_LSIL
 # HSIL costs for ages 30, 40, and 50:
 a_c_SoC["HSIL", c("HSIL", "Well", "Infection", "LSIL"), c(30, 40, 50), ] <- a_c_SoC["HSIL", c("HSIL", "Well", "Infection", "LSIL"), c(30, 40, 50), ] + c_HSIL
 
-# Array of state costs based on time interval t under New Treatment:
+# Array of state costs for New Treatment:
 a_c_NT <- a_c_SoC
 # Vaccine cost at age 12:
-a_c_NT["Well", "Well", 12, ] <- a_c_NT["Well", "Well", 12, ] + c_Vaccine # only applied to Well state since patients can only move to Death from Well till 15
+a_c_NT["Well", "Well", 12, ] <- a_c_NT["Well", "Well", 12, ] + c_Vaccine # only applied to Well state since patients can only move to Death from Well till age 15
 
 ## Total costs Arrays ------------------------------------------------------
 # Standard of Care
 a_Y_c_SoC <- a_A_SoC * a_c_SoC
-a_Y_c_SoC[c("Well", "Infection", "LSIL", "HSIL"), c("Well", "Infection", "LSIL", "HSIL"), c(30, 40, 50), ] <- a_Y_c_SoC[c("Well", "Infection", "LSIL", "HSIL"), c("Well", "Infection", "LSIL", "HSIL"), c(30, 40, 50), ] * 0.5 # 50% of cohort screened
+a_Y_c_SoC[c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c(30, 40, 50), ] <- a_Y_c_SoC[c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c(30, 40, 50), ] * 0.5 # 50% of cohort screened
 
 # New Treatment
 a_Y_c_NT <- a_A_NT * a_c_NT
 a_Y_c_NT[, , 12, ] <- a_Y_c_NT[, , 12, ] * 0.8 # 80% of cohort vaccinated
-a_Y_c_NT[c("Well", "Infection", "LSIL", "HSIL"), c("Well", "Infection", "LSIL", "HSIL"), c(30, 40, 50), ] <- a_Y_c_NT[c("Well", "Infection", "LSIL", "HSIL"), c("Well", "Infection", "LSIL", "HSIL"), c(30, 40, 50), ] * 0.5 # 50% of cohort screened
+a_Y_c_NT[c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c(30, 40, 50), ] <- a_Y_c_NT[c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cancer", "Stage-III Cancer", "Stage-IV Cancer"), c(30, 40, 50), ] * 0.5 # 50% of cohort screened
 
 # Health State Utilities --------------------------------------------------
 u_Well <- 1 # utility of being in Well for one cycle
@@ -210,7 +211,7 @@ n_comps <- 2 # number of comparators
 v_names_comps <- c("Standard of Care: screening only", "New Treatment: screening & vaccine")
 
 # Create n_t 
-m_effects <- m_costs <- matrix(NA, nrow = n.sims, ncol = n_comp, 
+m_effects <- m_costs <- matrix(NA, nrow = n.sims, ncol = n_comps, 
                            byrow = TRUE) # create an n.sims x n_comp matrix
 
 ### For Standard of Care (screening only):
@@ -222,10 +223,9 @@ m_costs[, 2] <- t(m_costs_NT) %*% v_dwc # Costs
 m_effects[, 2] <- t(m_qaly_NT) %*% v_dwe # QALYs
 
 df_cea <- bcea(eff = m_effects, cost = m_costs, ref = 2, 
-               interventions = v_names_comps, Kmax = 5724, 
-               plot = FALSE)
-BCEA::contour(he = df_cea)
-BCEA::ceplane.plot(df_cea, wtp = 5724, graph = "ggplot")
+               interventions = v_names_comps)
+BCEA::contour2(he = df_cea, wtp = 5724, graph = "ggplot2")
+BCEA::ceplane.plot(df_cea, wtp = 5724, graph = "ggplot2")
 BCEA::ceac.plot(df_cea, graph = "ggplot2")
 BCEA::eib.plot(df_cea, graph = "ggplot")
 BCEA::ib.plot(df_cea, wtp = 5724, graph = "ggplot")
