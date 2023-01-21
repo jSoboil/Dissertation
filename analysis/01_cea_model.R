@@ -8,24 +8,22 @@
 ## Names of required packages for analysis:
 pkgs <- c("bayesplot", "BCEA", "dampack", "readxl",  "reshape2", "R2jags", 
           "tidyverse", "rjags", "darthtools")
-
 # Install packages not yet installed:
 installed_packages <- pkgs %in% rownames(installed.packages())
 if (any(installed_packages == FALSE)) {
  install.packages(pkgs[!installed_packages])
 }
-
 # Load required packages:
 invisible(lapply(pkgs, library, character.only = TRUE))
 
 # Detect and set parallel processing to number of cores:
 options(mc.cores = parallel::detectCores())
 
-# Initialise start time counter:
-start_time <- Sys.time()
-
 # Set seed for replication:
 set.seed(100)
+
+# Initialise start time counter:
+start_time <- Sys.time()
 
 # Note that the source code for this section sits on top of the code for the Markov Models
 # found in the R folder (R/02_markov_model.R):
@@ -41,36 +39,9 @@ source("R/02_markov_model.R")
 # developed by Sinanovic, E., et al. 2009): "The potential cost-effectiveness of adding a 
 # human papillomavirus vaccine to the cervical cancer screening programme in South Africa" 
 
-# Initialize transition-dynamics array under SoC and New Treatment
-a_A_SoC <- array(0,
-             dim = c(n_states, n_states, (n_cycles + 1), n.sims),
-             dimnames = list(v_names_states, v_names_states, 0:n_cycles))
-# New Treatment:
-a_A_NT <- a_A_SoC
-
-# Set first slice to the initial state vector in its diagonal
-for (i in 1:n.sims) {
- diag(a_A_SoC[, , 1, i]) <- v_s_init
- diag(a_A_NT[, , 1, i]) <- v_s_init
-}
-
-# Iterative solution to produce the transition-dynamics array under SoC:
-for (i in 1:n.sims) {
- for (t in 1:n_cycles){
-  a_A_SoC[, , t + 1, i] <- diag(m_M_SoC[t, , i]) %*% a_P_SoC[ , , t, i] # using Markov trace found in 02_markov_model.R script
-  }
-}
-# Iterative solution to produce the transition-dynamics array under new Treatment:
-for (i in 1:n.sims) {
- for (t in 1:n_cycles){
-  a_A_NT[, , t + 1, i] <- diag(m_M_NT[t, , i]) %*% a_P_NT[ , , t, i]
-  }
-}
-
 # Health costs from a societal perspective --------------------------------
 ## *** All costs in US dollars $ ***
 ### *** Note: HPV 16/18 assumed asymptomatic and not treated ***
-
 c_Vaccine <- 570 # once off cost of vaccine from age 12.
 c_Screening <- 93 + 309 + 75 # cost of screening using HPV DNA, VIA, cancer cytology tests.
 c_LSIL <- 61 # cost of LSIL treatment*.
@@ -99,7 +70,6 @@ a_c_SoC[c("Well", "Infection", "LSIL", "HSIL", "Stage-I Cancer", "Stage-II Cance
 a_c_SoC["LSIL", c("LSIL", "Well", "Infection", "HSIL"), c(30, 40, 50), ] <- a_c_SoC["LSIL", c("LSIL", "Well", "Infection", "HSIL"), c(30, 40, 50), ] + c_LSIL
 # HSIL costs for ages 30, 40, and 50:
 a_c_SoC["HSIL", c("HSIL", "Well", "Infection", "LSIL"), c(30, 40, 50), ] <- a_c_SoC["HSIL", c("HSIL", "Well", "Infection", "LSIL"), c(30, 40, 50), ] + c_HSIL
-
 # Array of state costs for New Treatment:
 a_c_NT <- a_c_SoC
 # Vaccine cost at age 12:

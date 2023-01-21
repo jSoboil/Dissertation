@@ -298,7 +298,7 @@ attach.jags(mod_JAGS)
 # Probability Matrix --------------------------------------------------
 # ==========================================================================================
  # This section creates a transition array that is used to simulate the Markov cohort
-# for treatments, over time.
+# for treatments, over time. Note that all transitions are conditional on surviving.
 
 # The following initialises the structure of the transitions between health states:
 n_age_min <- 0 # age at baseline

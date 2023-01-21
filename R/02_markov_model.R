@@ -36,25 +36,33 @@ m_M_NT <- m_M_SoC
 m_M_SoC[1, , ] <- v_s_init
 m_M_NT[1, , ] <- v_s_init
 
-# Iterative solution of age-dependent cSTM model 1:
-for (t in 1:n_cycles) {
- for(i in 1:n.sims) {
-  # Fill in cohort trace
-  m_M_SoC[t + 1, , i] <- m_M_SoC[t, , i] %*% a_P_SoC[ , , t, i]
-  }
-}
-# Iterative solution of age-dependent cSTM model 2:
-for (t in 1:n_cycles) {
- for(i in 1:n.sims) {
-  # Fill in cohort trace
-  m_M_NT[t + 1, , i] <- m_M_NT[t, , i] %*% a_P_NT[ , , t, i]
-  }
-}
+# Create transition-dynamics array under SoC and New Treatment
+a_A_SoC <- array(0,
+             dim = c(n_states, n_states, (n_cycles + 1), n.sims),
+             dimnames = list(v_names_states, v_names_states, 0:n_cycles))
+# Store the initial state vector in the diagonal of the first slice of a_A
+for (i in 1:n.sims) {
+ diag(a_A_SoC[, , 1, i]) <- v_s_init
+ }
+# New Treatment
+a_A_NT <- a_A_SoC
 
-# Check for transition leakage (each cycle must sum to n.sims, otherwise there is something 
-# wrong with the transitions probabilities):
-round(apply(m_M_SoC, 1, sum), 1)
-round(apply(m_M_NT, 1, sum), 1)
+# Loop through the number of simulations
+for (i in 1:n.sims) {
+ # Loop through the number of cycles
+ for(t in 1:n_cycles){ 
+  # Iterative solution of age-dependent cSTM for SoC
+   # estimate the state vector for the next cycle (t + 1)
+  m_M_SoC[t + 1, , i] <- m_M_SoC[t, , i] %*% a_P_SoC[, , t, i]
+   # estimate the transition dynamics at t + 1
+  a_A_SoC[, , t + 1, i] <- diag(m_M_SoC[t, , i]) %*% a_P_SoC[, , t, i]
+  # Iterative solution of age-dependent cSTM for New Treatment
+   # estimate the state vector for the next cycle (t + 1)
+  m_M_NT[t + 1, , i] <- m_M_NT[t, , i] %*% a_P_NT[, , t, i]
+   # estimate the transition dynamics at t + 1
+  a_A_NT[, , t + 1, i] <- diag(m_M_NT[t, , i]) %*% a_P_NT[, , t, i]
+  }
+}
 
 # ==========================================================================================
 # Visualisation of Markov Models ------------------------------------------
