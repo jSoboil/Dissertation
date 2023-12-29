@@ -167,7 +167,7 @@ v_names_comps <- c("Standard of Care: screening only", "New Treatment: screening
 
 # Create n_cycles 
 m_effects <- m_costs <- matrix(NA, nrow = n.sims, ncol = n_comps, 
-                           byrow = TRUE) # create an n.sims x n_comp matrix
+                           byrow = TRUE) # create an n.sims * n_comp matrix
 
 ### For Standard of Care (screening only):
 m_costs[, 1] <- t(m_costs_SoC) %*% v_dwc # Costs

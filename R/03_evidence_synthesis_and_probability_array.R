@@ -200,7 +200,6 @@ data_JAGS <- list(
   alpha.StageIII = alpha.StageIII, beta.StageIII = beta.StageIII,
   alpha.StageIV = alpha.StageIV, beta.StageIV = beta.StageIV,
   
-  
   # Stage I 5-year Survival:
   alpha.StageI_YearI = alpha.StageI_YearI, beta.StageI_YearI = beta.StageI_YearI,
   alpha.StageI_YearII = alpha.StageI_YearII, beta.StageI_YearII = beta.StageI_YearII,
@@ -269,7 +268,8 @@ mod_JAGS <- jags(data = data_JAGS, parameters.to.save = params,
                  n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 mod_JAGS
 # Note: mixed predictive checks show that variation in data is largely 
-# consistent between studies.
+# consistent between studies and that there is only weak evidence that 
+# each study is inconsistent with the results of the other studies.
 
 # Attach JAGS model to local envir.:
 attach.jags(mod_JAGS)
@@ -358,11 +358,11 @@ for (i in 15:(n_cycles - 61)) {
      
      a_P_SoC["Infection", "Well", i, j] <- HPV_Well_15to24[j] * (1 - v_p_mort_lessHPV[i])
       
-     a_P_SoC["Infection", "LSIL", i, j] <- ((1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_15to24[j]) * (1 - v_p_mort_lessHPV[i])
+     a_P_SoC["Infection", "LSIL", i, j] <- ((1 - exp(-0.2 * 3)) * 0.9) * (1 - HPV_Well_15to24[j]) * (1 - v_p_mort_lessHPV[i])
                                            
-     a_P_SoC["Infection", "HSIL", i, j] <- ((1 - exp(-.2 * 3)) * 0.1) * (1 - (1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_15to24[j]) * (1 - v_p_mort_lessHPV[i])
+     a_P_SoC["Infection", "HSIL", i, j] <- ((1 - exp(-0.2 * 3)) * 0.1) * (1 - (1 - exp(-0.2 * 3)) * 0.9) * (1 - HPV_Well_15to24[j]) * (1 - v_p_mort_lessHPV[i])
       
-     a_P_SoC["Infection", "Infection", i, j] <- (1 - (1 - exp(-.2 * 3)) * 0.1) * (1 - (1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_15to24[j]) * (1 - v_p_mort_lessHPV[i])
+     a_P_SoC["Infection", "Infection", i, j] <- (1 - (1 - exp(-0.2 * 3)) * 0.1) * (1 - (1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_15to24[j]) * (1 - v_p_mort_lessHPV[i])
     }
 }
 
@@ -668,7 +668,7 @@ for (i in 1:n_cycles) {
   a_P_NT["Well", "Well", i, j] <-  (1 - (p.age[j, i] * (1 - pEfficacy.vac[j]))) * (1 - v_p_mort_lessHPV[i])
  }
 }
-
+sum(a_P_NT["Well", , 15, 15])
 # Transitions from Infection State ----------------------------------------
 # The following enters all transition probabilities for ages 15-24 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
@@ -679,11 +679,11 @@ for (i in 15:(n_cycles - 61)) {
      
      a_P_NT["Infection", "Well", i, j] <- HPV_Well_15to24[j] * (1 - v_p_mort_lessHPV[i])
       
-     a_P_NT["Infection", "LSIL", i, j] <- ((1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_15to24[j]) * (1 - v_p_mort_lessHPV[i])
+     a_P_NT["Infection", "LSIL", i, j] <- ((1 - exp(-0.2 * 3)) * 0.9) * (1 - HPV_Well_15to24[j]) * (1 - v_p_mort_lessHPV[i])
                                            
-     a_P_NT["Infection", "HSIL", i, j] <- ((1 - exp(-.2 * 3)) * 0.1) * (1 - (1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_15to24[j]) * (1 - v_p_mort_lessHPV[i])
+     a_P_NT["Infection", "HSIL", i, j] <- ((1 - exp(-0.2 * 3)) * 0.1) * (1 - (1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_15to24[j]) * (1 - v_p_mort_lessHPV[i])
       
-     a_P_NT["Infection", "Infection", i, j] <- (1 - (1 - exp(-.2 * 3)) * 0.1) * (1 - (1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_15to24[j]) * (1 - v_p_mort_lessHPV[i])
+     a_P_NT["Infection", "Infection", i, j] <- (1 - (1 - exp(-0.2 * 3)) * 0.1) * (1 - (1 - exp(-0.2 * 3)) * 0.9) * (1 - HPV_Well_15to24[j]) * (1 - v_p_mort_lessHPV[i])
     }
 }
 
@@ -696,11 +696,11 @@ for (i in 25:(n_cycles - 56)) {
      
      a_P_NT["Infection", "Well", i, j] <- HPV_Well_25to29[j] * (1 - v_p_mort_lessHPV[i])
       
-     a_P_NT["Infection", "LSIL", i, j] <- ((1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_25to29[j]) * (1 - v_p_mort_lessHPV[i])
+     a_P_NT["Infection", "LSIL", i, j] <- ((1 - exp(-0.2 * 3)) * 0.9) * (1 - HPV_Well_25to29[j]) * (1 - v_p_mort_lessHPV[i])
                                            
-     a_P_NT["Infection", "HSIL", i, j] <- ((1 - exp(-.2 * 3)) * 0.1) * (1 - (1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_25to29[j]) * (1 - v_p_mort_lessHPV[i])
+     a_P_NT["Infection", "HSIL", i, j] <- ((1 - exp(-0.2 * 3)) * 0.1) * (1 - (1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_25to29[j]) * (1 - v_p_mort_lessHPV[i])
       
-     a_P_NT["Infection", "Infection", i, j] <- (1 - (1 - exp(-.2 * 3)) * 0.1) * (1 - (1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_25to29[j]) * (1 - v_p_mort_lessHPV[i])
+     a_P_NT["Infection", "Infection", i, j] <- (1 - (1 - exp(-0.2 * 3)) * 0.1) * (1 - (1 - exp(-0.2 * 3)) * 0.9) * (1 - HPV_Well_25to29[j]) * (1 - v_p_mort_lessHPV[i])
     }
 }
 
@@ -713,11 +713,11 @@ for (i in 30:n_cycles) {
      
      a_P_NT["Infection", "Well", i, j] <- HPV_Well_30toEnd[j] * (1 - v_p_mort_lessHPV[i])
       
-     a_P_NT["Infection", "LSIL", i, j] <- ((1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_30toEnd[j]) * (1 - v_p_mort_lessHPV[i])
+     a_P_NT["Infection", "LSIL", i, j] <- ((1 - exp(-0.2 * 3)) * 0.9) * (1 - HPV_Well_30toEnd[j]) * (1 - v_p_mort_lessHPV[i])
                                            
-     a_P_NT["Infection", "HSIL", i, j] <- ((1 - exp(-.2 * 3)) * 0.1) * (1 - (1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_30toEnd[j]) * (1 - v_p_mort_lessHPV[i])
+     a_P_NT["Infection", "HSIL", i, j] <- ((1 - exp(-0.2 * 3)) * 0.1) * (1 - (1 - exp(-0.2 * 3)) * 0.9) * (1 - HPV_Well_30toEnd[j]) * (1 - v_p_mort_lessHPV[i])
       
-     a_P_NT["Infection", "Infection", i, j] <- (1 - (1 - exp(-.2 * 3)) * 0.1) * (1 - (1 - exp(-.2 * 3)) * 0.9) * (1 - HPV_Well_30toEnd[j]) * (1 - v_p_mort_lessHPV[i])
+     a_P_NT["Infection", "Infection", i, j] <- (1 - (1 - exp(-0.2 * 3)) * 0.1) * (1 - (1 - exp(-0.2 * 3)) * 0.9) * (1 - HPV_Well_30toEnd[j]) * (1 - v_p_mort_lessHPV[i])
     }
 }
 
