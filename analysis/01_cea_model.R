@@ -189,8 +189,8 @@ BCEA::evi.plot(he = df_cea) # plot the EVI
 
 # Model run time ----------------------------------------------------------
 # End time counter:
-end_time <- Sys.time()
+run_time <- Sys.time() - start_time
 # Total run time:
-end_time - start_time
+run_time
 
 # End file ----------------------------------------------------------------

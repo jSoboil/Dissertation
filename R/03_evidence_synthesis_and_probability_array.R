@@ -663,12 +663,12 @@ for (i in 1:n_cycles) {
  for (j in 1:n.sims) {
   a_P_NT["Well", "Death", i, j] <-  v_p_mort_lessHPV[i] 
   
-  a_P_NT["Well", "Infection", i, j] <-  p.age[j, i] * (1 - pEfficacy.vac[j]) * (1 - v_p_mort_lessHPV[i])
+  a_P_NT["Well", "Infection", i, j] <-  (1 - (1 - p.age[j, i]) ^ (1 - pEfficacy.vac[j])) * (1 - v_p_mort_lessHPV[i])
   
-  a_P_NT["Well", "Well", i, j] <-  (1 - (p.age[j, i] * (1 - pEfficacy.vac[j]))) * (1 - v_p_mort_lessHPV[i])
+  a_P_NT["Well", "Well", i, j] <-  ((1 - p.age[j, i]) ^ (1 - pEfficacy.vac[j])) * (1 - v_p_mort_lessHPV[i])
  }
 }
-sum(a_P_NT["Well", , 15, 15])
+
 # Transitions from Infection State ----------------------------------------
 # The following enters all transition probabilities for ages 15-24 for each transition from
 # the state Infection, across the appropriate time horizon i and all probabilistic 
